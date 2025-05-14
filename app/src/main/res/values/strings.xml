@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">prototyp_inżynierka</string>
+    <string name="LogicMind">Logic Mind</string>
+    <string name="koordynacja">Koordynacja</string>
+    <string name="rozwiazywanie">Rozwiazywanie problemów</string>
+    <string name="skupienie">Skupienie</string>
+    <string name="pamiec">Pamięć</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+</resources>
