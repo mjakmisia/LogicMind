@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">prototyp_inżynierka</string>
-    <string name="LogicMind">Logic Mind</string>
+    <string name="LogicMind">LogicMind</string>
     <string name="koordynacja">Koordynacja</string>
     <string name="rozwiazywanie">Rozwiazywanie problemów</string>
     <string name="skupienie">Skupienie</string>

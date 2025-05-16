@@ -5,85 +5,95 @@
     android:layout_height="match_parent"
     android:background="#F5F5F5">
 
+    <!-- Guideline dla przesunięcia góry -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/topGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.10" />
+
     <!-- Tytuł aplikacji -->
     <TextView
         android:id="@+id/appTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="48dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="24dp"
         android:text="@string/LogicMind"
         android:textColor="#333333"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/topGuideline" />
 
     <!-- KOORDYNACJA -->
     <Button
         android:id="@+id/btnKoordynacja"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginTop="50dp"
         android:backgroundTint="@color/niebieski"
         android:text="@string/koordynacja"
         android:textColor="#FFFFFF"
         android:textSize="18sp"
-        app:layout_constraintEnd_toStartOf="@id/btnRozwiazywanie"
-        app:layout_constraintHeight_percent="0.20"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btnRozwiazywanie"
         app:layout_constraintTop_toBottomOf="@id/appTitle"
-        app:layout_constraintWidth_percent="0.45" />
+        app:layout_constraintHeight_percent="0.20" />
 
     <!-- ROZWIĄZYWANIE -->
     <Button
         android:id="@+id/btnRozwiazywanie"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"
         android:layout_marginTop="50dp"
         android:backgroundTint="@color/rozowy"
         android:text="@string/rozwiazywanie"
         android:textColor="#FFFFFF"
         android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_percent="0.20"
         app:layout_constraintStart_toEndOf="@id/btnKoordynacja"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/appTitle"
-        app:layout_constraintWidth_percent="0.45" />
+        app:layout_constraintHeight_percent="0.20" />
 
     <!-- SKUPIENIE -->
     <Button
         android:id="@+id/btnSkupienie"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="16dp"
         android:backgroundTint="@color/zolty"
         android:text="@string/skupienie"
         android:textColor="#FFFFFF"
         android:textSize="18sp"
-        app:layout_constraintEnd_toStartOf="@id/btnPamiec"
-        app:layout_constraintHeight_percent="0.20"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btnPamiec"
         app:layout_constraintTop_toBottomOf="@id/btnKoordynacja"
-        app:layout_constraintWidth_percent="0.45" />
+        app:layout_constraintHeight_percent="0.20" />
 
     <!-- PAMIĘĆ -->
     <Button
         android:id="@+id/btnPamiec"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
         android:backgroundTint="@color/zielony"
         android:text="@string/pamiec"
         android:textColor="#FFFFFF"
         android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_percent="0.20"
         app:layout_constraintStart_toEndOf="@id/btnSkupienie"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btnRozwiazywanie"
-        app:layout_constraintWidth_percent="0.45" />
+        app:layout_constraintHeight_percent="0.20" />
 
     <!-- DOLNY PASEK NAWIGACJI -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
@@ -94,7 +104,8 @@
         app:itemIconTint="@color/selector_nav_item_color"
         app:itemTextColor="@color/selector_nav_item_color"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:menu="@menu/bottom_nav_menu" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
