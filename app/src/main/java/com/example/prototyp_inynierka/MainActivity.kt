@@ -17,7 +17,7 @@ class MainActivity : AppCompatActivity() {
 
         // Kategorie gier
         val btnKoordynacja = findViewById<Button>(R.id.btnKoordynacja)
-        val btnRozwiazywanie = findViewById<Button>(R.id.btnRozwiazywanie)
+        val btnRozwiazywanie = findViewById<Button>(R.id.btnRozwiazywanieProblemow)
         val btnSkupienie = findViewById<Button>(R.id.btnSkupienie)
         val btnPamiec = findViewById<Button>(R.id.btnPamiec)
 
@@ -37,6 +37,8 @@ class MainActivity : AppCompatActivity() {
 
         btnSkupienie.setOnClickListener {
             it.playSoundEffect(android.view.SoundEffectConstants.CLICK)
+            val intent = Intent(this, GameSelectionAttentionActivity::class.java)
+            startActivity(intent)
         }
 
         btnPamiec.setOnClickListener {
@@ -48,6 +50,11 @@ class MainActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.nav_home -> {
                     // Już jesteśmy na stronie głównej
+                    true
+                }
+                R.id.nav_statistics -> {
+                    // Tu możesz otworzyć ekran statystyk
+                    // startActivity(Intent(this, SettingsActivity::class.java))
                     true
                 }
                 R.id.nav_profile -> {
