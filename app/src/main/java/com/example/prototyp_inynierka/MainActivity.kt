@@ -21,11 +21,6 @@ class MainActivity : AppCompatActivity() {
         val btnSkupienie = findViewById<Button>(R.id.btnSkupienie)
         val btnPamiec = findViewById<Button>(R.id.btnPamiec)
 
-        //btnKoordynacja.setBackgroundColor(ContextCompat.getColor(this, R.color.niebieski))
-        //btnRozwiazywanie.setBackgroundColor(ContextCompat.getColor(this, R.color.rozowy))
-        //btnSkupienie.setBackgroundColor(ContextCompat.getColor(this, R.color.zolty))
-        //btnPamiec.setBackgroundColor(ContextCompat.getColor(this, R.color.zielony))
-
         btnKoordynacja.setOnClickListener {
             // Tu dodaj później np. start gry z kategorii Koordynacja
             it.playSoundEffect(android.view.SoundEffectConstants.CLICK)
@@ -63,7 +58,7 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_settings -> {
-                    // startActivity(Intent(this, SettingsActivity::class.java))
+                    startActivity(Intent(this, SettingsActivity::class.java))
                     true
                 }
                 else -> false
