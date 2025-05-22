@@ -62,7 +62,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Dźwięki"
+                    android:text="@string/sound"
                     android:textSize="22sp"
                     android:textColor="#333333" />
 
@@ -71,6 +71,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true"
+                    android:scaleX="1.2"
+                    android:scaleY="1.2"
                     app:trackTint="@color/switch_track_color"
                     app:thumbTint="@color/switch_thumb_color" />
             </TableRow>
@@ -94,7 +96,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Tryb nocny"
+                    android:text="@string/darkMode"
                     android:textSize="22sp"
                     android:textColor="#333333" />
 
@@ -103,11 +105,147 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="false"
+                    android:scaleX="1.2"
+                    android:scaleY="1.2"
+                    app:trackTint="@color/switch_track_color"
+                    app:thumbTint="@color/switch_thumb_color" />
+            </TableRow>
+
+            <!-- WIERSZ 2: Powiadomienia -->
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:gravity="center_vertical"
+                >
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_notification"
+                    android:layout_marginEnd="2dp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/notifications"
+                    android:textSize="22sp"
+                    android:textColor="#333333" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switchNotification"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:scaleX="1.2"
+                    android:scaleY="1.2"
                     app:trackTint="@color/switch_track_color"
                     app:thumbTint="@color/switch_thumb_color" />
             </TableRow>
         </TableLayout>
     </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/languageCard"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="6dp"
+        app:layout_constraintTop_toBottomOf="@id/settingsCard"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Język:"
+                    android:textSize="22sp"
+                    android:textColor="#333333"
+                    android:layout_marginEnd="50dp" />
+
+                <LinearLayout
+                    android:id="@+id/languageSelector"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <!-- Przycisk POLSKI -->
+                    <LinearLayout
+                        android:id="@+id/langPl"
+                        android:layout_width="120dp"
+                        android:layout_height="48dp"
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:background="@drawable/lang_button_selected"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_marginEnd="6dp"
+                            android:src="@drawable/polska_flaga" />
+
+                        <TextView
+                            android:id="@+id/textLangPl"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Polski"
+                            android:textSize="16sp"
+                            android:textColor="#000000" />
+                    </LinearLayout>
+
+                    <!-- Przycisk ENGLISH -->
+                    <LinearLayout
+                        android:id="@+id/langEn"
+                        android:layout_width="120dp"
+                        android:layout_height="48dp"
+                        android:layout_marginStart="8dp"
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:background="@drawable/lang_button_unselected"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_marginEnd="6dp"
+                            android:src="@drawable/uk_flaga" />
+
+                        <TextView
+                            android:id="@+id/textLangEn"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="English"
+                            android:textSize="16sp"
+                            android:textColor="#666666" />
+                    </LinearLayout>
+                </LinearLayout>
+
+            </TableRow>
+        </TableLayout>
+    </androidx.cardview.widget.CardView>
+
+
 
     <!-- DOLNY PASEK NAWIGACJI -->
     <com.google.android.material.bottomnavigation.BottomNavigationView

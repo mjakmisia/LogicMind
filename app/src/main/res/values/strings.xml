@@ -20,4 +20,7 @@
     <string name="start_game">Rozpocznij</string>
     <string name="help">Pomoc</string>
     <string name="close">Zamknij</string>
+    <string name="notifications">Powiadomienia</string>
+    <string name="darkMode">Tryb nocny</string>
+    <string name="sound">Dźwięk</string>
 </resources>
