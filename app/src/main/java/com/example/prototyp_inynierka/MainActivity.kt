@@ -6,10 +6,18 @@ import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        //odczytanie języka
+        val sharedPrefs = getSharedPreferences("Settings", MODE_PRIVATE)
+        val lang = sharedPrefs.getString("My_Lang", "pl") ?: "pl"
+
+        // Ustaw język przed ustawieniem widoku
+        setLocale(lang)
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -54,7 +62,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.nav_profile -> {
                     // Tu możesz otworzyć ekran profilu
-                    // startActivity(Intent(this, ProfileActivity::class.java))
+                    startActivity(Intent(this, ProfileActivity::class.java))
                     true
                 }
                 R.id.nav_settings -> {
@@ -64,5 +72,15 @@ class MainActivity : AppCompatActivity() {
                 else -> false
             }
         }
+    }
+
+    //funkcja do ustawiania języka
+    private fun setLocale(lang: String) {
+        val locale = Locale(lang)
+        Locale.setDefault(locale)
+
+        val config = resources.configuration
+        config.setLocale(locale)
+        resources.updateConfiguration(config, resources.displayMetrics)
     }
 }

@@ -23,4 +23,6 @@
     <string name="notifications">Powiadomienia</string>
     <string name="darkMode">Tryb nocny</string>
     <string name="sound">Dźwięk</string>
+    <string name="ustawienia">Ustawienia</string>
+    <string name="changes">Zapisz zmiany</string>
 </resources>
