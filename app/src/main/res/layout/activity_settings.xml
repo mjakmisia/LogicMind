@@ -174,23 +174,26 @@
                 android:paddingBottom="8dp">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Język:"
+                    android:layout_weight="0.4"
+                    android:text="@string/language"
                     android:textSize="22sp"
                     android:textColor="@color/textGrey"
-                    android:layout_marginEnd="35dp" />
+                    android:layout_marginEnd="6dp" />
 
                 <LinearLayout
                     android:id="@+id/languageSelector"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_weight="0.6"
+                    android:orientation="horizontal"
+                    android:gravity="end">
 
                     <!-- Przycisk POLSKI -->
                     <LinearLayout
                         android:id="@+id/langPl"
-                        android:layout_width="120dp"
+                        android:layout_width="95dp"
                         android:layout_height="48dp"
                         android:orientation="horizontal"
                         android:gravity="center"
@@ -208,7 +211,7 @@
                             android:id="@+id/textLangPl"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Polski"
+                            android:text="@string/polish"
                             android:textSize="16sp"
                             android:textColor="#000000" />
                     </LinearLayout>
@@ -216,7 +219,7 @@
                     <!-- Przycisk ENGLISH -->
                     <LinearLayout
                         android:id="@+id/langEn"
-                        android:layout_width="120dp"
+                        android:layout_width="95dp"
                         android:layout_height="48dp"
                         android:layout_marginStart="8dp"
                         android:orientation="horizontal"
@@ -235,7 +238,7 @@
                             android:id="@+id/textLangEn"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="English"
+                            android:text="@string/english"
                             android:textSize="16sp"
                             android:textColor="#666666" />
                     </LinearLayout>
@@ -244,6 +247,26 @@
             </TableRow>
         </TableLayout>
     </androidx.cardview.widget.CardView>
+
+
+    <Button
+        android:id="@+id/resetButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Zresetuj ustawienia"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:backgroundTint="@color/purple_700"
+        android:textColor="@android:color/white"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        app:layout_constraintBottom_toTopOf="@id/saveButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
 
     <Button
         android:id="@+id/saveButton"

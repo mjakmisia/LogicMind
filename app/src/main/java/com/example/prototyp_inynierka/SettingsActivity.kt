@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SwitchCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.util.*
 
@@ -69,10 +70,55 @@ class SettingsActivity : AppCompatActivity() {
 
                         setLocale(selectedLanguage!!)
                         recreate()
+                        editor.putBoolean("Sound_Enabled", true)
+                        editor.putBoolean("DarkMode_Enabled", false)
+                        editor.putBoolean("Notifications_Enabled", true)
+                        editor.apply()
+
                     }
                     .setNegativeButton(android.R.string.cancel, null)
                     .show()
             }
+
+        }
+
+        val resetBtn = findViewById<Button>(R.id.resetButton)
+        val switchSound = findViewById<SwitchCompat>(R.id.switchSound)
+        val switchDarkMode = findViewById<SwitchCompat>(R.id.switchDarkMode)
+        val switchNotification = findViewById<SwitchCompat>(R.id.switchNotification)
+
+        resetBtn.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("Przywracanie ustawień")
+                .setMessage("Czy na pewno chcesz zresetować ustawienia do domyślnych?")
+                .setPositiveButton("Tak") { _, _ ->
+                    // Resetuj ustawienia
+                    val editor = getSharedPreferences("Settings", MODE_PRIVATE).edit()
+                    editor.putString("My_Lang", "pl")
+                    editor.apply()
+
+                    switchSound.isChecked = true
+                    switchDarkMode.isChecked = false
+                    switchNotification.isChecked = true
+
+                    selectedLanguage = "pl"
+                    setLocale("pl")
+                    updateLanguageSelectionUI("pl")
+
+                    recreate() // Przeładuj widok, by język się zaktualizował
+                    editor.putBoolean("Sound_Enabled", true)
+                    editor.putBoolean("DarkMode_Enabled", false)
+                    editor.putBoolean("Notifications_Enabled", true)
+                    editor.apply()
+
+                }
+
+                .setNegativeButton("Anuluj", null)
+                .show()
+            switchSound.isChecked = sharedPrefs.getBoolean("Sound_Enabled", true)
+            switchDarkMode.isChecked = sharedPrefs.getBoolean("DarkMode_Enabled", false)
+            switchNotification.isChecked = sharedPrefs.getBoolean("Notifications_Enabled", true)
+
         }
 
 
@@ -106,13 +152,6 @@ class SettingsActivity : AppCompatActivity() {
         editor.apply()
     }
 
-
-    private fun applyLanguageChange() {
-        if (selectedLanguage != null) {
-            setLocale(selectedLanguage!!)
-            recreate()
-        }
-    }
 
 
     private fun updateLanguageSelectionUI(currentLang: String) {

@@ -25,4 +25,8 @@
     <string name="sound">Sound</string>
     <string name="ustawienia">Settings</string>
     <string name="changes">Save changes</string>
+    <string name="language">Language:</string>
+    <string name="polish">Polski</string>
+    <string name="english">English</string>
+    <string name="deleteAccount">Delete account</string>
 </resources>
