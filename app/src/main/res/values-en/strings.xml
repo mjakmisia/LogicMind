@@ -29,4 +29,8 @@
     <string name="polish">Polski</string>
     <string name="english">English</string>
     <string name="deleteAccount">Delete account</string>
+    <string name="color_sequence">Colorful sequence</string>
+    <string name="matching_pairs">Memory game</string>
+    <string name="pause">Stop</string>
+    <string name="reset">Reset progress</string>
 </resources>

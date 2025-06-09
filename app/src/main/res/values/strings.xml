@@ -32,4 +32,5 @@
     <string name="color_sequence">Kolorowa sekwencja</string>
     <string name="matching_pairs">Gra w pary</string>
     <string name="pause">Zatrzymaj</string>
+    <string name="reset">Resetuj postęp</string>
 </resources>
