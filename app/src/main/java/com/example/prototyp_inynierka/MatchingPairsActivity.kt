@@ -21,8 +21,11 @@ class MatchingPairsActivity : AppCompatActivity() {
     private lateinit var countdownText: TextView
     private lateinit var pauseButton: ImageView
     private lateinit var pauseOverlay: View
-    private var boardRows: Int = 0
-    private var boardCols: Int = 0
+    private var boardRows: Int = 4
+    private var boardCols: Int = 4
+
+    private var countdownIndex = 0
+    private var countdownInProgress = false
 
     private val cardImages = listOf(
         R.drawable.fruit_card_apple,
@@ -66,8 +69,6 @@ class MatchingPairsActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        Log.d("MatchingPairs", "Saving instance state")
-
         outState.putInt("boardRows", boardRows)
         outState.putInt("boardCols", boardCols)
         outState.putBoolean("isFlipping", isFlipping)
@@ -80,51 +81,51 @@ class MatchingPairsActivity : AppCompatActivity() {
         outState.putInt("firstCardIndex", cards.indexOf(firstCard))
         outState.putInt("secondCardIndex", cards.indexOf(secondCard))
         outState.putIntArray("cardValues", cardValues.toIntArray())
+        outState.putInt("countdownIndex", countdownIndex)
+        outState.putBoolean("countdownInProgress", countdownInProgress)
     }
 
     private fun setupPauseMenu() {
         pauseOverlay.findViewById<Button>(R.id.btnResume).setOnClickListener {
             pauseOverlay.visibility = View.GONE
-            Log.d("MatchingPairs", "Game resumed")
         }
 
         pauseOverlay.findViewById<Button>(R.id.btnRestart).setOnClickListener {
             pauseOverlay.visibility = View.GONE
-            Log.d("MatchingPairs", "Restarting game")
             startCountdown()
         }
 
         pauseOverlay.findViewById<Button>(R.id.btnExit).setOnClickListener {
-            Log.d("MatchingPairs", "Exiting game")
             finish()
         }
 
         pauseOverlay.findViewById<Button>(R.id.btnHelp).setOnClickListener {
-            // Tutaj możesz dodać dialog lub Toast z instrukcjami
             Log.d("MatchingPairs", "Help button clicked")
         }
     }
 
-    private fun startCountdown() {
-        Log.d("MatchingPairs", "Starting countdown")
+    private fun startCountdown(startFromIndex: Int = 0) {
+        countdownIndex = startFromIndex
+        countdownInProgress = true
+
         countdownText.visibility = View.VISIBLE
         gridLayout.visibility = View.INVISIBLE
         pauseButton.visibility = View.INVISIBLE
 
         val countdownValues = listOf("3", "2", "1", "Start!")
-        var index = 0
 
         val handler = Handler(Looper.getMainLooper())
         val countdownRunnable = object : Runnable {
             override fun run() {
-                if (index < countdownValues.size) {
-                    countdownText.text = countdownValues[index]
-                    index++
+                if (countdownIndex < countdownValues.size) {
+                    countdownText.text = countdownValues[countdownIndex]
+                    countdownIndex++
                     handler.postDelayed(this, 1000)
                 } else {
                     countdownText.visibility = View.GONE
                     gridLayout.visibility = View.VISIBLE
                     pauseButton.visibility = View.VISIBLE
+                    countdownInProgress = false
                     startNewGame()
                 }
             }
@@ -133,31 +134,28 @@ class MatchingPairsActivity : AppCompatActivity() {
     }
 
     private fun startNewGame() {
-        Log.d("MatchingPairs", "Starting new game")
         gridLayout.removeAllViews()
         firstCard = null
         secondCard = null
         isFlipping = false
 
-        val boardSizes = listOf(Pair(3, 4), Pair(4, 4), Pair(4, 5))
-        val (rows, cols) = boardSizes.random()
-        boardRows = rows
-        boardCols = cols
+        gridLayout.rowCount = boardRows
+        gridLayout.columnCount = boardCols
 
-        gridLayout.rowCount = rows
-        gridLayout.columnCount = cols
-
-        val cardCount = rows * cols
+        val cardCount = boardRows * boardCols
         val pairCount = cardCount / 2
         val selectedImages = cardImages.shuffled().take(pairCount)
         cardValues = (selectedImages + selectedImages).shuffled()
 
         cards = mutableListOf()
 
-        for (i in 0 until rows) {
-            for (j in 0 until cols) {
+        for (i in 0 until boardRows) {
+            for (j in 0 until boardCols) {
+                val index = i * boardCols + j
+                if (index >= cardValues.size) continue
+
                 val imageView = ImageView(this).apply {
-                    setImageResource(0) // brak obrazka na start, tło z bg_rounded_card.xml
+                    setImageResource(0)
                     setBackgroundResource(R.drawable.bg_rounded_card)
                     layoutParams = GridLayout.LayoutParams().apply {
                         width = 0
@@ -170,7 +168,7 @@ class MatchingPairsActivity : AppCompatActivity() {
                     adjustViewBounds = true
                 }
 
-                val card = Card(imageView, cardValues[i * cols + j])
+                val card = Card(imageView, cardValues[index])
                 imageView.setOnClickListener { onCardClick(card) }
 
                 gridLayout.addView(imageView)
@@ -182,7 +180,6 @@ class MatchingPairsActivity : AppCompatActivity() {
     }
 
     private fun restoreGameState(savedInstanceState: Bundle) {
-        Log.d("MatchingPairs", "Restoring game state")
         boardRows = savedInstanceState.getInt("boardRows")
         boardCols = savedInstanceState.getInt("boardCols")
         isFlipping = savedInstanceState.getBoolean("isFlipping")
@@ -190,6 +187,8 @@ class MatchingPairsActivity : AppCompatActivity() {
         countdownText.visibility = savedInstanceState.getInt("countdownTextVisibility")
         gridLayout.visibility = savedInstanceState.getInt("gridLayoutVisibility")
         pauseButton.visibility = savedInstanceState.getInt("pauseButtonVisibility")
+        countdownIndex = savedInstanceState.getInt("countdownIndex", 0)
+        countdownInProgress = savedInstanceState.getBoolean("countdownInProgress", false)
 
         val savedCardValues = savedInstanceState.getIntArray("cardValues")
         cardValues = savedCardValues?.toList() ?: emptyList()
@@ -207,6 +206,9 @@ class MatchingPairsActivity : AppCompatActivity() {
 
             for (i in 0 until boardRows) {
                 for (j in 0 until boardCols) {
+                    val index = i * boardCols + j
+                    if (index >= cardValues.size) continue
+
                     val imageView = ImageView(this).apply {
                         setImageResource(0)
                         setBackgroundResource(R.drawable.bg_rounded_card)
@@ -221,7 +223,6 @@ class MatchingPairsActivity : AppCompatActivity() {
                         adjustViewBounds = true
                     }
 
-                    val index = i * boardCols + j
                     val card = Card(imageView, cardValues[index])
                     card.isFlipped = flippedArray.getOrElse(index) { false }
                     card.isMatched = matchedArray.getOrElse(index) { false }
@@ -246,13 +247,24 @@ class MatchingPairsActivity : AppCompatActivity() {
 
             val firstCardIndex = savedInstanceState.getInt("firstCardIndex", -1)
             val secondCardIndex = savedInstanceState.getInt("secondCardIndex", -1)
-            if (firstCardIndex != -1) firstCard = cards[firstCardIndex]
-            if (secondCardIndex != -1) secondCard = cards[secondCardIndex]
+            if (firstCardIndex in cards.indices) firstCard = cards[firstCardIndex]
+            if (secondCardIndex in cards.indices) secondCard = cards[secondCardIndex]
+
+            // Kontynuuj sprawdzanie pary, jeśli była w trakcie
+            if (firstCard != null && secondCard != null) {
+                Handler(Looper.getMainLooper()).postDelayed({
+                    checkMatch()
+                }, 500)
+            }
+
+            // Kontynuuj countdown, jeśli był w trakcie
+            if (countdownInProgress) {
+                startCountdown(countdownIndex)
+            }
         }
     }
 
     private fun showAllCardsInitially() {
-        Log.d("MatchingPairs", "Showing all cards initially")
         cards.forEach { flipCard(it, true) }
 
         Handler(Looper.getMainLooper()).postDelayed({
@@ -312,5 +324,3 @@ class MatchingPairsActivity : AppCompatActivity() {
         var isMatched: Boolean = false
     }
 }
-
-
