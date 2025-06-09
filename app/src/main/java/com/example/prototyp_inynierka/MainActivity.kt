@@ -30,7 +30,6 @@ class MainActivity : AppCompatActivity() {
         val btnPamiec = findViewById<Button>(R.id.btnPamiec)
 
         btnKoordynacja.setOnClickListener {
-            // Tu dodaj później np. start gry z kategorii Koordynacja
             it.playSoundEffect(android.view.SoundEffectConstants.CLICK)
         }
 
@@ -46,6 +45,8 @@ class MainActivity : AppCompatActivity() {
 
         btnPamiec.setOnClickListener {
             it.playSoundEffect(android.view.SoundEffectConstants.CLICK)
+            val intent = Intent(this, GameSelectionMemoryActivity::class.java)
+            startActivity(intent)
         }
 
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
@@ -61,7 +62,6 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_profile -> {
-                    // Tu możesz otworzyć ekran profilu
                     startActivity(Intent(this, ProfileActivity::class.java))
                     true
                 }

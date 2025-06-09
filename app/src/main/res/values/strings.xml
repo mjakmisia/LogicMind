@@ -29,4 +29,7 @@
     <string name="polish">Polski</string>
     <string name="english">English</string>
     <string name="deleteAccount">Usuń konto</string>
+    <string name="color_sequence">Kolorowa sekwencja</string>
+    <string name="matching_pairs">Gra w pary</string>
+    <string name="pause">Zatrzymaj</string>
 </resources>
