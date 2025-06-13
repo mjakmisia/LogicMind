@@ -1,4 +1,4 @@
-package com.example.prototyp_inynierka
+package com.example.prototyp_inynierka.activities
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.example.prototyp_inynierka.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.util.Calendar
 

@@ -33,4 +33,5 @@
     <string name="matching_pairs">Gra w pary</string>
     <string name="pause">Zatrzymaj</string>
     <string name="reset">Resetuj postęp</string>
+    <string name="icon_star">Ikona gwiazdki</string>
 </resources>

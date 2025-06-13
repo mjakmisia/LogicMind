@@ -1,9 +1,10 @@
-package com.example.prototyp_inynierka
+package com.example.prototyp_inynierka.activities
 
 import android.content.Intent
 import android.os.Bundle
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
+import com.example.prototyp_inynierka.R
 
 class GameSelectionMemoryActivity : AppCompatActivity() {
 

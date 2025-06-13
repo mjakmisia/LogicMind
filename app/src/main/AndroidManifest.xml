@@ -15,35 +15,35 @@
         tools:targetApi="31">
 
         <activity
-            android:name=".MatchingPairsActivity"
+            android:name=".activities.MatchingPairsActivity"
             android:exported="false" />
 
         <activity
-            android:name=".GameSelectionAttentionActivity"
+            android:name=".activities.GameSelectionAttentionActivity"
             android:exported="false" />
 
         <activity
-            android:name=".GameSelectionMemoryActivity"
+            android:name=".activities.GameSelectionMemoryActivity"
             android:exported="false" />
 
         <activity
-            android:name=".SettingsActivity"
+            android:name=".activities.SettingsActivity"
             android:exported="false" />
 
         <activity
-            android:name=".ProfileActivity"
+            android:name=".activities.ProfileActivity"
             android:exported="false" />
 
         <activity
-            android:name=".IntroMatchingPairsActivity"
+            android:name=".activities.IntroMatchingPairsActivity"
             android:exported="false" />
 
         <activity
-            android:name=".IntroWordSearchActivity"
+            android:name=".activities.IntroWordSearchActivity"
             android:exported="false" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
