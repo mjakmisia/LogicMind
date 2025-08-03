@@ -34,4 +34,6 @@
     <string name="pause">Stop</string>
     <string name="reset">Reset progress</string>
     <string name="icon_star">Star icon</string>
+    <string name="current_streak">Current streak</string>
+    <string name="best_streak">Best streak</string>
 </resources>
