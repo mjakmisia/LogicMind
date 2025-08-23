@@ -36,4 +36,8 @@
     <string name="icon_star">Star icon</string>
     <string name="current_streak">Current streak</string>
     <string name="best_streak">Best streak</string>
+    <string name="question_choose_game_problem_solving">Choose one game from category: Problem solving</string>
+    <string name="number_addition">Number Addition</string>
+    <string name="other_problem_game">Path change</string>
+
 </resources>

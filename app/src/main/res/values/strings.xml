@@ -36,4 +36,8 @@
     <string name="icon_star">Ikona gwiazdki</string>
     <string name="current_streak">Aktualny streak</string>
     <string name="best_streak">Najlepszy streak</string>
+    <string name="question_choose_game_problem_solving">Wybierz grę z kategorii: Rozwiązywanie problemów</string>
+    <string name="number_addition">Dodawanie</string>
+    <string name="other_problem_game">Zmiana ścieżki</string>
+
 </resources>

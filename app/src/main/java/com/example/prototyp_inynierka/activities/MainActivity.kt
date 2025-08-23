@@ -35,6 +35,8 @@ class MainActivity : AppCompatActivity() {
 
         btnRozwiazywanie.setOnClickListener {
             it.playSoundEffect(android.view.SoundEffectConstants.CLICK)
+            val intent = Intent(this, GameSelectionProblemSolvingActivity::class.java)
+            startActivity(intent)
         }
 
         btnSkupienie.setOnClickListener {
