@@ -1,4 +1,4 @@
-package com.example.prototyp_inynierka
+package com.example.logicmind
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "prototyp_inżynierka"
+rootProject.name = "LogicMind"
 include(":app")
  

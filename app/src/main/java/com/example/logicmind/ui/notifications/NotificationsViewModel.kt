@@ -1,4 +1,4 @@
-package com.example.prototyp_inynierka.ui.notifications
+package com.example.logicmind.ui.notifications
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

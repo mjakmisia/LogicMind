@@ -1,4 +1,4 @@
-package com.example.prototyp_inynierka.common
+package com.example.logicmind.common
 
 import android.content.Context
 import android.os.CountDownTimer

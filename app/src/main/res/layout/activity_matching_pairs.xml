@@ -16,7 +16,7 @@
         app:layout_constraintGuide_percent="0.08" />
 
     <!-- Pasek czasu -->
-    <com.example.prototyp_inynierka.common.GameTimerProgressBar
+    <com.example.logicmind.common.GameTimerProgressBar
         style="?android:attr/progressBarStyleHorizontal"
         android:id="@+id/gameTimerProgressBar"
         android:layout_width="0dp"

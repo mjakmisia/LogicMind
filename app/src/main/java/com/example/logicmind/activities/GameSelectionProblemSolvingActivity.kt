@@ -1,10 +1,11 @@
-package com.example.prototyp_inynierka.activities
+package com.example.logicmind.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.SoundEffectConstants
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
-import com.example.prototyp_inynierka.R
+import com.example.logicmind.R
 
 class GameSelectionProblemSolvingActivity : AppCompatActivity() {
 
@@ -18,13 +19,13 @@ class GameSelectionProblemSolvingActivity : AppCompatActivity() {
         val game2Container = findViewById<LinearLayout>(R.id.gameOtherProblemGameContainer)
 
         game1Container.setOnClickListener {
-            it.playSoundEffect(android.view.SoundEffectConstants.CLICK)
+            it.playSoundEffect(SoundEffectConstants.CLICK)
             val intent = Intent(this, IntroNumberAdditionActivity::class.java)
             startActivity(intent)
         }
 
         game2Container.setOnClickListener {
-            it.playSoundEffect(android.view.SoundEffectConstants.CLICK)
+            it.playSoundEffect(SoundEffectConstants.CLICK)
             // TODO: dodaj odpowiednią aktywność dla gry 2 w tej kategorii
         }
     }

@@ -1,4 +1,4 @@
-package com.example.prototyp_inynierka
+package com.example.logicmind
 
 import org.junit.Test
 

@@ -1,11 +1,11 @@
-package com.example.prototyp_inynierka.activities
+package com.example.logicmind.activities
 
 import android.os.Bundle
 import android.widget.Button
 import android.widget.GridLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.example.prototyp_inynierka.R
+import com.example.logicmind.R
 
 class NumberAdditionActivity : AppCompatActivity() {
 

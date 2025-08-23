@@ -1,4 +1,4 @@
-package com.example.prototyp_inynierka.activities
+package com.example.logicmind.activities
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -10,9 +10,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.gridlayout.widget.GridLayout
-import com.example.prototyp_inynierka.R
-import com.example.prototyp_inynierka.common.GameCountdownManager
-import com.example.prototyp_inynierka.common.GameTimerProgressBar
+import com.example.logicmind.R
+import com.example.logicmind.common.GameCountdownManager
+import com.example.logicmind.common.GameTimerProgressBar
 
 //TODO: Przycisk pauzy i okna z pauzą do oddzilnego pliku w common, odliczanie gwiazdek tak samo
 //TODO: Ukryj widok gwiazdki z licznikiem na czas ekranu odliczania

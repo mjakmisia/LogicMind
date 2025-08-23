@@ -1,4 +1,4 @@
-package com.example.prototyp_inynierka.activities
+package com.example.logicmind.activities
 
 import android.app.AlertDialog
 import android.content.Intent
@@ -10,7 +10,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
-import com.example.prototyp_inynierka.R
+import com.example.logicmind.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.util.*
 

@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.prototyp_inynierka"
-    compileSdk = 35
+    namespace = "com.example.logicmind"
+    compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.prototyp_inynierka"
+        applicationId = "com.example.LogicMind"
         minSdk = 28
         targetSdk = 35
         versionCode = 1
