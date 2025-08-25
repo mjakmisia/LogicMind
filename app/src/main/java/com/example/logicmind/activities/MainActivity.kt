@@ -31,26 +31,33 @@ class MainActivity : AppCompatActivity() {
 
         btnKoordynacja.setOnClickListener {
             it.playSoundEffect(android.view.SoundEffectConstants.CLICK)
+            val intent = Intent(this, GameSelectionActivity::class.java)
+            intent.putExtra("CATEGORY_ID", "coordination")
+            startActivity(intent)
         }
 
         btnRozwiazywanie.setOnClickListener {
             it.playSoundEffect(android.view.SoundEffectConstants.CLICK)
-            val intent = Intent(this, GameSelectionProblemSolvingActivity::class.java)
+            val intent = Intent(this, GameSelectionActivity::class.java)
+            intent.putExtra("CATEGORY_ID", "reasoning")
             startActivity(intent)
         }
 
         btnSkupienie.setOnClickListener {
             it.playSoundEffect(android.view.SoundEffectConstants.CLICK)
-            val intent = Intent(this, GameSelectionAttentionActivity::class.java)
+            val intent = Intent(this, GameSelectionActivity::class.java)
+            intent.putExtra("CATEGORY_ID", "attention")
             startActivity(intent)
         }
 
         btnPamiec.setOnClickListener {
             it.playSoundEffect(android.view.SoundEffectConstants.CLICK)
-            val intent = Intent(this, GameSelectionMemoryActivity::class.java)
+            val intent = Intent(this, GameSelectionActivity::class.java)
+            intent.putExtra("CATEGORY_ID", "memory")
             startActivity(intent)
         }
 
+        // Obsługa bottom navigation
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -59,8 +66,8 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_statistics -> {
-                    // Tu możesz otworzyć ekran statystyk
-                    // startActivity(Intent(this, SettingsActivity::class.java))
+                    // np. otwórz ekran statystyk (dodasz później)
+                    // startActivity(Intent(this, StatisticsActivity::class.java))
                     true
                 }
                 R.id.nav_profile -> {

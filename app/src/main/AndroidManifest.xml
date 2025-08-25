@@ -20,18 +20,6 @@
             android:exported="false" />
 
         <activity
-            android:name=".activities.GameSelectionAttentionActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".activities.GameSelectionMemoryActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".activities.GameSelectionProblemSolvingActivity"
-            android:exported="false" />
-
-        <activity
             android:name=".activities.SettingsActivity"
             android:exported="false" />
 
@@ -45,6 +33,10 @@
 
         <activity
             android:name=".activities.IntroWordSearchActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".activities.GameSelectionActivity"
             android:exported="false" />
 
         <activity

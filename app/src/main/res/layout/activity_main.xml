@@ -99,7 +99,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginTop="50dp"
         android:backgroundTint="@color/category_pink"
-        android:text="@string/category_reasoning"
+        android:text="@string/category_reasoning_enter"
         android:textColor="#FFFFFF"
         android:textSize="16sp"
         app:layout_constraintStart_toEndOf="@id/btnKoordynacja"

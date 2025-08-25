@@ -19,21 +19,21 @@
         android:id="@+id/tvQuestionChooseGame"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/question_choose_game"
+        android:text="@string/choose_game_request"
         android:textSize="25sp"
         android:textStyle="bold"
         android:textColor="#FFFFFF"
         android:gravity="center"
-        android:background="@color/category_green"
         android:padding="14dp"
+        android:background="@color/category_yellow"
         app:layout_constraintTop_toTopOf="@id/guidelineCenter"
         app:layout_constraintBottom_toBottomOf="@id/guidelineCenter"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Górna połowa: Kolorowa sekwencja -->
+    <!-- Górna połowa: Gra 1 -->
     <LinearLayout
-        android:id="@+id/gameColorSequenceContainer"
+        android:id="@+id/game1Container"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:orientation="vertical"
@@ -46,25 +46,25 @@
         app:layout_constraintEnd_toEndOf="parent">
 
         <ImageView
-            android:id="@+id/imgColorSequence"
+            android:id="@+id/game1Icon"
             android:layout_width="240dp"
             android:layout_height="240dp"
-            android:src="@drawable/image_color_sequence"
-            android:layout_gravity="center" />
+            android:layout_gravity="center"
+            android:src="@drawable/ic_close" />
 
         <TextView
-            android:id="@+id/titleColorSequence"
+            android:id="@+id/game1Title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/color_sequence"
+            android:text="@string/game_1"
             android:textSize="22sp"
             android:textColor="@color/grey"
             android:layout_marginTop="12dp" />
     </LinearLayout>
 
-    <!-- Dolna połowa: Gra w pary  -->
+    <!-- Dolna połowa: Gra 2 -->
     <LinearLayout
-        android:id="@+id/gameMatchingPairsContainer"
+        android:id="@+id/game2Container"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="#FFFFFF"
@@ -77,18 +77,18 @@
         app:layout_constraintTop_toBottomOf="@id/tvQuestionChooseGame">
 
         <ImageView
-            android:id="@+id/imgMatchingPairs"
+            android:id="@+id/game2Icon"
             android:layout_width="240dp"
             android:layout_height="240dp"
             android:layout_gravity="center"
-            android:src="@drawable/image_matching_pairs" />
+            android:src="@drawable/ic_close" />
 
         <TextView
-            android:id="@+id/titleMatchingPairs"
+            android:id="@+id/game2Title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="@string/matching_pairs"
+            android:text="@string/game_2"
             android:textColor="@color/grey"
             android:textSize="22sp" />
     </LinearLayout>

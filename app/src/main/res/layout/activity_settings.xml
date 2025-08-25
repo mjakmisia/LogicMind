@@ -15,7 +15,7 @@
         android:id="@+id/settingsHeader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/ustawienia"
+        android:text="@string/settings"
         android:textSize="28sp"
         android:textColor="@color/textGrey"
         android:textStyle="bold"

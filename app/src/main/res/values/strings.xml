@@ -3,9 +3,11 @@
     <string name="hello">Witaj!</string>
     <string name="welcome_message">Wybierz kategorię, aby rozpocząć trening.</string>
     <string name="category_coordination">Koordynacja</string>
-    <string name="category_reasoning">Rozwiązywanie\nproblemów</string>
+    <string name="category_reasoning_enter">Rozwiązywanie\nproblemów</string>
+    <string name="category_reasoning">Rozwiązywanie problemów</string>
     <string name="category_attention">Skupienie</string>
     <string name="category_memory">Pamięć</string>
+    <string name="unknown">Nieznane</string>
     <string name="title_home">Strona główna</string>
     <string name="title_dashboard">Panel główny</string>
     <string name="title_notifications">Powiadomienia</string>
@@ -14,7 +16,7 @@
     <string name="settings">Ustawienia</string>
     <string name="flame_icon">0</string>
     <string name="statistics">Statystyki</string>
-    <string name="question_choose_game">W którą grę chcesz zagrać?</string>
+    <string name="choose_game_request">Wybierz grę z kategorii:\n%1$s</string>
     <string name="word_search">Szukanie słów</string>
     <string name="fruit_sorting">Sortowanie owoców</string>
     <string name="start_game">Rozpocznij</string>
@@ -23,11 +25,10 @@
     <string name="notifications">Powiadomienia</string>
     <string name="darkMode">Tryb nocny</string>
     <string name="sound">Dźwięk</string>
-    <string name="ustawienia">Ustawienia</string>
     <string name="changes">Zapisz zmiany</string>
     <string name="language">Język:</string>
     <string name="polish">Polski</string>
-    <string name="english">English</string>
+    <string name="english">Angielski</string>
     <string name="deleteAccount">Usuń konto</string>
     <string name="color_sequence">Kolorowa sekwencja</string>
     <string name="matching_pairs">Gra w pary</string>
@@ -36,8 +37,7 @@
     <string name="icon_star">Ikona gwiazdki</string>
     <string name="current_streak">Aktualny streak</string>
     <string name="best_streak">Najlepszy streak</string>
-    <string name="question_choose_game_problem_solving">Wybierz grę z kategorii: Rozwiązywanie problemów</string>
     <string name="number_addition">Dodawanie</string>
-    <string name="other_problem_game">Zmiana ścieżki</string>
-
+    <string name="game_1">Gra 1</string>
+    <string name="game_2">Gra 2</string>
 </resources>
