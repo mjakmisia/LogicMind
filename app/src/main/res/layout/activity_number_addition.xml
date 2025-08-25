@@ -2,15 +2,22 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/dark_grey"
-    android:padding="16dp">
+    android:background="@color/dark_grey">
 
-    <!-- Pasek postępu czasu gry -->
+    <!-- Górna linia pomocnicza -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/topGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.08" />
+
+    <!-- Pasek czasu -->
     <com.example.logicmind.common.GameTimerProgressBar
         android:id="@+id/gameTimerProgressBar"
-        style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="0dp"
         android:layout_height="12dp"
         android:max="60"
@@ -19,29 +26,81 @@
         android:indeterminate="false"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/topGuideline"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Tekst z docelową sumą -->
+    <!-- Przycisk pauzy -->
+    <ImageButton
+        android:id="@+id/pauseButton"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_marginTop="25dp"
+        android:padding="12dp"
+        android:background="@drawable/bg_rounded_light_gray"
+        android:src="@drawable/ic_pause"
+        android:contentDescription="@string/pause"
+        app:tint="@android:color/white"
+        app:layout_constraintTop_toTopOf="@id/topGuideline"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="16dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        />
+
+    <!-- Liczba punktów / gwiazdki -->
+    <LinearLayout
+        android:id="@+id/starContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="25dp"
+        app:layout_constraintTop_toTopOf="@id/topGuideline"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:id="@+id/starIcon"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:src="@drawable/icon_star"
+            android:contentDescription="@string/icon_star" />
+
+        <TextView
+            android:id="@+id/starCountText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textSize="24sp"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            android:layout_marginStart="8dp"
+            android:fontFamily="sans-serif-medium" />
+    </LinearLayout>
+
+    <!-- Docelowa liczba -->
     <TextView
         android:id="@+id/targetNumberText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="24sp"
-        android:textColor="#FFFFFF"
+        android:textSize="28sp"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
         android:layout_marginTop="16dp"
         app:layout_constraintTop_toBottomOf="@id/gameTimerProgressBar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Odliczanie początkowe (3,2,1,Start!) -->
+    <!-- Odliczanie startowe -->
     <TextView
         android:id="@+id/countdownText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="48sp"
-        android:textColor="#FFFFFF"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
         android:visibility="gone"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -53,60 +112,25 @@
         android:id="@+id/numberGrid"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="16dp"
+        android:padding="8dp"
+        android:layout_margin="16dp"
         app:layout_constraintTop_toBottomOf="@id/targetNumberText"
-        app:layout_constraintBottom_toTopOf="@id/pauseButton"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <!-- Przycisk pauzy -->
-    <Button
-        android:id="@+id/pauseButton"
-        android:layout_width="0dp"
-        android:layout_height="56dp"
-        android:text="Pauza"
-        android:textAllCaps="false"
-        android:textSize="18sp"
-        android:textColor="#222222"
-        android:backgroundTint="@color/category_green"
-        android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- Nakładka pauzy -->
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/pauseOverlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#80000000"
-        android:orientation="vertical"
-        android:gravity="center"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:visibility="gone"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Tekst pauzy -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Gra wstrzymana"
-            android:textSize="24sp"
-            android:textColor="#FFFFFF"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Przycisk wznowienia -->
-        <Button
-            android:id="@+id/resumeButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Wznów"
-            android:textAllCaps="false"
-            android:textSize="18sp"
-            android:textColor="#222222"
-            android:backgroundTint="@color/category_green" />
-    </LinearLayout>
+        <include layout="@layout/pause_overlay" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
