@@ -17,8 +17,6 @@
     <string name="flame_icon">0</string>
     <string name="statistics">Statystyki</string>
     <string name="choose_game_request">Wybierz grę z kategorii:\n%1$s</string>
-    <string name="word_search">Szukanie słów</string>
-    <string name="fruit_sorting">Sortowanie owoców</string>
     <string name="start_game">Rozpocznij</string>
     <string name="help">Pomoc</string>
     <string name="close">Zamknij</string>
@@ -30,14 +28,19 @@
     <string name="polish">Polski</string>
     <string name="english">Angielski</string>
     <string name="deleteAccount">Usuń konto</string>
-    <string name="color_sequence">Kolorowa sekwencja</string>
-    <string name="matching_pairs">Gra w pary</string>
     <string name="pause">Zatrzymaj</string>
     <string name="reset">Resetuj postęp</string>
     <string name="icon_star">Ikona gwiazdki</string>
     <string name="current_streak">Aktualny streak</string>
     <string name="best_streak">Najlepszy streak</string>
-    <string name="number_addition">Dodawanie</string>
+    <string name="word_search">Wyszukiwanie słów</string>
+    <string name="fruit_sort">Sortowanie owoców</string>
+    <string name="color_sequence">Kolorowa sekwencja</string>
+    <string name="card_match">Dopasowywanie kart</string>
+    <string name="number_addition">Dodawanie liczb</string>
+    <string name="path_change">Zmiana ścieżki</string>
+    <string name="road_dash">Unikanie przeszkód</string>
+    <string name="symbol_race">Wyścig symboli</string>
     <string name="game_1">Gra 1</string>
     <string name="game_2">Gra 2</string>
 </resources>

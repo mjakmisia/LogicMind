@@ -17,8 +17,6 @@
     <string name="flame_icon">0</string>
     <string name="statistics">Statistics</string>
     <string name="choose_game_request">Choose one game from category:\n%1$s</string>
-    <string name="word_search">Word Search</string>
-    <string name="fruit_sorting">Fruit Sorting</string>
     <string name="start_game">Start</string>
     <string name="help">Help</string>
     <string name="close">Close</string>
@@ -30,14 +28,19 @@
     <string name="polish">Polish</string>
     <string name="english">English</string>
     <string name="deleteAccount">Delete account</string>
-    <string name="color_sequence">Colorful sequence</string>
-    <string name="matching_pairs">Memory game</string>
     <string name="pause">Stop</string>
     <string name="reset">Reset progress</string>
     <string name="icon_star">Star icon</string>
     <string name="current_streak">Current streak</string>
     <string name="best_streak">Best streak</string>
+    <string name="word_search">Word Search</string>
+    <string name="fruit_sort">Fruit Sort</string>
+    <string name="color_sequence">Color Sequence</string>
+    <string name="card_match">Card Match</string>
     <string name="number_addition">Number Addition</string>
+    <string name="path_change">Path Change</string>
+    <string name="road_dash">Road Dash</string>
+    <string name="symbol_race">Symbol Race</string>
     <string name="game_1">Game 1</string>
     <string name="game_2">Game 2</string>
 </resources>

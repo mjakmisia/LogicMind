@@ -55,7 +55,7 @@
         android:layout_width="180dp"
         android:layout_height="180dp"
         android:layout_marginTop="32dp"
-        android:src="@drawable/image_matching_pairs"
+        android:src="@drawable/image_card_match"
         app:layout_constraintTop_toBottomOf="@id/btnClose"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -65,7 +65,7 @@
         android:id="@+id/gameTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/matching_pairs"
+        android:text="@string/card_match"
         android:textColor="#FFFFFF"
         android:textSize="28sp"
         android:textStyle="bold"

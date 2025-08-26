@@ -22,7 +22,7 @@ object GameConfigProvider {
                 nameRes = R.string.category_attention,
                 games = listOf(
                     GameOption(R.string.word_search, R.drawable.image_word_search, IntroWordSearchActivity::class.java),
-                    GameOption(R.string.fruit_sorting, R.drawable.image_fruit_sorting, null) //obrazek do zmiany
+                    GameOption(R.string.fruit_sort, R.drawable.image_fruit_sort, null) //obrazek do zmiany
                 )
             )
             "memory" -> GameCategoryConfig(
@@ -30,7 +30,7 @@ object GameConfigProvider {
                 nameRes = R.string.category_memory,
                 games = listOf(
                     GameOption(R.string.color_sequence, R.drawable.image_color_sequence, null),
-                    GameOption(R.string.matching_pairs, R.drawable.image_matching_pairs,
+                    GameOption(R.string.card_match, R.drawable.image_card_match,
                         IntroMatchingPairsActivity::class.java)
                 )
             )
@@ -40,15 +40,15 @@ object GameConfigProvider {
                 games = listOf(
                     GameOption(R.string.number_addition, R.drawable.image_number_addition,
                         IntroNumberAdditionActivity::class.java),
-                    GameOption(R.string.unknown, R.drawable.image_path_change, null) //obrazek do zmiany (?)
+                    GameOption(R.string.path_change, R.drawable.image_path_change, null) //obrazek do zmiany (?)
                 )
             )
             "coordination" -> GameCategoryConfig(
                 colorRes = R.color.category_blue,
                 nameRes = R.string.category_coordination,
                 games = listOf(
-                    GameOption(R.string.unknown, R.drawable.ic_close, null),
-                    GameOption(R.string.unknown, R.drawable.ic_close, null)
+                    GameOption(R.string.road_dash, R.drawable.ic_close, null),
+                    GameOption(R.string.symbol_race, R.drawable.ic_close, null)
                 )
             )
             else -> GameCategoryConfig(

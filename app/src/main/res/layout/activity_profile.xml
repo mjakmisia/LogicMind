@@ -436,7 +436,7 @@
                     android:layout_width="0dp"
                     android:layout_height="120dp"
                     android:layout_weight="1"
-                    android:src="@drawable/image_fruit_sorting"
+                    android:src="@drawable/image_fruit_sort"
                     android:scaleType="centerCrop"
                     android:layout_marginStart="4dp"
                     android:layout_marginEnd="4dp"
@@ -447,7 +447,7 @@
                     android:layout_width="0dp"
                     android:layout_height="120dp"
                     android:layout_weight="1"
-                    android:src="@drawable/image_matching_pairs"
+                    android:src="@drawable/image_card_match"
                     android:scaleType="centerCrop"
                     android:layout_marginStart="8dp"
                     android:background="@drawable/bg_rounded_light_gray" />
