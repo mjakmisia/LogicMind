@@ -17,6 +17,7 @@
 
     <!-- Pasek czasu -->
     <com.example.logicmind.common.GameTimerProgressBar
+        style="?android:attr/progressBarStyleHorizontal"
         android:id="@+id/gameTimerProgressBar"
         android:layout_width="0dp"
         android:layout_height="12dp"
@@ -85,13 +86,19 @@
         android:id="@+id/targetNumberText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="28sp"
+        android:textSize="56sp"
         android:textColor="@android:color/white"
+        android:gravity="center"
+        android:background="@drawable/circle_bg"
         android:textStyle="bold"
-        android:layout_marginTop="16dp"
+        android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/gameTimerProgressBar"
+        app:layout_constraintBottom_toTopOf="@id/numberGrid"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_bias="0.3"
+        />
+
 
     <!-- Odliczanie startowe -->
     <TextView
@@ -110,14 +117,17 @@
     <!-- Siatka przycisków -->
     <androidx.gridlayout.widget.GridLayout
         android:id="@+id/numberGrid"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:padding="8dp"
         android:layout_margin="16dp"
         app:layout_constraintTop_toBottomOf="@id/targetNumberText"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_bias="0.3"/>
+
+
 
     <!-- Nakładka pauzy -->
     <androidx.constraintlayout.widget.ConstraintLayout

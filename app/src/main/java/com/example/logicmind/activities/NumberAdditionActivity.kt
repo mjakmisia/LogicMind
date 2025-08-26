@@ -1,5 +1,6 @@
 package com.example.logicmind.activities
 
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
@@ -15,13 +16,14 @@ import androidx.gridlayout.widget.GridLayout
 import com.example.logicmind.R
 import com.example.logicmind.common.GameCountdownManager
 import com.example.logicmind.common.GameTimerProgressBar
-
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.shape.CornerFamily
 class NumberAdditionActivity : AppCompatActivity() {
 
     /*TODO:
-       - naprawienie widocznosci paska(teraz sie tylko ładuje)
-       - dodanie gwiazdek-punktow
-       - rozbudowanie wyglądu */
+       - naprawienie zeby nie pokazywal sie okrag po zakonczeniu rozgrywki
+       - rozbudowanie wyglądu
+       - dodanie kolejnych poziomów*/
 
     private lateinit var targetNumberText: TextView
     private lateinit var numberGrid: GridLayout
@@ -52,6 +54,8 @@ class NumberAdditionActivity : AppCompatActivity() {
         countdownText = findViewById(R.id.countdownText)
         starCountText = findViewById(R.id.starCountText)
 
+        targetNumberText.visibility = View.GONE
+        numberGrid.visibility = View.GONE
         updateStarCountUI()
 
         // Timer gry
@@ -72,6 +76,8 @@ class NumberAdditionActivity : AppCompatActivity() {
                 starCount = 0
                 updateStarCountUI()
                 timerProgressBar.start()
+                targetNumberText.visibility = View.VISIBLE  // pokazujemy kółko z liczbą
+                numberGrid.visibility = View.VISIBLE       // pokazujemy siatkę
                 startLevel()
             }
         )
@@ -145,26 +151,61 @@ class NumberAdditionActivity : AppCompatActivity() {
 
     private fun setupNumberGrid() {
         numberGrid.removeAllViews()
+
+        val displayMetrics = resources.displayMetrics
+        val screenWidth = displayMetrics.widthPixels
+        val screenHeight = displayMetrics.heightPixels
+
+        // dopasuj do tego ile masz kolumn i wierszy
+        val cols = 4
+        val rows = 4
+
+        // Odliczamy marginesy (np. 16px między kafelkami)
+        val margin = 16 * 2 // lewy + prawy
+        val buttonWidth = (screenWidth / cols) - margin
+        val buttonHeight = (screenHeight / rows) - margin
+
+        // Wybieramy mniejszy wymiar, żeby kafelki się zmieściły
+        val buttonSize = minOf(buttonWidth, buttonHeight)
+
+        numberGrid.columnCount = cols
+        numberGrid.rowCount = rows
+
         for (i in numbers.indices) {
-            val button = Button(this)
-            button.text = if (numbers[i] == -1) "" else numbers[i].toString()
-            button.layoutParams = GridLayout.LayoutParams().apply {
-                width = 150
-                height = 150
-                setMargins(8, 8, 8, 8)
+            val button = MaterialButton(this).apply {
+                text = if (numbers[i] == -1) "" else numbers[i].toString()
+
+                layoutParams = GridLayout.LayoutParams().apply {
+                    width = buttonSize
+                    height = buttonSize
+                    setMargins(12, 12, 12, 12)
+                }
+
+                textSize = (buttonSize * 0.3f) / resources.displayMetrics.scaledDensity
+                setTextColor(Color.BLACK)
+
+                // nadajemy zaokrąglenie
+                shapeAppearanceModel = shapeAppearanceModel
+                    .toBuilder()
+                    .setAllCorners(CornerFamily.ROUNDED, buttonSize * 0.15f)
+                    .build()
             }
 
             if (numbers[i] == -1) {
                 button.isEnabled = false
-                button.setBackgroundColor(Color.LTGRAY)
+                button.backgroundTintList = ColorStateList.valueOf(Color.LTGRAY)
+                button.setTextColor(Color.DKGRAY)
             } else {
                 button.setOnClickListener { handleNumberClick(button, i) }
-                button.setBackgroundColor(Color.WHITE)
+                button.backgroundTintList = ColorStateList.valueOf(Color.WHITE)
+                button.setTextColor(Color.BLACK)
             }
+
 
             numberGrid.addView(button)
         }
     }
+
 
     private fun handleNumberClick(button: Button, index: Int) {
         if (selectedButtons.contains(button)) {
