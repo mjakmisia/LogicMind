@@ -7,7 +7,7 @@ import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import com.example.logicmind.R
 
-class IntroMatchingPairsActivity : AppCompatActivity() {
+class IntroCardMatchActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_intro_matching_pairs)
@@ -32,7 +32,7 @@ class IntroMatchingPairsActivity : AppCompatActivity() {
             // TODO: Dodać ekran pomocy
         }
         btnStartGame.setOnClickListener {
-            val intent = Intent(this, MatchingPairsActivity::class.java)
+            val intent = Intent(this, CardMatchActivity::class.java)
             startActivity(intent)
         }
     }

@@ -56,7 +56,9 @@ class GameSelectionActivity : AppCompatActivity() {
         container.setOnClickListener { view ->
             view.playSoundEffect(SoundEffectConstants.CLICK)
             gameOption.introActivity?.let {
-                startActivity(Intent(this, it))
+                val intent = Intent(this, it)
+                intent.putExtra("GAME_ID", gameOption.gameId)
+                startActivity(intent)
             }
         }
     }

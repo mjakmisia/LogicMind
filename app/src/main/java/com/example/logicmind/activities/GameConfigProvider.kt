@@ -3,6 +3,7 @@ package com.example.logicmind.activities
 import com.example.logicmind.R
 
 data class GameOption(
+    val gameId: String,
     val title: Int,
     val iconRes: Int,
     val introActivity: Class<*>?
@@ -21,34 +22,35 @@ object GameConfigProvider {
                 colorRes = R.color.category_yellow,
                 nameRes = R.string.category_attention,
                 games = listOf(
-                    GameOption(R.string.word_search, R.drawable.image_word_search, IntroWordSearchActivity::class.java),
-                    GameOption(R.string.fruit_sort, R.drawable.image_fruit_sort, null) //obrazek do zmiany
+                    GameOption(gameId = "word_search", R.string.word_search, R.drawable.image_word_search,
+                        GameIntroActivity::class.java),
+                    GameOption(gameId = "fruit_sort", R.string.fruit_sort, R.drawable.image_fruit_sort, null) //obrazek do zmiany
                 )
             )
             "memory" -> GameCategoryConfig(
                 colorRes = R.color.category_green,
                 nameRes = R.string.category_memory,
                 games = listOf(
-                    GameOption(R.string.color_sequence, R.drawable.image_color_sequence, null),
-                    GameOption(R.string.card_match, R.drawable.image_card_match,
-                        IntroMatchingPairsActivity::class.java)
+                    GameOption("color_sequence", R.string.color_sequence, R.drawable.image_color_sequence, null),
+                    GameOption("card_match", R.string.card_match, R.drawable.image_card_match,
+                        GameIntroActivity::class.java)
                 )
             )
             "reasoning" -> GameCategoryConfig(
                 colorRes = R.color.category_pink,
                 nameRes = R.string.category_reasoning,
                 games = listOf(
-                    GameOption(R.string.number_addition, R.drawable.image_number_addition,
-                        IntroNumberAdditionActivity::class.java),
-                    GameOption(R.string.path_change, R.drawable.image_path_change, null) //obrazek do zmiany (?)
+                    GameOption("number_addition", R.string.number_addition, R.drawable.image_number_addition,
+                        GameIntroActivity::class.java),
+                    GameOption("path_change", R.string.path_change, R.drawable.image_path_change, null) //obrazek do zmiany (?)
                 )
             )
             "coordination" -> GameCategoryConfig(
                 colorRes = R.color.category_blue,
                 nameRes = R.string.category_coordination,
                 games = listOf(
-                    GameOption(R.string.road_dash, R.drawable.ic_close, null),
-                    GameOption(R.string.symbol_race, R.drawable.ic_close, null)
+                    GameOption("road_dash", R.string.road_dash, R.drawable.ic_close, null),
+                    GameOption("symbol_race", R.string.symbol_race, R.drawable.ic_close, null)
                 )
             )
             else -> GameCategoryConfig(
