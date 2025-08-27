@@ -7,8 +7,6 @@ import android.os.Handler
 import android.os.Looper
 import android.view.View
 import android.widget.Button
-import android.widget.ImageButton
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -16,27 +14,24 @@ import androidx.gridlayout.widget.GridLayout
 import com.example.logicmind.R
 import com.example.logicmind.common.GameCountdownManager
 import com.example.logicmind.common.GameTimerProgressBar
+import com.example.logicmind.ui.GameIntroView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.shape.CornerFamily
-class NumberAdditionActivity : AppCompatActivity() {
 
-    /*TODO:
-       - naprawienie zeby nie pokazywal sie okrag po zakonczeniu rozgrywki
-       - rozbudowanie wyglądu
-       - dodanie kolejnych poziomów*/
+class NumberAdditionActivity : AppCompatActivity() {
 
     private lateinit var targetNumberText: TextView
     private lateinit var numberGrid: GridLayout
     private lateinit var timerProgressBar: GameTimerProgressBar
-    private lateinit var pauseButton: ImageView
+    private lateinit var pauseButton: View
     private lateinit var pauseOverlay: View
     private lateinit var countdownText: TextView
     private lateinit var countdownManager: GameCountdownManager
     private lateinit var starCountText: TextView
+    private lateinit var gameIntro: GameIntroView
 
     private val numbers = mutableListOf<Int>()
     private val selectedButtons = mutableListOf<Button>()
-
     private var level = 1
     private var remainingTime: Long = 60_000
     private var starCount = 0
@@ -46,6 +41,7 @@ class NumberAdditionActivity : AppCompatActivity() {
         setContentView(R.layout.activity_number_addition)
         supportActionBar?.hide()
 
+        // 🔹 Inicjalizacja widoków
         targetNumberText = findViewById(R.id.targetNumberText)
         numberGrid = findViewById(R.id.numberGrid)
         timerProgressBar = findViewById(R.id.gameTimerProgressBar)
@@ -53,6 +49,7 @@ class NumberAdditionActivity : AppCompatActivity() {
         pauseOverlay = findViewById(R.id.pauseOverlay)
         countdownText = findViewById(R.id.countdownText)
         starCountText = findViewById(R.id.starCountText)
+        //gameIntro = findViewById(R.id.gameIntro)
 
         targetNumberText.visibility = View.GONE
         numberGrid.visibility = View.GONE
@@ -76,8 +73,8 @@ class NumberAdditionActivity : AppCompatActivity() {
                 starCount = 0
                 updateStarCountUI()
                 timerProgressBar.start()
-                targetNumberText.visibility = View.VISIBLE  // pokazujemy kółko z liczbą
-                numberGrid.visibility = View.VISIBLE       // pokazujemy siatkę
+                targetNumberText.visibility = View.VISIBLE
+                numberGrid.visibility = View.VISIBLE
                 startLevel()
             }
         )
@@ -116,6 +113,7 @@ class NumberAdditionActivity : AppCompatActivity() {
     }
 
     private fun startLevel() {
+        targetNumberText.background = getDrawable(R.drawable.circle_bg)
         numberGrid.isEnabled = true
         numberGrid.columnCount = if (level == 1) 4 else 4
         numberGrid.rowCount = if (level == 1) 3 else 4
@@ -151,21 +149,15 @@ class NumberAdditionActivity : AppCompatActivity() {
 
     private fun setupNumberGrid() {
         numberGrid.removeAllViews()
-
         val displayMetrics = resources.displayMetrics
         val screenWidth = displayMetrics.widthPixels
         val screenHeight = displayMetrics.heightPixels
 
-        // dopasuj do tego ile masz kolumn i wierszy
         val cols = 4
         val rows = 4
-
-        // Odliczamy marginesy (np. 16px między kafelkami)
-        val margin = 16 * 2 // lewy + prawy
+        val margin = 16 * 2
         val buttonWidth = (screenWidth / cols) - margin
         val buttonHeight = (screenHeight / rows) - margin
-
-        // Wybieramy mniejszy wymiar, żeby kafelki się zmieściły
         val buttonSize = minOf(buttonWidth, buttonHeight)
 
         numberGrid.columnCount = cols
@@ -174,17 +166,13 @@ class NumberAdditionActivity : AppCompatActivity() {
         for (i in numbers.indices) {
             val button = MaterialButton(this).apply {
                 text = if (numbers[i] == -1) "" else numbers[i].toString()
-
                 layoutParams = GridLayout.LayoutParams().apply {
                     width = buttonSize
                     height = buttonSize
                     setMargins(12, 12, 12, 12)
                 }
-
                 textSize = (buttonSize * 0.3f) / resources.displayMetrics.scaledDensity
                 setTextColor(Color.BLACK)
-
-                // nadajemy zaokrąglenie
                 shapeAppearanceModel = shapeAppearanceModel
                     .toBuilder()
                     .setAllCorners(CornerFamily.ROUNDED, buttonSize * 0.15f)
@@ -201,11 +189,9 @@ class NumberAdditionActivity : AppCompatActivity() {
                 button.setTextColor(Color.BLACK)
             }
 
-
             numberGrid.addView(button)
         }
     }
-
 
     private fun handleNumberClick(button: Button, index: Int) {
         if (selectedButtons.contains(button)) {
@@ -243,13 +229,9 @@ class NumberAdditionActivity : AppCompatActivity() {
                 }
                 setupNumberGrid()
             } else {
-                selectedButtons.forEach { btn ->
-                    btn.setBackgroundColor(Color.RED)
-                }
+                selectedButtons.forEach { btn -> btn.setBackgroundColor(Color.RED) }
                 Handler(Looper.getMainLooper()).postDelayed({
-                    selectedButtons.forEach { btn ->
-                        btn.setBackgroundColor(Color.WHITE)
-                    }
+                    selectedButtons.forEach { btn -> btn.setBackgroundColor(Color.WHITE) }
                     selectedButtons.clear()
                 }, 1000)
             }
@@ -272,6 +254,7 @@ class NumberAdditionActivity : AppCompatActivity() {
     }
 
     private fun endGame() {
+        targetNumberText.background = null
         targetNumberText.text = "Koniec!"
         numberGrid.removeAllViews()
 

@@ -1,0 +1,12 @@
+<resources>
+    <!--To plik, w którym definiujesz własne atrybuty XML (custom attributes),
+     które potem możesz przypisać do swojego custom view.
+     „Mój widok GameIntroView będzie obsługiwał atrybuty
+     gameTitle, gameCategory, gameDescription, gameIcon”.-->
+    <declare-styleable name="GameIntroView">
+        <attr name="gameTitle" format="string" />
+        <attr name="gameCategory" format="string" />
+        <attr name="gameDescription" format="string" />
+        <attr name="gameIcon" format="reference" />
+    </declare-styleable>
+</resources>
