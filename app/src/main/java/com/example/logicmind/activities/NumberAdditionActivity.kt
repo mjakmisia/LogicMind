@@ -115,37 +115,71 @@ class NumberAdditionActivity : AppCompatActivity() {
     private fun startLevel() {
         targetNumberText.background = getDrawable(R.drawable.circle_bg)
         numberGrid.isEnabled = true
-        numberGrid.columnCount = if (level == 1) 4 else 4
-        numberGrid.rowCount = if (level == 1) 3 else 4
+
+        when (level) {
+            1 -> {
+                numberGrid.columnCount = 4
+                numberGrid.rowCount = 3
+            }
+            2 -> {
+                numberGrid.columnCount = 4
+                numberGrid.rowCount = 4
+            }
+            else -> {
+                numberGrid.columnCount = 4
+                numberGrid.rowCount = 3
+            }
+        }
 
         generateNumbers()
         generateTarget()
         setupNumberGrid()
     }
 
+
     private fun generateNumbers() {
         numbers.clear()
-        val gridSize = if (level == 1) 12 else 16
+        val gridSize = when (level) {
+            1 -> 12   // 4x3
+            2 -> 16   // 4x4
+            else -> 12 // 4x3
+        }
         repeat(gridSize) {
             numbers.add((1..9).random())
         }
     }
 
+
     private fun generateTarget(): Boolean {
         val availableNumbers = numbers.filter { it != -1 }
-        if (availableNumbers.size < 2) return false
+        if (availableNumbers.size < numbersToSelect()) return false
 
         val possibleSums = mutableListOf<Int>()
-        for (i in availableNumbers.indices) {
-            for (j in i + 1 until availableNumbers.size) {
-                possibleSums.add(availableNumbers[i] + availableNumbers[j])
+
+        if (numbersToSelect() == 2) {
+            for (i in availableNumbers.indices) {
+                for (j in i + 1 until availableNumbers.size) {
+                    possibleSums.add(availableNumbers[i] + availableNumbers[j])
+                }
+            }
+        } else { // 3 liczby
+            for (i in availableNumbers.indices) {
+                for (j in i + 1 until availableNumbers.size) {
+                    for (k in j + 1 until availableNumbers.size) {
+                        possibleSums.add(
+                            availableNumbers[i] + availableNumbers[j] + availableNumbers[k]
+                        )
+                    }
+                }
             }
         }
+
         if (possibleSums.isEmpty()) return false
 
         targetNumberText.text = possibleSums.random().toString()
         return true
     }
+
 
     private fun setupNumberGrid() {
         numberGrid.removeAllViews()
@@ -153,8 +187,12 @@ class NumberAdditionActivity : AppCompatActivity() {
         val screenWidth = displayMetrics.widthPixels
         val screenHeight = displayMetrics.heightPixels
 
-        val cols = 4
-        val rows = 4
+        val (cols, rows) = when (level) {
+            1 -> 4 to 3
+            2 -> 4 to 4
+            else -> 4 to 3
+        }
+
         val margin = 16 * 2
         val buttonWidth = (screenWidth / cols) - margin
         val buttonHeight = (screenHeight / rows) - margin
@@ -193,6 +231,7 @@ class NumberAdditionActivity : AppCompatActivity() {
         }
     }
 
+
     private fun handleNumberClick(button: Button, index: Int) {
         if (selectedButtons.contains(button)) {
             selectedButtons.remove(button)
@@ -200,15 +239,14 @@ class NumberAdditionActivity : AppCompatActivity() {
             return
         }
 
-        if (selectedButtons.size < 2 && button.isEnabled && numbers[index] != -1) {
+        if (selectedButtons.size < numbersToSelect() && button.isEnabled && numbers[index] != -1) {
             selectedButtons.add(button)
             button.setBackgroundColor(Color.rgb(106, 27, 154))
         }
 
-        if (selectedButtons.size == 2) {
-            val firstIndex = numberGrid.indexOfChild(selectedButtons[0])
-            val secondIndex = numberGrid.indexOfChild(selectedButtons[1])
-            val sum = numbers[firstIndex] + numbers[secondIndex]
+        if (selectedButtons.size == numbersToSelect()) {
+            val indices = selectedButtons.map { numberGrid.indexOfChild(it) }
+            val sum = indices.sumOf { numbers[it] }
             val target = targetNumberText.text.toString().toIntOrNull() ?: 0
 
             if (sum == target) {
@@ -236,15 +274,25 @@ class NumberAdditionActivity : AppCompatActivity() {
                 }, 1000)
             }
         }
+
     }
 
     private fun updateStarCountUI() {
         starCountText.text = starCount.toString()
     }
 
+    private fun numbersToSelect(): Int {
+        return if (level < 3) 2 else 3
+    }
+
+
     private fun proceedToNextLevel() {
         if (timerProgressBar.getRemainingTimeSeconds() > 0) {
-            level = if (level == 1) 2 else 1
+            level = when (level) {
+                1 -> 2
+                2 -> 3
+                else -> 3
+            }
             generateNumbers()
             generateTarget()
             setupNumberGrid()
@@ -252,6 +300,7 @@ class NumberAdditionActivity : AppCompatActivity() {
             endGame()
         }
     }
+
 
     private fun endGame() {
         targetNumberText.background = null
