@@ -18,4 +18,11 @@
     <color name="dark_grey">#222222</color>
     <color name="light_grey">#DEDDDD</color>
 
+    <color name="light_switch_track">#BF3F51B5</color>
+    <color name="light_switch_thumb">#FF3700B3</color>
+
+    <color name="dark_switch_track">#BF3F51B5</color>
+    <color name="dark_switch_thumb">#FF3700B3</color>
+
+
 </resources>

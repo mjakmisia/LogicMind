@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import com.example.logicmind.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.util.Locale
@@ -11,11 +12,23 @@ import java.util.Locale
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        //odczytanie języka
+        // odczytanie zapisanych ustawień
         val sharedPrefs = getSharedPreferences("Settings", MODE_PRIVATE)
+
+        // odczytanie języka
         val lang = sharedPrefs.getString("My_Lang", "pl") ?: "pl"
 
-        // Ustaw język przed ustawieniem widoku
+        // odczytanie motywu (ciemny/jasny)
+        val darkModeEnabled = sharedPrefs.getBoolean("DarkMode_Enabled", false)
+
+        // ✅ Ustaw motyw przed wywołaniem super.onCreate
+        if (darkModeEnabled) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        }
+
+        // ✅ Ustaw język przed ustawieniem widoku
         setLocale(lang)
 
         super.onCreate(savedInstanceState)
@@ -83,7 +96,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    //funkcja do ustawiania języka
+    // funkcja do ustawiania języka
     private fun setLocale(lang: String) {
         val locale = Locale(lang)
         Locale.setDefault(locale)

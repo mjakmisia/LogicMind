@@ -1,16 +1,29 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Theme.Prototyp_inżynierka" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Primary brand color. -->
+
+    <!-- Base application theme for dark mode -->
+    <style name="Theme.LogicMind" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary brand color -->
         <item name="colorPrimary">@color/purple_200</item>
         <item name="colorPrimaryVariant">@color/purple_700</item>
         <item name="colorOnPrimary">@color/black</item>
-        <!-- Secondary brand color. -->
+
+        <!-- Secondary brand color -->
         <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorSecondaryVariant">@color/teal_200</item>
-        <item name="colorOnSecondary">@color/black</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
-        <!-- Customize your theme here. -->
+        <item name="colorSecondaryVariant">@color/teal_700</item>
+        <item name="colorOnSecondary">@color/white</item>
+
+        <!-- Background and surface -->
+        <item name="android:windowBackground">@color/dark_grey</item>
+        <item name="colorSurface">@color/dark_grey</item>
+        <item name="colorOnBackground">@color/light_grey</item>
+        <item name="colorOnSurface">@color/light_grey</item>
+
+        <!-- Error color -->
+        <item name="colorError">@color/category_pink_lighter</item>
+
+        <!-- Switch colors -->
+        <item name="switchTrackColor">@color/dark_switch_track</item>
+        <item name="switchThumbColor">@color/dark_switch_thumb</item>
     </style>
+
 </resources>
