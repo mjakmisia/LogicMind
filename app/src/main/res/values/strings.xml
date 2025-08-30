@@ -43,4 +43,36 @@
     <string name="symbol_race">Wyścig symboli</string>
     <string name="game_1">Gra 1</string>
     <string name="game_2">Gra 2</string>
+
+    <!-- OPISY GIER DO INTRO -->
+
+    <!-- Card Match -->
+    <string name="cm_section_working_memory">Pamięć robocza</string>
+    <string name="cm_desc_working_memory">Podnieś zdolność tymczasowego przechowywania informacji w głowie</string>
+
+    <string name="cm_section_selective_attention">Selektywna uwaga</string>
+    <string name="cm_desc_selective_attention">Popraw koncentrację na właściwym zadaniu i ignoruj zbędne bodźce</string>
+
+
+    <!-- Word Search -->
+    <string name="ws_section_active_vocab">Aktywne słownictwo</string>
+    <string name="ws_desc_active_vocab">Ucz się nowych słów i poszerzaj słownictwo</string>
+
+    <string name="ws_section_attention">Skupienie</string>
+    <string name="ws_desc_attention">Utrzymuj uwagę na celu, mimo obecności rozpraszaczy</string>
+
+    <string name="ws_section_mind_speed">Tempo myślenia</string>
+    <string name="ws_desc_mind_speed">Skróć czas potrzebny na wykonanie zadań umysłowych</string>
+
+
+    <!-- Number Addition -->
+    <string name="na_section_number_memory">Pamięć liczbowa</string>
+    <string name="na_desc_number_memory">Ucz się szybciej zapamiętywać i kojarzyć liczby</string>
+
+    <string name="na_section_flexibility">Elastyczność myślenia</string>
+    <string name="na_desc_flexibility">Przestawiaj się błyskawicznie na nowe wyzwania</string>
+
+    <string name="na_section_calculation">Sprawność rachunkowa</string>
+    <string name="na_desc_calculation">Trenuj szybkie liczenie i logiczne wnioskowanie</string>
+
 </resources>

@@ -7,6 +7,22 @@
     android:background="@color/white"
     android:padding="16dp">
 
+    <!-- Guideline dla przesunięcia góry -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/topGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.04" />
+
+    <!-- Guideline dla przesunięcia dołu przycisku -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/bottomButtonGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.96" />
+
     <!-- Górne przyciski -->
     <ImageButton
         android:id="@+id/btnClose"
@@ -16,7 +32,7 @@
         android:background="@drawable/bg_rounded_light_gray"
         android:src="@drawable/ic_close"
         app:tint="@color/black"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="@id/topGuideline"
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageButton
@@ -27,7 +43,7 @@
         android:background="@drawable/bg_rounded_light_gray"
         android:src="@drawable/ic_help"
         app:tint="@color/black"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="@id/topGuideline"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- Ikona gry -->
@@ -61,7 +77,6 @@
         android:layout_height="0dp"
         android:orientation="vertical"
         android:layout_marginTop="24dp"
-        android:layout_marginBottom="80dp"
         app:layout_constraintTop_toBottomOf="@id/gameTitle"
         app:layout_constraintBottom_toTopOf="@id/btnStartGame"
         app:layout_constraintStart_toStartOf="parent"
@@ -77,7 +92,7 @@
         android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="@color/black"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomButtonGuideline"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

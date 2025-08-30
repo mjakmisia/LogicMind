@@ -43,4 +43,34 @@
     <string name="symbol_race">Symbol Race</string>
     <string name="game_1">Game 1</string>
     <string name="game_2">Game 2</string>
+
+    <!-- GAME INTRO DESCRIPTIONS -->
+
+    <!-- Card Match -->
+    <string name="cm_section_working_memory">Working Memory</string>
+    <string name="cm_desc_working_memory">Boost your ability to temporarily hold information in your mind</string>
+
+    <string name="cm_section_selective_attention">Selective Attention</string>
+    <string name="cm_desc_selective_attention">Enhance your focus on the right task while ignoring distractions</string>
+
+    <!-- Word Search -->
+    <string name="ws_section_active_vocab">Active Vocabulary</string>
+    <string name="ws_desc_active_vocab">Learn new words and expand your vocabulary</string>
+
+    <string name="ws_section_attention">Focus</string>
+    <string name="ws_desc_attention">Maintain concentration on your goal despite distractions</string>
+
+    <string name="ws_section_mind_speed">Mental Speed</string>
+    <string name="ws_desc_mind_speed">Reduce the time needed to complete mental tasks</string>
+
+    <!-- Number Addition -->
+    <string name="na_section_number_memory">Numerical Memory</string>
+    <string name="na_desc_number_memory">Train to quickly memorize and recall numbers</string>
+
+    <string name="na_section_flexibility">Cognitive Flexibility</string>
+    <string name="na_desc_flexibility">Switch rapidly between new challenges</string>
+
+    <string name="na_section_calculation">Calculation Skills</string>
+    <string name="na_desc_calculation">Practice fast arithmetic and logical reasoning</string>
+
 </resources>

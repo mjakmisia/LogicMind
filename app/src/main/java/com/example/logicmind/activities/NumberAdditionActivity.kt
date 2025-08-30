@@ -14,7 +14,6 @@ import androidx.gridlayout.widget.GridLayout
 import com.example.logicmind.R
 import com.example.logicmind.common.GameCountdownManager
 import com.example.logicmind.common.GameTimerProgressBar
-import com.example.logicmind.ui.GameIntroView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.shape.CornerFamily
 
@@ -28,7 +27,6 @@ class NumberAdditionActivity : AppCompatActivity() {
     private lateinit var countdownText: TextView
     private lateinit var countdownManager: GameCountdownManager
     private lateinit var starCountText: TextView
-    private lateinit var gameIntro: GameIntroView
 
     private val numbers = mutableListOf<Int>()
     private val selectedButtons = mutableListOf<Button>()
