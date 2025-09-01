@@ -17,6 +17,7 @@
 
         <activity
             android:name=".activities.SettingsActivity"
+            android:configChanges="locale|uiMode|screenSize|orientation|keyboardHidden"
             android:exported="false" />
 
         <activity
@@ -37,6 +38,7 @@
 
         <activity
             android:name=".activities.NumberAdditionActivity"
+            android:configChanges="locale|uiMode|screenSize|orientation|keyboardHidden"
             android:exported="false"/>
 
         <activity

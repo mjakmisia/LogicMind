@@ -17,6 +17,10 @@ import com.example.logicmind.common.GameTimerProgressBar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.shape.CornerFamily
 
+/* TODO:
+    -dopasowanie kolorów do themes
+*/
+
 class NumberAdditionActivity : AppCompatActivity() {
 
     private lateinit var targetNumberText: TextView

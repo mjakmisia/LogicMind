@@ -75,7 +75,7 @@ class SettingsActivity : AppCompatActivity() {
 
             val mode = if (isChecked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
             AppCompatDelegate.setDefaultNightMode(mode)
-            // ❌ NIE wywołujemy recreate() – Android sam przeładowuje widok
+            recreate()
         }
 
         // zapis ustawień
@@ -103,8 +103,9 @@ class SettingsActivity : AppCompatActivity() {
                         // tylko jeśli język się zmienił
                         if (selectedLanguage != currentLangBeforeChange) {
                             setLocale(selectedLanguage!!)
-                            recreate()
+                            recreate()   // przeładowanie całej aktywności
                         }
+
                     }
                     .setNegativeButton(android.R.string.cancel, null)
                     .show()
@@ -114,8 +115,8 @@ class SettingsActivity : AppCompatActivity() {
         // reset ustawień
         resetBtn.setOnClickListener {
             AlertDialog.Builder(this)
-                .setTitle("Przywracanie ustawień")
-                .setMessage("Czy na pewno chcesz zresetować ustawienia do domyślnych?")
+                .setTitle(getString(R.string.reset_settings_title))
+                .setMessage(getString(R.string.reset_settings_message))
                 .setPositiveButton("Tak") { _, _ ->
                     val editor = sharedPrefs.edit()
                     editor.putString("My_Lang", "pl")
@@ -135,7 +136,7 @@ class SettingsActivity : AppCompatActivity() {
 
                     recreate()
                 }
-                .setNegativeButton("Anuluj", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show()
         }
 

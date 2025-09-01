@@ -13,8 +13,19 @@
         <attr name="gameCategory" format="string" />
         <attr name="gameDescription" format="string" />
         <attr name="gameIcon" format="reference" />
+
         <!-- Deklaracja własnych atrybutów dla switch -->
         <attr name="switchTrackColor" format="color"/>
         <attr name="switchThumbColor" format="color"/>
+
+        <attr name="categoryKoordynacja" format="color"/>
+        <attr name="categoryMemory" format="color"/>
+        <attr name="categoryProblemSolving" format="color"/>
+        <attr name="categorySkupienie" format="color"/>
+
+        <attr name="text_dark" format="color"/>
+        <attr name="text_light" format="color"/>
+        <attr name="text_category" format="color"/>
+        <attr name="colorOnBackgroundMenu" format="color"/>
     </declare-styleable>
 </resources>

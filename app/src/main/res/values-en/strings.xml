@@ -29,7 +29,12 @@
     <string name="english">English</string>
     <string name="deleteAccount">Delete account</string>
     <string name="pause">Stop</string>
-    <string name="reset">Reset progress</string>
+    <string name="reset_progress">Reset proggress</string>
+    <string name="reset_settings">Reset settings</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="reset_settings_title">Resetting progress</string>
+    <string name="reset_settings_message">Are you sure you want to return to default settings?</string>
     <string name="icon_star">Star icon</string>
     <string name="current_streak">Current streak</string>
     <string name="best_streak">Best streak</string>

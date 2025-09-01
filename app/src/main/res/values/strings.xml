@@ -29,7 +29,12 @@
     <string name="english">Angielski</string>
     <string name="deleteAccount">Usuń konto</string>
     <string name="pause">Zatrzymaj</string>
-    <string name="reset">Resetuj postęp</string>
+    <string name="reset_progress">Resetuj postęp</string>
+    <string name="reset_settings">Resetuj ustawienia</string>
+    <string name="save">Zapisz</string>
+    <string name="cancel">Anuluj</string>
+    <string name="reset_settings_title">Przywracanie ustawień</string>
+    <string name="reset_settings_message">Czy na pewno chcesz wrócić do ustawień domyślnych?</string>
     <string name="icon_star">Ikona gwiazdki</string>
     <string name="current_streak">Aktualny streak</string>
     <string name="best_streak">Najlepszy streak</string>
