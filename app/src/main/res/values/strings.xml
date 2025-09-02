@@ -35,6 +35,7 @@
     <string name="cancel">Anuluj</string>
     <string name="reset_settings_title">Przywracanie ustawień</string>
     <string name="reset_settings_message">Czy na pewno chcesz wrócić do ustawień domyślnych?</string>
+    <string name="game_icon">Ikona gry</string>
     <string name="icon_star">Ikona gwiazdki</string>
     <string name="current_streak">Aktualny streak</string>
     <string name="best_streak">Najlepszy streak</string>

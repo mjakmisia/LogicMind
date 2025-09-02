@@ -35,6 +35,7 @@
     <string name="cancel">Cancel</string>
     <string name="reset_settings_title">Resetting progress</string>
     <string name="reset_settings_message">Are you sure you want to return to default settings?</string>
+    <string name="game_icon">Game icon</string>
     <string name="icon_star">Star icon</string>
     <string name="current_streak">Current streak</string>
     <string name="best_streak">Best streak</string>
