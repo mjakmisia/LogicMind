@@ -16,7 +16,7 @@ import com.example.logicmind.common.GameTimerProgressBar
 
 //TODO: Przycisk pauzy i okna z pauzą do oddzilnego pliku w common, odliczanie gwiazdek tak samo
 //TODO: Ukryj widok gwiazdki z licznikiem na czas ekranu odliczania
-class CardMatchActivity : AppCompatActivity() {
+class CardMatchActivity : BaseActivity() {
 
     private lateinit var cards: MutableList<Card> // Lista wszystkich kart w grze
     private var firstCard: Card? = null // Pierwsza wybrana karta do dopasowania

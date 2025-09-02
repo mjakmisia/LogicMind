@@ -19,7 +19,7 @@ object GameConfigProvider {
     fun getConfig(categoryId: String): GameCategoryConfig {
         return when (categoryId) {
             "attention" -> GameCategoryConfig(
-                colorRes = R.color.category_yellow,
+                colorRes = R.color.category_yellow_dark_mode,
                 nameRes = R.string.category_attention,
                 games = listOf(
                     GameOption(gameId = "word_search", R.string.word_search, R.drawable.image_word_search,
@@ -28,7 +28,7 @@ object GameConfigProvider {
                 )
             )
             "memory" -> GameCategoryConfig(
-                colorRes = R.color.category_green,
+                colorRes = R.color.category_green_dark_mode,
                 nameRes = R.string.category_memory,
                 games = listOf(
                     GameOption("color_sequence", R.string.color_sequence, R.drawable.image_color_sequence, null),
@@ -37,7 +37,7 @@ object GameConfigProvider {
                 )
             )
             "reasoning" -> GameCategoryConfig(
-                colorRes = R.color.category_pink,
+                colorRes = R.color.category_pink_dark_mode,
                 nameRes = R.string.category_reasoning,
                 games = listOf(
                     GameOption("number_addition", R.string.number_addition, R.drawable.image_number_addition,
@@ -46,7 +46,7 @@ object GameConfigProvider {
                 )
             )
             "coordination" -> GameCategoryConfig(
-                colorRes = R.color.category_blue,
+                colorRes = R.color.category_blue_dark_mode,
                 nameRes = R.string.category_coordination,
                 games = listOf(
                     GameOption("road_dash", R.string.road_dash, R.drawable.ic_close, null),

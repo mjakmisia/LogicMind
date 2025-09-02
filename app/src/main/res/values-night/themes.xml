@@ -11,10 +11,10 @@
         <item name="colorOnBackground">@color/dark_grey</item>
         <item name="colorOnBackgroundMenu">@color/darker_grey</item>
 
-        <item name="categoryKoordynacja">@color/category_blue_lighter</item>
-        <item name="categoryMemory">@color/category_green_lighter</item>
-        <item name="categoryProblemSolving">@color/category_pink_lighter</item>
-        <item name="categorySkupienie">@color/category_yellow_lighter</item>
+        <item name="categoryKoordynacja">@color/category_blue_dark_mode</item>
+        <item name="categoryMemory">@color/category_green_dark_mode</item>
+        <item name="categoryProblemSolving">@color/category_pink_dark_mode</item>
+        <item name="categorySkupienie">@color/category_yellow_dark_mode</item>
 
         <item name="switchTrackColor">@color/switch_track_color</item>
         <item name="switchThumbColor">@color/switch_thumb_color</item>

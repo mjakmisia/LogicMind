@@ -9,7 +9,7 @@ import com.example.logicmind.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.util.Locale
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // odczytanie zapisanych ustawień

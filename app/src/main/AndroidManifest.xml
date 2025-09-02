@@ -26,11 +26,15 @@
 
         <activity
             android:name=".activities.GameSelectionActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:configChanges="locale|layoutDirection"
+            />
 
         <activity
             android:name=".activities.GameIntroActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:configChanges="locale|layoutDirection"
+            />
 
         <activity
             android:name=".activities.CardMatchActivity"

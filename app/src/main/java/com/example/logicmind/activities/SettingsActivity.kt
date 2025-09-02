@@ -15,7 +15,7 @@ import com.example.logicmind.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.util.*
 
-class SettingsActivity : AppCompatActivity() {
+class SettingsActivity : BaseActivity() {
 
     private var selectedLanguage: String? = "pl"  // "pl" lub "en"
 

@@ -10,7 +10,7 @@ import com.example.logicmind.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.util.Calendar
 
-class ProfileActivity : AppCompatActivity() {
+class ProfileActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

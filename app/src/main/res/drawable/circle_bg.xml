@@ -2,12 +2,12 @@
     android:shape="oval">
 
     <!-- Białe wypełnienie -->
-    <solid android:color="@color/category_pink_lighter" />
+    <solid android:color="@color/category_pink_light_mode" />
 
     <!-- Obramowanie w kolorze różowym -->
     <stroke
         android:width="8dp"
-        android:color="@color/category_pink" />
+        android:color="@color/category_pink_dark_mode" />
 
     <!-- Rozmiar -->
     <size

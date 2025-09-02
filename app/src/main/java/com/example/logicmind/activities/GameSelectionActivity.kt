@@ -11,7 +11,7 @@ import androidx.core.content.ContextCompat
 import com.example.logicmind.R
 
 //TODO: Opcja wyjścia z aktywności
-class GameSelectionActivity : AppCompatActivity() {
+class GameSelectionActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

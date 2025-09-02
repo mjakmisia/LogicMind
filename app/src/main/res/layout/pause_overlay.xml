@@ -19,7 +19,7 @@
             android:id="@+id/btnResume"
             android:text="Kontynuuj"
             android:drawableStart="@drawable/ic_play"
-            android:textColor="@color/category_green"
+            android:textColor="@color/category_green_dark_mode"
             style="@style/PauseButton" />
 
         <Button

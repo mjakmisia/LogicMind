@@ -21,7 +21,7 @@ import com.google.android.material.shape.CornerFamily
     -dopasowanie kolorów do themes
 */
 
-class NumberAdditionActivity : AppCompatActivity() {
+class NumberAdditionActivity : BaseActivity() {
 
     private lateinit var targetNumberText: TextView
     private lateinit var numberGrid: GridLayout

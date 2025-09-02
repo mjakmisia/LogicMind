@@ -19,7 +19,7 @@ object GameIntroProvider {
     fun getConfig(gameId: String): GameIntroConfig {
         return when (gameId) {
             "card_match" -> GameIntroConfig(
-                colorRes = R.color.category_green,
+                colorRes = R.color.category_green_dark_mode,
                 titleRes = R.string.card_match,
                 imageRes = R.drawable.image_card_match,
                 sections = listOf(
@@ -29,7 +29,7 @@ object GameIntroProvider {
                 gameActivity = CardMatchActivity::class.java
             )
             "number_addition" -> GameIntroConfig(
-                colorRes = R.color.category_pink,
+                colorRes = R.color.category_pink_dark_mode,
                 titleRes = R.string.number_addition,
                 imageRes = R.drawable.image_number_addition,
                 sections = listOf(
@@ -40,7 +40,7 @@ object GameIntroProvider {
                 gameActivity = NumberAdditionActivity::class.java
             )
             "word_search" -> GameIntroConfig(
-                colorRes = R.color.category_yellow,
+                colorRes = R.color.category_yellow_dark_mode,
                 titleRes = R.string.word_search,
                 imageRes = R.drawable.image_word_search,
                 sections = listOf(
