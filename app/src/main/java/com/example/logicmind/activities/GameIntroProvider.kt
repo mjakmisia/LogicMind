@@ -12,7 +12,8 @@ data class GameIntroConfig(
     val titleRes: Int,
     val imageRes: Int,
     val sections: List<IntroSection>,
-    val gameActivity: Class<*>
+    val gameActivity: Class<*>,
+    val instructionRes: Int = 0
 )
 
 object GameIntroProvider {
@@ -26,7 +27,8 @@ object GameIntroProvider {
                     IntroSection(R.string.cm_section_working_memory, R.string.cm_desc_working_memory),
                     IntroSection(R.string.cm_section_selective_attention, R.string.cm_desc_selective_attention)
                 ),
-                gameActivity = CardMatchActivity::class.java
+                gameActivity = CardMatchActivity::class.java,
+                instructionRes = R.string.card_match_instruction
             )
             "number_addition" -> GameIntroConfig(
                 colorRes = R.color.category_pink_dark_mode,
@@ -37,7 +39,8 @@ object GameIntroProvider {
                     IntroSection(R.string.na_section_flexibility, R.string.na_desc_flexibility),
                     IntroSection(R.string.na_section_calculation, R.string.na_desc_calculation)
                 ),
-                gameActivity = NumberAdditionActivity::class.java
+                gameActivity = NumberAdditionActivity::class.java,
+                instructionRes = R.string.number_addition_instruction
             )
             "word_search" -> GameIntroConfig(
                 colorRes = R.color.category_yellow_dark_mode,
@@ -48,7 +51,8 @@ object GameIntroProvider {
                     IntroSection(R.string.ws_section_attention, R.string.ws_desc_attention),
                     IntroSection(R.string.ws_section_mind_speed, R.string.ws_desc_mind_speed)
                 ),
-                gameActivity = NumberAdditionActivity::class.java // ZMIEŃ
+                gameActivity = NumberAdditionActivity::class.java, // ZMIEŃ
+                instructionRes = R.string.word_search_instruction
             )
             else -> throw IllegalArgumentException("Unknown gameId: $gameId")
         }

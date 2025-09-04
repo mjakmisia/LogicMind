@@ -7,7 +7,6 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.logicmind.R
 
@@ -51,7 +50,12 @@ class GameIntroActivity : BaseActivity() {
 
         // Pomoc
         findViewById<ImageButton>(R.id.btnHelp).setOnClickListener {
-            //TODO: utworzyć ekran pomocy dla gry
+            val config = GameIntroProvider.getConfig(gameId)
+            if (config.instructionRes != 0) {
+                InstructionDialogFragment
+                    .newInstance(getString(config.titleRes), getString(config.instructionRes))
+                    .show(supportFragmentManager, "InstructionDialog")
+            }
         }
     }
 }

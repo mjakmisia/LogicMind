@@ -49,6 +49,7 @@
     <string name="symbol_race">Wyścig symboli</string>
     <string name="game_1">Gra 1</string>
     <string name="game_2">Gra 2</string>
+    <string name="instructions">Instrukcja</string>
 
     <!-- OPISY GIER DO INTRO -->
 
@@ -80,5 +81,11 @@
 
     <string name="na_section_calculation">Sprawność rachunkowa</string>
     <string name="na_desc_calculation">Trenuj szybkie liczenie i logiczne wnioskowanie</string>
+
+    <!-- OKNO POMOCY -->
+
+    <string name="card_match_instruction">Dopasuj pary identycznych owoców! Masz 60 sekund, by zdobyć jak najwięcej gwiazdek – ukończenie poziomu daje dodatkowy czas.\n\nJak grać:\n• Zapamiętaj układ kart przez 2 sekundy, zanim się odwrócą.\n• Klikaj karty, aby je odkrywać.\n• Pasujące pary zostają na planszy, niepasujące wracają na miejsce po chwili.\n\nBonusy:\n• Zdobywaj gwiazdki za każdą dopasowaną parę.\n• Ukończenie poziomu dodaje 10 sekund i przenosi do kolejnej planszy.</string>
+    <string name="number_addition_instruction">Znajdź liczby, które po dodaniu dadzą podaną sumę! Masz 60 sekund, by zdobyć jak najwięcej gwiazdek.\n\nJak grać:\n• Wybierz 2 (lub 3 na wyższych poziomach) liczby z siatki.\n• Ich suma musi równać się liczbie docelowej.\n• Poprawna suma usuwa liczby z planszy, niepoprawna miga na czerwono.\n\nBonusy:\n• Zdobywaj gwiazdki za każdą poprawną sumę.\n• Ukończenie poziomu przenosi Cię na trudniejszy poziom z większą siatką liczb.</string>
+    <string name="word_search_instruction">Tu będzie instrukcja.</string>
 
 </resources>

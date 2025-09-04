@@ -3,7 +3,6 @@ package com.example.logicmind.activities
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import com.example.logicmind.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -21,14 +20,14 @@ class MainActivity : BaseActivity() {
         // odczytanie motywu (ciemny/jasny)
         val darkModeEnabled = sharedPrefs.getBoolean("DarkMode_Enabled", false)
 
-        // ✅ Ustaw motyw przed wywołaniem super.onCreate
+        // Ustaw motyw przed wywołaniem super.onCreate
         if (darkModeEnabled) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
         } else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }
 
-        // ✅ Ustaw język przed ustawieniem widoku
+        // Ustaw język przed ustawieniem widoku
         setLocale(lang)
 
         super.onCreate(savedInstanceState)

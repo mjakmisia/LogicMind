@@ -6,11 +6,9 @@ import android.view.SoundEffectConstants
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.logicmind.R
 
-//TODO: Opcja wyjścia z aktywności
 class GameSelectionActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
