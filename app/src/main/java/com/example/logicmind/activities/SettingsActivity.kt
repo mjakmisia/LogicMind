@@ -167,14 +167,14 @@ class SettingsActivity : BaseActivity() {
 
         if (currentLang == "pl") {
             langPl.setBackgroundResource(R.drawable.lang_button_selected)
-            textLangPl.setTextColor(Color.BLACK)
+            textLangPl.isSelected = true
             langEn.setBackgroundResource(R.drawable.lang_button_unselected)
-            textLangEn.setTextColor(Color.GRAY)
+            textLangPl.isSelected = false
         } else {
             langEn.setBackgroundResource(R.drawable.lang_button_selected)
-            textLangEn.setTextColor(Color.BLACK)
+            textLangPl.isSelected = true
             langPl.setBackgroundResource(R.drawable.lang_button_unselected)
-            textLangPl.setTextColor(Color.GRAY)
+            textLangPl.isSelected = false
         }
     }
 }

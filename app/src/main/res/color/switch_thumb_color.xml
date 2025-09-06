@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?> <!-- Plik do zmiany kolorów jak switche są na on lub off -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:color="#3F51B5" android:state_checked="true" />
-    <item android:color="#BFBFBF" /> <!-- kolor dla OFF -->
+    <item android:color="@color/navy_blue" android:state_checked="true" />
+    <item android:color="@color/light_grey" /> <!-- kolor dla OFF -->
 </selector>

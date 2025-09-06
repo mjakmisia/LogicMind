@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="category_pink_dark_mode">#EF476F</color>
-    <color name="category_pink_light_mode">#f0587c</color>
+    <color name="category_pink_light_mode">#F0577B</color>
     <color name="category_yellow_dark_mode">#FFD166</color>
-    <color name="category_yellow_light_mode">#ffd675</color>
+    <color name="category_yellow_light_mode">#ffd572</color>
     <color name="category_green_dark_mode">#06D6A0</color>
-    <color name="category_green_light_mode">#37DEB3</color>
+    <color name="category_green_light_mode">#06ecaf</color>
     <color name="category_blue_dark_mode">#118AB2</color>
-    <color name="category_blue_light_mode">#40A1C1</color>
+    <color name="category_blue_light_mode">#139bc8</color>
     <color name="purple_light_mode">#AC92EC</color>
     <color name="purple_dark_mode">#967BDC</color>
     <color name="purple_500">#FF6200EE</color>
@@ -17,16 +17,26 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="milky">#FFFFFC</color>
-    <color name="milky_darker">#e5e5e5</color>
+    <color name="background_light">#F6F7FA</color>
+    <color name="background_light_transparent">#fbfbfd</color>
+    <color name="background_light_menu">#E6E9ED</color>
+    <color name="background_dark">#1E1E1E</color>
+    <color name="background_dark_transparent">#333333</color>
+    <color name="background_dark_menu">#141414</color>
     <color name="gray_blue">#2a3342</color>
     <color name="grey">#383535</color>
     <color name="textGrey">#333333</color>
     <color name="textGreyLight">#666666</color>
     <color name="dark_grey">#222222</color>
     <color name="darker_grey">#181818</color>
-    <color name="light_grey">#DEDDDD</color>
-    <color name="navy_blue">#023e8a</color>
+    <color name="light_grey">#BFBFBF</color>
+    <color name="light_blue">#7C8FC3</color>
+    <color name="navy_blue">#3F51B5</color>
+    <color name="purple">#FFBB86FC</color>
+    <color name="purple_darker">#584076</color>
+    <color name="gray2">#888888</color>
+    <color name="almost_white">#DCDBDB</color>
+    <color name="picker_gray">#444444</color>
 
 
 

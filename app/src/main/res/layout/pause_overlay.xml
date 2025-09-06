@@ -17,26 +17,26 @@
 
         <Button
             android:id="@+id/btnResume"
-            android:text="Kontynuuj"
+            android:text="@string/continuee"
             android:drawableStart="@drawable/ic_play"
             android:textColor="@color/category_green_dark_mode"
             style="@style/PauseButton" />
 
         <Button
             android:id="@+id/btnRestart"
-            android:text="Restartuj"
+            android:text="@string/restart"
             android:drawableStart="@drawable/ic_restart"
             style="@style/PauseButton" />
 
         <Button
             android:id="@+id/btnHelp"
-            android:text="Jak grać"
+            android:text="@string/how_to_play"
             android:drawableStart="@drawable/ic_help"
             style="@style/PauseButton" />
 
         <Button
             android:id="@+id/btnExit"
-            android:text="Opuść grę"
+            android:text="@string/leave"
             android:drawableStart="@drawable/ic_exit"
             style="@style/PauseButton" />
     </LinearLayout>

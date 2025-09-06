@@ -8,8 +8,9 @@
         <item name="text_light">@color/textGreyLight</item>
         <item name="text_category">@color/white</item>
 
-        <item name="colorOnBackground">@color/milky</item>
-        <item name="colorOnBackgroundMenu">@color/milky_darker</item>
+        <item name="colorOnBackground">@color/background_light</item>
+        <item name="colorOnBackground_transparent">@color/background_light_transparent</item>
+        <item name="colorOnBackgroundMenu">@color/background_light_menu</item>
 
         <item name="categoryKoordynacja">@color/category_blue_light_mode</item>
         <item name="categoryMemory">@color/category_green_light_mode</item>
@@ -18,19 +19,23 @@
 
         <item name="switchTrackColor">@color/switch_track_color</item>
         <item name="switchThumbColor">@color/switch_thumb_color</item>
+
+        <item name="langTextColor">#555555</item> <!-- np. ciemnoszary -->
+        <item name="langTextColorSelected">#000000</item> <!-- czarny, bardziej widoczny -->
+
+
+        <item name="colorPrimary">@color/navy_blue</item>
+        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorOnPrimary">@color/white</item>
+
+        <item name="colorSecondary">@color/light_blue</item>
+        <item name="colorSecondaryVariant">@color/teal_700</item>
+        <item name="colorOnSecondary">@color/black</item>
+
         <!--        -->
 
 
         <!--
-        <item name="colorPrimary">@color/purple_500</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
-        <item name="colorOnPrimary">@color/white</item>
-
-
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorSecondaryVariant">@color/teal_700</item>
-        <item name="colorOnSecondary">@color/black</item>
-
 
         <item name="android:windowBackground">@color/white</item>
         <item name="colorSurface">@color/white</item>

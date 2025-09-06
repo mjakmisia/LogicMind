@@ -50,6 +50,13 @@
     <string name="game_1">Gra 1</string>
     <string name="game_2">Gra 2</string>
     <string name="instructions">Instrukcja</string>
+    <string name="user_account">Profil użytkownika</string>
+    <string name="last_played">Ostatnio zagrane</string>
+    <string name="app_policy">Polityka aplikacji</string>
+    <string name="continuee">Kontynuuj</string>
+    <string name="restart">Zagraj ponownie</string>
+    <string name="how_to_play">Jak grać</string>
+    <string name="leave">Opuść grę</string>
 
     <!-- OPISY GIER DO INTRO -->
 

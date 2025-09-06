@@ -50,6 +50,13 @@
     <string name="game_1">Game 1</string>
     <string name="game_2">Game 2</string>
     <string name="instructions">Instruction</string>
+    <string name="user_account">User account</string>
+    <string name="last_played">Last played</string>
+    <string name="app_policy">App policy</string>
+    <string name="continuee">Continue</string>
+    <string name="restart">Restart</string>
+    <string name="how_to_play">How to play</string>
+    <string name="leave">Leave</string>
 
     <!-- GAME INTRO DESCRIPTIONS -->
 

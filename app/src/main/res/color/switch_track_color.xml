@@ -2,7 +2,7 @@
 <!-- Plik do zmiany kolorów jak switche są na on lub off -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- stan ON -->
-    <item android:color="#7C8FC3" android:state_checked="true" />
+    <item android:color="@color/light_blue" android:state_checked="true" />
     <!-- stan OFF -->
-    <item android:color="#DCDBDB" />
+    <item android:color="@color/almost_white" />
 </selector>
