@@ -24,11 +24,14 @@
         <attr name="categorySkupienie" format="color"/>
 
         <attr name="text_dark" format="color"/>
+        <attr name="text" format="color"/>
         <attr name="text_light" format="color"/>
         <attr name="text_category" format="color"/>
         <attr name="colorOnBackgroundMenu" format="color"/>
         <attr name="colorOnBackground_transparent" format="color"/>
         <attr name="langTextColor" format="color"/>
         <attr name="langTextColorSelected" format="color"/>
+
+        <attr name="pause_background" format="color"/>
     </declare-styleable>
 </resources>

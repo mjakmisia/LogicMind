@@ -11,7 +11,7 @@
         android:id="@+id/sectionTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/black"
+        android:textColor="?attr/text"
         android:textSize="16sp"
         android:textStyle="bold"/>
 
@@ -19,7 +19,7 @@
         android:id="@+id/sectionDescription"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/black"
+        android:textColor="?attr/text"
         android:textSize="14sp"
         android:layout_marginTop="4dp"/>
 </LinearLayout>

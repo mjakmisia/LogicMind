@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="?attr/colorOnBackground"
     android:padding="16dp">
 
     <!-- Guideline dla przesunięcia góry -->
@@ -41,7 +41,7 @@
         android:background="@drawable/bg_rounded_light_gray"
         android:src="@drawable/ic_close"
         android:contentDescription="@string/close"
-        app:tint="@color/black"
+        app:tint="?attr/text"
         app:layout_constraintTop_toTopOf="@id/topGuideline"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -53,7 +53,7 @@
         android:background="@drawable/bg_rounded_light_gray"
         android:src="@drawable/ic_help"
         android:contentDescription="@string/help"
-        app:tint="@color/black"
+        app:tint="?attr/text"
         app:layout_constraintTop_toTopOf="@id/topGuideline"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -73,7 +73,7 @@
         android:id="@+id/gameTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textColor="@color/black"
+        android:textColor="?attr/text"
         android:textSize="24sp"
         android:textStyle="bold"
         android:gravity="center"
@@ -104,7 +104,7 @@
         android:textAllCaps="false"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:textColor="@color/black"
+        android:textColor="?attr/colorOnBackground"
         tools:ignore="ButtonSize"
         app:layout_constraintBottom_toTopOf="@id/bottomButtonGuideline"
         app:layout_constraintStart_toStartOf="parent"

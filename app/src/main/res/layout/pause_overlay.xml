@@ -2,6 +2,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="#99000000"
     android:clickable="true"
     android:focusable="true">
@@ -15,29 +16,44 @@
         android:layout_gravity="center"
         android:elevation="10dp">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnResume"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:text="@string/continuee"
-            android:drawableStart="@drawable/ic_play"
-            android:textColor="@color/category_green_dark_mode"
+            app:icon="@drawable/ic_play"
+            android:textColor="?attr/colorOnPrimary"
+            android:backgroundTint="?attr/colorPrimary"
             style="@style/PauseButton" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnRestart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:text="@string/restart"
-            android:drawableStart="@drawable/ic_restart"
+            app:icon="@drawable/ic_restart"
+            android:textColor="?attr/colorOnPrimary"
+            android:backgroundTint="?attr/colorPrimary"
             style="@style/PauseButton" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnHelp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:text="@string/how_to_play"
-            android:drawableStart="@drawable/ic_help"
+            app:icon="@drawable/ic_help"
+            android:textColor="?attr/colorOnPrimary"
+            android:backgroundTint="?attr/colorPrimary"
             style="@style/PauseButton" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnExit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:text="@string/leave"
-            android:drawableStart="@drawable/ic_exit"
+            app:icon="@drawable/ic_exit"
+            android:textColor="?attr/colorOnPrimary"
+            android:backgroundTint="?attr/colorPrimary"
             style="@style/PauseButton" />
     </LinearLayout>
 </FrameLayout>
