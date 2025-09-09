@@ -2,9 +2,7 @@ package com.example.logicmind.activities
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.View
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -12,9 +10,10 @@ import androidx.gridlayout.widget.GridLayout
 import com.example.logicmind.R
 import com.example.logicmind.common.GameCountdownManager
 import com.example.logicmind.common.GameTimerProgressBar
+import com.example.logicmind.common.PauseMenu
 
-//TODO: Przycisk pauzy i okna z pauzą do oddzilnego pliku w common, odliczanie gwiazdek tak samo
-//TODO: Ukryj widok gwiazdki z licznikiem na czas ekranu odliczania
+//TODO: Odliczanie gwiazdek do oddzielnego pliku w common
+//TODO: Ukryj widok gwiazdki z licznikiem na czas ekranu odliczania, może schowaj przy przechodzeniu między poziomami (?)
 class CardMatchActivity : BaseActivity() {
 
     private lateinit var cards: MutableList<Card> // Lista wszystkich kart w grze
@@ -28,10 +27,11 @@ class CardMatchActivity : BaseActivity() {
     private var boardRows: Int = 4
     private var boardCols: Int = 4
     private lateinit var countdownManager: GameCountdownManager // Manager odliczania
-    private var currentLevel = 1
-    private lateinit var timerProgressBar: GameTimerProgressBar
-    private var starCount: Int = 0
-    private lateinit var starCountText: TextView
+    private var currentLevel = 1 // Aktualny poziom gry
+    private lateinit var timerProgressBar: GameTimerProgressBar // Pasek postępu czasu gry
+    private var starCount: Int = 0 // Licznik zdobytych gwiazdek
+    private lateinit var starCountText: TextView // Pole tekstowe wyświetlające liczbę gwiazdek
+    private lateinit var pauseMenu: PauseMenu // Menu pauzy gry
 
     // Lista obrazów kart używanych w grze
     private val cardImages = listOf(
@@ -52,6 +52,7 @@ class CardMatchActivity : BaseActivity() {
         setContentView(R.layout.activity_matching_pairs)
         supportActionBar?.hide()
 
+        // Inicjalizacja widoków
         gridLayout = findViewById(R.id.gridLayout)
         countdownText = findViewById(R.id.countdownText)
         pauseButton = findViewById(R.id.pauseButton)
@@ -77,25 +78,35 @@ class CardMatchActivity : BaseActivity() {
             gameView = gridLayout,
             pauseButton = pauseButton
         ) {
+            // Callback wywoływany po zakończeniu odliczania początkowego
             starCount = 0
             updateStarCountUI()
             startNewGame()
         }
 
-        setupPauseMenu()
+        // Inicjalizacja menu pauzy
+        pauseMenu = PauseMenu(
+            context = this,
+            pauseOverlay = pauseOverlay,
+            pauseButton = pauseButton,
+            onRestart = {
+                timerProgressBar.reset() // Resetuje timer
+                countdownManager.startCountdown() // Rozpoczyna odliczanie początkowe
+            },
+            onResume = { timerProgressBar.start() }, // Wznawia timer po pauzie
+            onPause = { timerProgressBar.pause() }, // Zatrzymuje timer podczas pauzy
+            onExit = { finish() }, // Kończy aktywność
+            instructionTitle = getString(R.string.instructions),
+            instructionMessage = getString(R.string.card_match_instruction),
+        )
 
-        pauseButton.setOnClickListener {
-            pauseOverlay.visibility = View.VISIBLE
-            timerProgressBar.pause()
-        }
-
+        // Sprawdzenie, czy gra jest uruchamiana po raz pierwszy
         if (savedInstanceState == null) {
-            countdownManager.startCountdown() // Odliczanie tylko na samym początku
+            countdownManager.startCountdown() // Rozpoczyna odliczanie początkowe
         } else {
-            restoreGameState(savedInstanceState)
+            restoreGameState(savedInstanceState) // Przywraca stan gry
         }
     }
-
 
     // Zapisuje stan gry, gdy aktywność jest pauzowana lub niszczona
     override fun onSaveInstanceState(outState: Bundle) {
@@ -116,28 +127,7 @@ class CardMatchActivity : BaseActivity() {
         outState.putBoolean("countdownInProgress", countdownManager.isInProgress())
         outState.putLong("timerRemainingTimeMs", timerProgressBar.getRemainingTimeSeconds() * 1000L)
         outState.putBoolean("timerIsRunning", timerProgressBar.isRunning())
-    }
-
-    // Konfiguruje menu pauzy z przyciskami wznów, restart, wyjście i pomoc
-    private fun setupPauseMenu() {
-        pauseOverlay.findViewById<Button>(R.id.btnResume).setOnClickListener {
-            pauseOverlay.visibility = View.GONE // Wznów grę
-            timerProgressBar.start() // Wznów timer
-        }
-
-        pauseOverlay.findViewById<Button>(R.id.btnRestart).setOnClickListener {
-            pauseOverlay.visibility = View.GONE // Restart gry
-            timerProgressBar.reset() // Resetuj timer
-            countdownManager.startCountdown()
-        }
-
-        pauseOverlay.findViewById<Button>(R.id.btnExit).setOnClickListener {
-            finish() // Zakończ aktywność
-        }
-
-        pauseOverlay.findViewById<Button>(R.id.btnHelp).setOnClickListener {
-            Log.d("MatchingPairs", "Przycisk pomocy kliknięty") // Placeholder dla akcji pomocy
-        }
+        outState.putInt("starCount", starCount)
     }
 
     // Inicjalizuje nową grę
@@ -167,6 +157,7 @@ class CardMatchActivity : BaseActivity() {
                 val index = i * boardCols + j
                 if (index >= cardValues.size) continue
 
+                // Tworzenie widoku karty
                 val imageView = ImageView(this).apply {
                     setImageResource(0) // Początkowo brak obrazu
                     setBackgroundResource(R.drawable.bg_rounded_card) // Tył karty
@@ -190,10 +181,11 @@ class CardMatchActivity : BaseActivity() {
             }
         }
 
-        // Pokaż wszystkie karty na początku, a potem je ukryj
+        // Pokaż wszystkie karty na początku rundy
         showAllCardsInitially()
     }
 
+    // Aktualizuje tekst wyświetlający liczbę gwiazdek
     private fun updateStarCountUI() {
         starCountText.text = starCount.toString()
     }
@@ -207,13 +199,15 @@ class CardMatchActivity : BaseActivity() {
         countdownText.visibility = savedInstanceState.getInt("countdownTextVisibility")
         gridLayout.visibility = savedInstanceState.getInt("gridLayoutVisibility")
         pauseButton.visibility = savedInstanceState.getInt("pauseButtonVisibility")
+
         val countdownIndex = savedInstanceState.getInt("countdownIndex", 0)
         val countdownInProgress = savedInstanceState.getBoolean("countdownInProgress", false)
 
+        // Przywracanie wartości kart
         val savedCardValues = savedInstanceState.getIntArray("cardValues")
         cardValues = savedCardValues?.toList() ?: emptyList()
 
-        // Przywróć stan timera
+        // Przywracanie stanu timera
         val timerRemainingTimeMs = savedInstanceState.getLong("timerRemainingTimeMs", 60000L)
         val timerIsRunning = savedInstanceState.getBoolean("timerIsRunning", false)
         timerProgressBar.setTotalTime((timerRemainingTimeMs / 1000).toInt())
@@ -223,6 +217,7 @@ class CardMatchActivity : BaseActivity() {
             timerProgressBar.start()
         }
 
+        // Odtwarzanie planszy gry
         if (boardRows != 0 && boardCols != 0 && cardValues.isNotEmpty()) {
             gridLayout.removeAllViews()
             gridLayout.rowCount = boardRows
@@ -234,7 +229,7 @@ class CardMatchActivity : BaseActivity() {
 
             cards = mutableListOf()
 
-            // Odtwórz karty
+            // Odtwarzanie kart
             for (i in 0 until boardRows) {
                 for (j in 0 until boardCols) {
                     val index = i * boardCols + j
@@ -277,20 +272,20 @@ class CardMatchActivity : BaseActivity() {
                 }
             }
 
-            // Przywróć wybrane karty
+            // Przywracanie wybranych kart
             val firstCardIndex = savedInstanceState.getInt("firstCardIndex", -1)
             val secondCardIndex = savedInstanceState.getInt("secondCardIndex", -1)
             if (firstCardIndex in cards.indices) firstCard = cards[firstCardIndex]
             if (secondCardIndex in cards.indices) secondCard = cards[secondCardIndex]
 
-            // Kontynuuj sprawdzanie pary, jeśli była w trakcie
+            // Kontynuowanie sprawdzania pary, jeśli była w trakcie
             if (firstCard != null && secondCard != null) {
                 Handler(Looper.getMainLooper()).postDelayed({
                     checkMatch()
                 }, 500)
             }
 
-            // Kontynuuj odliczanie, jeśli było aktywne
+            // Kontynuowanie odliczania, jeśli było aktywne
             if (countdownInProgress) {
                 countdownManager.startCountdown(countdownIndex)
             }
@@ -300,14 +295,15 @@ class CardMatchActivity : BaseActivity() {
     // Pokazuje wszystkie karty na początku gry przez 2 sekundy
     private fun showAllCardsInitially() {
         cards.forEach { flipCard(it, true) }
-        Handler(Looper.getMainLooper()).postDelayed({
+        runDelayed(2000) {
             cards.forEach { flipCard(it, false) }
-            timerProgressBar.start()
-        }, 2000)
+            timerProgressBar.start() // Start timera po ukryciu kart
+        }
     }
 
     // Obsługuje kliknięcie karty
     private fun onCardClick(card: Card) {
+        if (pauseMenu.isPaused) return // Ignoruj kliknięcia, gdy gra jest wstrzymana
         if (isFlipping || card.isFlipped || card.isMatched || !gridLayout.isEnabled) return // Ignoruj, jeśli karta jest zablokowana
 
         flipCard(card, true) // Odwróć kartę
@@ -333,27 +329,27 @@ class CardMatchActivity : BaseActivity() {
             firstCard = null
             secondCard = null
 
+            // Sprawdzenie, czy wszystkie karty zostały dopasowane
             if (cards.all { it.isMatched }) {
                 currentLevel++
 
-                timerProgressBar.pause()  // wstrzymaj odliczanie
-                timerProgressBar.addTime(10) // dodaj czas
+                timerProgressBar.pause()
+                timerProgressBar.addTime(10)
 
-                Handler(Looper.getMainLooper()).postDelayed({
+                runDelayed(2200) {
                     startNewGame()
-                    timerProgressBar.start() // wznow odliczanie
-                }, 2200)
+                }
             }
         } else {
             // Karty nie pasują, odwróć je z powrotem po sekundzie
             isFlipping = true
-            Handler(Looper.getMainLooper()).postDelayed({
+            runDelayed(1000) {
                 flipCard(firstCard!!, false)
                 flipCard(secondCard!!, false)
                 firstCard = null
                 secondCard = null
                 isFlipping = false
-            }, 1000)
+            }
         }
     }
 
@@ -370,6 +366,31 @@ class CardMatchActivity : BaseActivity() {
             card.isFlipped = false
             card.view.animate().scaleX(1f).scaleY(1f).setDuration(150).start() // Animacja powrotu do normalnego rozmiaru
         }
+    }
+
+    // Uruchamia akcję z opóźnieniem, uwzględniając pauzę – jeśli gra jest wstrzymana, akcja zostanie wykonana po wznowieniu
+    private fun runDelayed(delay: Long, action: () -> Unit) {
+        var remaining = delay
+        val handler = Handler(Looper.getMainLooper())
+        val interval = 16L // ~60fps, aby odliczanie było płynne
+
+        val runnable = object : Runnable {
+            override fun run() {
+                if (pauseMenu.isPaused) {
+                    // Gra w pauzie – nie zmniejszamy remaining, czekamy do wznowienia
+                    handler.postDelayed(this, interval)
+                    return
+                }
+
+                remaining -= interval
+                if (remaining <= 0) {
+                    action() // Wykonanie akcji po upłynięciu czasu
+                } else {
+                    handler.postDelayed(this, interval) // Kolejna iteracja
+                }
+            }
+        }
+        handler.postDelayed(runnable, interval)
     }
 
     // Klasa danych dla karty
