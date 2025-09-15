@@ -17,9 +17,9 @@ class GameTimerProgressBar @JvmOverloads constructor(
     private var totalTimeMs: Long = 60000 // Domyślny czas całkowity 60 sekund
     private var currentTimeMs: Long = totalTimeMs // Aktualny pozostały czas
     private var maxTimeMs: Long = 120000 // Maksymalny limit czasu
-
     private val warningThresholdPercent = 25 // Próg, poniżej którego pasek zmienia kolor na czerwony
-
+    private var startTimeMs: Long = 0L
+    private var endTimeMs: Long = 0L
     private var timer: CountDownTimer? = null // Androidowy timer odliczający czas
     private var isRunning = false // Flaga czy timer jest aktywny
 
@@ -47,17 +47,24 @@ class GameTimerProgressBar @JvmOverloads constructor(
 
     /** Startuje odliczanie od aktualnego czasu */
     fun start() {
-        if (isRunning) return
-
         timer?.cancel()
+        if (currentTimeMs <= 0){
+            currentTimeMs = totalTimeMs
+        }
+
         isRunning = true
-        timer = object : CountDownTimer(currentTimeMs, 100L) {
+        startTimeMs = System.currentTimeMillis()
+        endTimeMs = startTimeMs + currentTimeMs
+
+        timer = object : CountDownTimer(currentTimeMs, 50L) {
             override fun onTick(millisUntilFinished: Long) {
-                currentTimeMs = millisUntilFinished
+                val now = System.currentTimeMillis()
+                currentTimeMs = (endTimeMs - now).coerceAtLeast(0)
                 updateProgress()
             }
 
             override fun onFinish() {
+                if (!isRunning) return // jeśli timer został anulowany nie wywołujemy callbacku!
                 currentTimeMs = 0
                 updateProgress()
                 isRunning = false
@@ -107,6 +114,8 @@ class GameTimerProgressBar @JvmOverloads constructor(
         timer?.cancel()
         isRunning = false
         currentTimeMs = totalTimeMs
+        startTimeMs = System.currentTimeMillis()
+        endTimeMs = startTimeMs + currentTimeMs
         updateProgress()
     }
 
@@ -131,4 +140,19 @@ class GameTimerProgressBar @JvmOverloads constructor(
 
     /** Zwraca pozostały czas w sekundach */
     fun getRemainingTimeSeconds() = (currentTimeMs / 1000).toInt()
+
+    /** Ustawia pozostały czas w ms bez restartowania logiki */
+    fun setRemainingTimeMs(ms: Long) {
+        currentTimeMs = ms.coerceAtLeast(0)
+        if (isRunning) {
+            startTimeMs = System.currentTimeMillis()
+            endTimeMs = startTimeMs + currentTimeMs
+        }
+        updateProgress()
+    }
+
+    fun cancel() {
+        timer?.cancel()
+        isRunning = false
+    }
 }

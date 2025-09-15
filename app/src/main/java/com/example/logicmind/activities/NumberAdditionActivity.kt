@@ -42,7 +42,7 @@ class NumberAdditionActivity : BaseActivity() {
         setContentView(R.layout.activity_number_addition)
         supportActionBar?.hide()
 
-        // 🔹 Inicjalizacja widoków
+        // Inicjalizacja widoków
         targetNumberText = findViewById(R.id.targetNumberText)
         numberGrid = findViewById(R.id.numberGrid)
         timerProgressBar = findViewById(R.id.gameTimerProgressBar)

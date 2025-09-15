@@ -28,6 +28,9 @@ class GameCountdownManager(
         countdownIndex = startFromIndex
         countdownInProgress = true
 
+        // Anulowanie poprzednich wywołań
+        handler.removeCallbacksAndMessages(null)
+
         // Ukryj planszę i przycisk pauzy, pokaż licznik
         countdownText.visibility = View.VISIBLE
         gameView.visibility = View.INVISIBLE
@@ -66,5 +69,9 @@ class GameCountdownManager(
                 onCountdownFinished() // Powiadom o zakończeniu odliczania
             }
         }
+    }
+    fun cancel() {
+        handler.removeCallbacksAndMessages(null)
+        countdownInProgress = false
     }
 }

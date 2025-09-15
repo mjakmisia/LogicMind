@@ -90,6 +90,7 @@ class CardMatchActivity : BaseActivity() {
             pauseOverlay = pauseOverlay,
             pauseButton = pauseButton,
             onRestart = {
+                if (pauseMenu.isPaused) pauseMenu.resume()
                 timerProgressBar.reset() // Resetuje timer
                 countdownManager.startCountdown() // Rozpoczyna odliczanie początkowe
             },
@@ -128,6 +129,12 @@ class CardMatchActivity : BaseActivity() {
         outState.putLong("timerRemainingTimeMs", timerProgressBar.getRemainingTimeSeconds() * 1000L)
         outState.putBoolean("timerIsRunning", timerProgressBar.isRunning())
         outState.putInt("starCount", starCount)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        timerProgressBar.cancel() // Zatrzymaj CountDownTimer
+        countdownManager.cancel() // Usuń handlery odliczania
     }
 
     // Inicjalizuje nową grę
@@ -210,9 +217,10 @@ class CardMatchActivity : BaseActivity() {
         // Przywracanie stanu timera
         val timerRemainingTimeMs = savedInstanceState.getLong("timerRemainingTimeMs", 60000L)
         val timerIsRunning = savedInstanceState.getBoolean("timerIsRunning", false)
-        timerProgressBar.setTotalTime((timerRemainingTimeMs / 1000).toInt())
+
         timerProgressBar.reset()
-        timerProgressBar.addTime(-(60 - (timerRemainingTimeMs / 1000).toInt())) // Ustaw pozostały czas
+        timerProgressBar.setRemainingTimeMs(timerRemainingTimeMs.coerceAtLeast(1L))
+
         if (timerIsRunning && pauseOverlay.visibility != View.VISIBLE) {
             timerProgressBar.start()
         }
