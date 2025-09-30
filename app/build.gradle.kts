@@ -1,6 +1,9 @@
 plugins {
-    alias(libs.plugins.android.application)
+    //alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("com.android.application")
+    id("com.google.gms.google-services")
+
 }
 
 android {
@@ -8,7 +11,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.LogicMind"
+        applicationId = "com.example.logicmind"
         minSdk = 28
         targetSdk = 35
         versionCode = 1
@@ -48,8 +51,17 @@ dependencies {
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.material)
+    //implementation(libs.google.firebase.auth.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.androidx.gridlayout)
+
+    // Firebase – używamy BoM i tylko potrzebnych bibliotek
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth.ktx)       // Firebase Auth
+    implementation(libs.firebase.firestore.ktx)  // Firestore (statystyki)
+    implementation(libs.firebase.analytics)
+    // Add the dependencies for any other desired Firebase products
+    // https://firebase.google.com/docs/android/setup#available-libraries
 }

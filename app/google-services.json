@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "925455633749",
+    "project_id": "logicmind",
+    "storage_bucket": "logicmind.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:925455633749:android:d32a36a1de12b8cee5f3dc",
+        "android_client_info": {
+          "package_name": "com.example.logicmind"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCv2sVoHTShS3HGzzC2vSOw_IXWGTf36D4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
