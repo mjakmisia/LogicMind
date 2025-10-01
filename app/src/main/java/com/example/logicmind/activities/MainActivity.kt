@@ -74,12 +74,11 @@ class MainActivity : BaseActivity() {
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
-                    // Już jesteśmy na stronie głównej
                     true
                 }
                 R.id.nav_statistics -> {
-                    // np. otwórz ekran statystyk (dodasz później)
-                    // startActivity(Intent(this, StatisticsActivity::class.java))
+
+                    startActivity(Intent(this, StatisticsActivity::class.java))
                     true
                 }
                 R.id.nav_profile -> {

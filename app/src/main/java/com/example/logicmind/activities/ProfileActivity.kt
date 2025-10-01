@@ -52,7 +52,7 @@ class ProfileActivity : BaseActivity() {
                     true
                 }
                 R.id.nav_statistics -> {
-                    // startActivity(Intent(this, StatisticsActivity::class.java)) // jeśli masz taką
+                    startActivity(Intent(this, StatisticsActivity::class.java))
                     true
                 }
                 R.id.nav_profile -> true

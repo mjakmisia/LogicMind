@@ -61,8 +61,12 @@ class WelcomeActivity : BaseActivity() {
             override fun afterTextChanged(s: Editable?) {}
         })
 
-
-
+        // pokaż wymagania dopiero po kliknięciu w pole hasła
+        binding.etPassword.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                binding.passwordRequirementsLayout.visibility = android.view.View.VISIBLE
+            }
+        }
 
         setContentView(binding.root)
 

@@ -143,7 +143,7 @@ class SettingsActivity : BaseActivity() {
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> { startActivity(Intent(this, MainActivity::class.java)); true }
-                R.id.nav_statistics -> true
+                R.id.nav_statistics -> { startActivity(Intent(this, StatisticsActivity::class.java)); true}
                 R.id.nav_profile -> { startActivity(Intent(this, ProfileActivity::class.java)); true }
                 R.id.nav_settings -> true
                 else -> false
