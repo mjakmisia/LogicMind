@@ -12,8 +12,6 @@ import com.example.logicmind.common.GameCountdownManager
 import com.example.logicmind.common.GameTimerProgressBar
 import com.example.logicmind.common.PauseMenu
 
-//TODO: Odliczanie gwiazdek do oddzielnego pliku w common
-//TODO: Ukryj widok gwiazdki z licznikiem na czas ekranu odliczania, może schowaj przy przechodzeniu między poziomami (?)
 class CardMatchActivity : BaseActivity() {
 
     private lateinit var cards: MutableList<Card> // Lista wszystkich kart w grze
@@ -49,7 +47,7 @@ class CardMatchActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_matching_pairs)
+        setContentView(R.layout.activity_card_match)
         supportActionBar?.hide()
 
         // Inicjalizacja widoków
@@ -139,6 +137,13 @@ class CardMatchActivity : BaseActivity() {
 
     // Inicjalizuje nową grę
     private fun startNewGame() {
+        // Upewnij się że menu pauzy jest schowane
+        if (pauseMenu.isPaused) {
+            pauseMenu.resume()
+        } else {
+            pauseOverlay.visibility = View.GONE
+        }
+
         gridLayout.removeAllViews() // Wyczyść poprzednie karty
         updateStarCountUI()
         gridLayout.isEnabled = true // Włącz interakcje
@@ -298,12 +303,15 @@ class CardMatchActivity : BaseActivity() {
                 countdownManager.startCountdown(countdownIndex)
             }
         }
+
+        pauseMenu.syncWithOverlay()
     }
 
     // Pokazuje wszystkie karty na początku gry przez 2 sekundy
     private fun showAllCardsInitially() {
         cards.forEach { flipCard(it, true) }
-        runDelayed(2000) {
+
+        runDelayed(2000L) {
             cards.forEach { flipCard(it, false) }
             timerProgressBar.start() // Start timera po ukryciu kart
         }
@@ -405,5 +413,12 @@ class CardMatchActivity : BaseActivity() {
     data class Card(val view: ImageView, val value: Int) {
         var isFlipped: Boolean = false // Czy karta jest odwrócona
         var isMatched: Boolean = false // Czy karta jest dopasowana
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (!pauseMenu.isPaused && !isChangingConfigurations) {
+            pauseMenu.pause()
+        }
     }
 }

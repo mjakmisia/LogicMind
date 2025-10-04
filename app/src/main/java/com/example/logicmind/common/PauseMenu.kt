@@ -78,4 +78,8 @@ class PauseMenu(
             onResume()
         }
     }
+
+    fun syncWithOverlay() {
+        isPaused = (pauseOverlay.visibility == View.VISIBLE)
+    }
 }

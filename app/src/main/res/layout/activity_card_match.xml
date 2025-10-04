@@ -48,17 +48,21 @@
     <!-- Przycisk pauzy -->
     <ImageButton
         android:id="@+id/pauseButton"
-        android:layout_width="44dp"
-        android:layout_height="44dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_marginTop="25dp"
-        android:padding="20dp"
+        android:padding="12dp"
         android:background="@drawable/bg_rounded_light_gray"
         android:src="@drawable/ic_pause"
         android:contentDescription="@string/pause"
-        app:tint="@android:color/white"
-        android:layout_marginEnd="16dp"
+        app:tint="@color/black"
         app:layout_constraintTop_toTopOf="@id/topGuideline"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="16dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        />
 
     <!-- Tekst odliczania -->
     <TextView
