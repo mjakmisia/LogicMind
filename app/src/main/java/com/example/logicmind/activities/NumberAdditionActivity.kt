@@ -69,7 +69,7 @@ class NumberAdditionActivity : BaseActivity() {
         countdownManager = GameCountdownManager(
             countdownText = countdownText,
             gameView = numberGrid,
-            pauseButton = pauseButton,
+            //pauseButton = pauseButton,
             onCountdownFinished = {
                 starCount = 0
                 updateStarCountUI()

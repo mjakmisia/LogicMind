@@ -13,13 +13,13 @@ import android.widget.TextView
 class GameCountdownManager(
     private val countdownText: TextView,     // Tekst odliczania
     private val gameView: View,              // Główny widok gry
-    private val pauseButton: View,           // Przycisk pauzy, który ma być ukryty w trakcie odliczania
+    private val viewsToHide: List<View>? = null, // Widoki do ukrycia podczas odliczania (pauseButton, timer, starText, starIcon)
     private val onCountdownFinished: () -> Unit // Funkcja wywoływana po zakończeniu odliczania
 ) {
-    private var countdownIndex = 0                   // Obecna pozycja w sekwencji odliczania
-    private var countdownInProgress = false          // Flaga informująca, czy trwa odliczanie
+    private var countdownIndex = 0 // Obecna pozycja w sekwencji odliczania
+    private var countdownInProgress = false // Flaga informująca, czy trwa odliczanie
     private val countdownValues = listOf("3", "2", "1", "Start!") // Teksty wyświetlane w trakcie odliczania
-    private val handler = Handler(Looper.getMainLooper())         // Handler do opóźnień czasowych na głównym wątku
+    private val handler = Handler(Looper.getMainLooper()) // Handler do opóźnień czasowych na głównym wątku
 
     /**
      * Rozpoczyna odliczanie od podanego indeksu (domyślnie od początku).
@@ -31,10 +31,10 @@ class GameCountdownManager(
         // Anulowanie poprzednich wywołań
         handler.removeCallbacksAndMessages(null)
 
-        // Ukryj planszę i przycisk pauzy, pokaż licznik
+        // Ukryj planszę i widoki; pokaż licznik
         countdownText.visibility = View.VISIBLE
         gameView.visibility = View.INVISIBLE
-        pauseButton.visibility = View.INVISIBLE
+        viewsToHide?.forEach { it.visibility = View.INVISIBLE }
 
         // Uruchom pierwsze wywołanie odliczania
         handler.post(countdownRunnable)
@@ -61,10 +61,10 @@ class GameCountdownManager(
                 countdownIndex++
                 handler.postDelayed(this, 1000) // Wywołaj ponownie za 1 sekundę
             } else {
-                // Odliczanie zakończone – pokaż grę i przycisk pauzy, ukryj tekst
+                // Odliczanie zakończone – pokaż grę i ukryte widoki; ukryj tekst
                 countdownText.visibility = View.GONE
                 gameView.visibility = View.VISIBLE
-                pauseButton.visibility = View.VISIBLE
+                viewsToHide?.forEach { it.visibility = View.VISIBLE }
                 countdownInProgress = false
                 onCountdownFinished() // Powiadom o zakończeniu odliczania
             }
@@ -73,5 +73,8 @@ class GameCountdownManager(
     fun cancel() {
         handler.removeCallbacksAndMessages(null)
         countdownInProgress = false
+        countdownText.visibility = View.GONE
+        gameView.visibility = View.VISIBLE
+        viewsToHide?.forEach { it.visibility = View.VISIBLE }
     }
 }
