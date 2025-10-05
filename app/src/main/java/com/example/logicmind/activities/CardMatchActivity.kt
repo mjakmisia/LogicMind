@@ -30,6 +30,8 @@ class CardMatchActivity : BaseActivity() {
     private var starCount: Int = 0 // Licznik zdobytych gwiazdek
     private lateinit var starCountText: TextView // Pole tekstowe wyświetlające liczbę gwiazdek
     private lateinit var pauseMenu: PauseMenu // Menu pauzy gry
+    private var previewRemaining: Long = 0L // Pozostały czas do ukrycia kart w fazie preview (ms)
+    private var isPreviewPhase: Boolean = false // Flaga aktywnej fazy preview (karty przodem na starcie rundy)
 
     // Lista obrazów kart używanych w grze
     private val cardImages = listOf(
@@ -92,8 +94,16 @@ class CardMatchActivity : BaseActivity() {
                 timerProgressBar.reset() // Resetuje timer
                 countdownManager.startCountdown() // Rozpoczyna odliczanie początkowe
             },
-            onResume = { timerProgressBar.start() }, // Wznawia timer po pauzie
-            onPause = { timerProgressBar.pause() }, // Zatrzymuje timer podczas pauzy
+            onResume = {
+                if (!isPreviewPhase) {
+                    timerProgressBar.start()
+                }
+            }, // Wznawia timer po pauzie pod warunkiem że nie jesteśmy w preview
+            onPause = {
+                if (!isPreviewPhase) {
+                    timerProgressBar.pause()
+                }
+            }, // Zatrzymuje timer podczas pauzy pod warunkiem że nie jesteśmy w preview
             onExit = { finish() }, // Kończy aktywność
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.card_match_instruction),
@@ -127,6 +137,8 @@ class CardMatchActivity : BaseActivity() {
         outState.putLong("timerRemainingTimeMs", timerProgressBar.getRemainingTimeSeconds() * 1000L)
         outState.putBoolean("timerIsRunning", timerProgressBar.isRunning())
         outState.putInt("starCount", starCount)
+        outState.putLong("previewRemaining", previewRemaining)
+        outState.putBoolean("isPreviewPhase", isPreviewPhase)
     }
 
     override fun onDestroy() {
@@ -144,16 +156,11 @@ class CardMatchActivity : BaseActivity() {
             pauseOverlay.visibility = View.GONE
         }
 
-        gridLayout.removeAllViews() // Wyczyść poprzednie karty
         updateStarCountUI()
         gridLayout.isEnabled = true // Włącz interakcje
         firstCard = null
         secondCard = null
         isFlipping = false
-
-        // Ustaw wymiary siatki
-        gridLayout.rowCount = boardRows
-        gridLayout.columnCount = boardCols
 
         // Tworzenie par kart
         val cardCount = boardRows * boardCols
@@ -161,18 +168,32 @@ class CardMatchActivity : BaseActivity() {
         val selectedImages = cardImages.shuffled().take(pairCount)
         cardValues = (selectedImages + selectedImages).shuffled()
 
-        cards = mutableListOf()
+        cards = createBoard(cardValues) // Tworzy, ustawia wymiary i czyści siatkę
 
-        // Tworzenie kart i dodawanie ich do siatki
+        isPreviewPhase = true
+        showAllCardsInitially() // Pokaż wszystkie karty na początku rundy
+    }
+
+    // Aktualizuje tekst wyświetlający liczbę gwiazdek
+    private fun updateStarCountUI() {
+        starCountText.text = starCount.toString()
+    }
+
+    // Tworzy planszę z kartami; w trybie restore ustawia stany flipped/matched
+    private fun createBoard(cardValues: List<Int>, flippedStates: BooleanArray? = null, matchedStates: BooleanArray? = null): MutableList<Card> {
+        val cards = mutableListOf<Card>()
+        gridLayout.removeAllViews() // Wyczyść siatkę (jeśli nie zrobione wcześniej)
+        gridLayout.rowCount = boardRows
+        gridLayout.columnCount = boardCols
+
         for (i in 0 until boardRows) {
             for (j in 0 until boardCols) {
                 val index = i * boardCols + j
                 if (index >= cardValues.size) continue
 
-                // Tworzenie widoku karty
                 val imageView = ImageView(this).apply {
-                    setImageResource(0) // Początkowo brak obrazu
-                    setBackgroundResource(R.drawable.bg_rounded_card) // Tył karty
+                    setImageResource(0)
+                    setBackgroundResource(R.drawable.bg_rounded_card)
                     layoutParams = GridLayout.LayoutParams().apply {
                         width = 0
                         height = 0
@@ -186,20 +207,20 @@ class CardMatchActivity : BaseActivity() {
                 }
 
                 val card = Card(imageView, cardValues[index])
-                imageView.setOnClickListener { onCardClick(card) }
+                if (flippedStates != null) card.isFlipped = flippedStates.getOrElse(index) { false }
+                if (matchedStates != null) card.isMatched = matchedStates.getOrElse(index) { false }
 
+                // Ustaw stan wizualny (dla restore) lub domyślny
+                if (card.isFlipped || card.isMatched) {
+                    flipCard(card, true) // Użyj flipCard dla spójności animacji
+                }
+
+                imageView.setOnClickListener { onCardClick(card) }
                 gridLayout.addView(imageView)
                 cards.add(card)
             }
         }
-
-        // Pokaż wszystkie karty na początku rundy
-        showAllCardsInitially()
-    }
-
-    // Aktualizuje tekst wyświetlający liczbę gwiazdek
-    private fun updateStarCountUI() {
-        starCountText.text = starCount.toString()
+        return cards
     }
 
     // Przywraca stan gry z zapisanego Bundle
@@ -211,6 +232,7 @@ class CardMatchActivity : BaseActivity() {
         countdownText.visibility = savedInstanceState.getInt("countdownTextVisibility")
         gridLayout.visibility = savedInstanceState.getInt("gridLayoutVisibility")
         pauseButton.visibility = savedInstanceState.getInt("pauseButtonVisibility")
+        isPreviewPhase = savedInstanceState.getBoolean("isPreviewPhase", false)
 
         val countdownIndex = savedInstanceState.getInt("countdownIndex", 0)
         val countdownInProgress = savedInstanceState.getBoolean("countdownInProgress", false)
@@ -232,58 +254,11 @@ class CardMatchActivity : BaseActivity() {
 
         // Odtwarzanie planszy gry
         if (boardRows != 0 && boardCols != 0 && cardValues.isNotEmpty()) {
-            gridLayout.removeAllViews()
-            gridLayout.rowCount = boardRows
-            gridLayout.columnCount = boardCols
-
             val cardCount = boardRows * boardCols
             val flippedArray = savedInstanceState.getBooleanArray("cardsFlipped") ?: BooleanArray(cardCount)
             val matchedArray = savedInstanceState.getBooleanArray("cardsMatched") ?: BooleanArray(cardCount)
 
-            cards = mutableListOf()
-
-            // Odtwarzanie kart
-            for (i in 0 until boardRows) {
-                for (j in 0 until boardCols) {
-                    val index = i * boardCols + j
-                    if (index >= cardValues.size) continue
-
-                    val imageView = ImageView(this).apply {
-                        setImageResource(0)
-                        setBackgroundResource(R.drawable.bg_rounded_card)
-                        layoutParams = GridLayout.LayoutParams().apply {
-                            width = 0
-                            height = 0
-                            rowSpec = GridLayout.spec(i, 1f)
-                            columnSpec = GridLayout.spec(j, 1f)
-                            setMargins(8, 8, 8, 8)
-                        }
-                        scaleType = ImageView.ScaleType.CENTER_INSIDE
-                        adjustViewBounds = true
-                    }
-
-                    val card = Card(imageView, cardValues[index])
-                    card.isFlipped = flippedArray.getOrElse(index) { false }
-                    card.isMatched = matchedArray.getOrElse(index) { false }
-
-                    // Ustaw stan wizualny karty
-                    if (card.isFlipped || card.isMatched) {
-                        imageView.setImageResource(card.value)
-                        imageView.background = null
-                        imageView.animate().scaleX(1.1f).scaleY(1.1f).setDuration(150).start()
-                    } else {
-                        imageView.scaleX = 1f
-                        imageView.scaleY = 1f
-                        imageView.setBackgroundResource(R.drawable.bg_rounded_card)
-                        imageView.setImageResource(0)
-                    }
-
-                    imageView.setOnClickListener { onCardClick(card) }
-
-                    gridLayout.addView(imageView)
-                    cards.add(card)
-                }
-            }
+            cards = createBoard(cardValues, flippedArray, matchedArray)
 
             // Przywracanie wybranych kart
             val firstCardIndex = savedInstanceState.getInt("firstCardIndex", -1)
@@ -305,14 +280,32 @@ class CardMatchActivity : BaseActivity() {
         }
 
         pauseMenu.syncWithOverlay()
+
+        // Przywracanie pozostałego czasu preview i wznowienie fazy, jeśli była aktywna
+        previewRemaining = savedInstanceState.getLong("previewRemaining", 0L)
+        if (previewRemaining > 0L) {
+            isPreviewPhase = true
+            cards.forEach { flipCard(it, true) }
+
+            runDelayed(previewRemaining) {
+                cards.forEach { flipCard(it, false) }
+                previewRemaining = 0L
+                isPreviewPhase = false
+                timerProgressBar.start()
+            }
+        }
     }
 
     // Pokazuje wszystkie karty na początku gry przez 2 sekundy
     private fun showAllCardsInitially() {
+        isPreviewPhase = true
+        previewRemaining = 2000L
         cards.forEach { flipCard(it, true) }
 
-        runDelayed(2000L) {
+        runDelayed(previewRemaining) {
             cards.forEach { flipCard(it, false) }
+            previewRemaining = 0L
+            isPreviewPhase = false
             timerProgressBar.start() // Start timera po ukryciu kart
         }
     }
@@ -399,6 +392,7 @@ class CardMatchActivity : BaseActivity() {
                 }
 
                 remaining -= interval
+                previewRemaining = remaining.coerceAtLeast(0L)
                 if (remaining <= 0) {
                     action() // Wykonanie akcji po upłynięciu czasu
                 } else {
