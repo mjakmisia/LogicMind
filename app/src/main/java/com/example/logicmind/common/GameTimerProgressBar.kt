@@ -37,6 +37,7 @@ class GameTimerProgressBar @JvmOverloads constructor(
     fun setTotalTime(seconds: Int) {
         totalTimeMs = seconds * 1000L
         currentTimeMs = totalTimeMs
+        maxTimeMs = totalTimeMs
         updateProgress()
     }
 
