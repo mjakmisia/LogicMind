@@ -72,8 +72,6 @@ class WelcomeActivity : BaseActivity() {
 
         auth = FirebaseAuth.getInstance()
 
-        Toast.makeText(this, "WelcomeActivity uruchomiona", Toast.LENGTH_SHORT).show()
-
         // Jeśli użytkownik jest już zalogowany
         //if (auth.currentUser != null) goToMain()
 
