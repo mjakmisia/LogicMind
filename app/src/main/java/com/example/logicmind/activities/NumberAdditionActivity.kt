@@ -1,120 +1,231 @@
 package com.example.logicmind.activities
 
-import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
-import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.gridlayout.widget.GridLayout
 import com.example.logicmind.R
 import com.example.logicmind.common.GameCountdownManager
 import com.example.logicmind.common.GameTimerProgressBar
+import com.example.logicmind.common.PauseMenu
+import com.example.logicmind.common.StarManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.shape.CornerFamily
-
-/* TODO:
-    -dopasowanie kolorów do themes
-*/
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
+import android.content.res.Configuration
+import androidx.core.view.isVisible
 
 class NumberAdditionActivity : BaseActivity() {
 
-    private lateinit var targetNumberText: TextView
-    private lateinit var numberGrid: GridLayout
-    private lateinit var timerProgressBar: GameTimerProgressBar
-    private lateinit var pauseButton: View
-    private lateinit var pauseOverlay: View
-    private lateinit var countdownText: TextView
-    private lateinit var countdownManager: GameCountdownManager
-    private lateinit var starCountText: TextView
+    private lateinit var targetNumberText: TextView // Pole tekstowe z docelową sumą
+    private lateinit var numberGrid: GridLayout // Siatka z przyciskami liczb
+    private lateinit var countdownText: TextView // Pole tekstowe dla odliczania
+    private lateinit var pauseButton: ImageView // Przycisk pauzy
+    private lateinit var pauseOverlay: View // Nakładka menu pauzy
+    private lateinit var countdownManager: GameCountdownManager // Manager odliczania
+    private lateinit var timerProgressBar: GameTimerProgressBar // Pasek postępu czasu gry
+    private lateinit var starManager: StarManager // Manager gwiazdek
+    private lateinit var pauseMenu: PauseMenu // Menu pauzy gry
 
-    private val numbers = mutableListOf<Int>()
-    private val selectedButtons = mutableListOf<Button>()
-    private var level = 1
-    private var remainingTime: Long = 60_000
-    private var starCount = 0
+    private val numbers = mutableListOf<Int>() // Lista liczb na siatce
+    private val selectedButtons = mutableListOf<MaterialButton>() // Wybrane przyciski
+    private var level = 1 // Aktualny poziom gry
+    private var isGameEnding = false // Flaga końca gry
+    private var isGameActive = false // Flaga, czy gra jest w trakcie
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_number_addition)
+
         supportActionBar?.hide()
 
         // Inicjalizacja widoków
         targetNumberText = findViewById(R.id.targetNumberText)
         numberGrid = findViewById(R.id.numberGrid)
-        timerProgressBar = findViewById(R.id.gameTimerProgressBar)
+        countdownText = findViewById(R.id.countdownText)
         pauseButton = findViewById(R.id.pauseButton)
         pauseOverlay = findViewById(R.id.pauseOverlay)
-        countdownText = findViewById(R.id.countdownText)
-        starCountText = findViewById(R.id.starCountText)
-        //gameIntro = findViewById(R.id.gameIntro)
+        timerProgressBar = findViewById(R.id.gameTimerProgressBar)
+        starManager = StarManager()
+        starManager.init(findViewById(R.id.starCountText))
 
-        targetNumberText.visibility = View.GONE
-        numberGrid.visibility = View.GONE
-        updateStarCountUI()
-
-        // Timer gry
-        timerProgressBar.setTotalTime(60)
+        // Inicjalizacja paska czasu
+        timerProgressBar.setTotalTime(60) // Ustaw czas na 1 minutę
         timerProgressBar.setOnFinishCallback {
             runOnUiThread {
+                isGameEnding = true
                 Toast.makeText(this, "Czas minął! Koniec gry!", Toast.LENGTH_LONG).show()
-                endGame()
+                numberGrid.isEnabled = false
+                pauseOverlay.visibility = View.GONE
+                finish()
             }
         }
 
-        // Odliczanie startowe
+        // Inicjalizacja managera odliczania
         countdownManager = GameCountdownManager(
             countdownText = countdownText,
             gameView = numberGrid,
-            //pauseButton = pauseButton,
+            viewsToHide = listOf(
+                pauseButton,
+                findViewById<TextView>(R.id.starCountText),
+                findViewById<ImageView>(R.id.starIcon),
+                timerProgressBar),
             onCountdownFinished = {
-                starCount = 0
-                updateStarCountUI()
+                level = 1
+                starManager.reset()
                 timerProgressBar.start()
                 targetNumberText.visibility = View.VISIBLE
                 numberGrid.visibility = View.VISIBLE
+                isGameActive = true
                 startLevel()
             }
         )
 
-        // Pauza
-        pauseButton.setOnClickListener {
-            pauseOverlay.visibility = View.VISIBLE
-            timerProgressBar.pause()
-            numberGrid.isEnabled = false
-        }
+        // Inicjalizacja menu pauzy
+        pauseMenu = PauseMenu(
+            context = this,
+            pauseOverlay = pauseOverlay,
+            pauseButton = pauseButton,
+            onRestart = {
+                if (pauseMenu.isPaused) pauseMenu.resume()
+                level = 1
+                starManager.reset()
+                timerProgressBar.reset() // Resetuje timer
 
-        setupPauseMenu()
+                // Czyszczenie siatki i stanów
+                numberGrid.removeAllViews()
+                numbers.clear()
+                selectedButtons.clear()
 
+                // Ustaw layout na bieżącą orientację po restarcie
+                updateLayoutForOrientation()
+
+                // Ukryj elementy gry przed startem odliczania
+                targetNumberText.visibility = View.GONE
+                numberGrid.visibility = View.GONE
+
+                countdownManager.startCountdown() // Rozpoczyna odliczanie początkowe
+            },
+            onResume = {
+                timerProgressBar.start()
+            },
+            onPause = {
+                timerProgressBar.pause()
+            },
+            onExit = { finish() }, // Kończy aktywność
+            instructionTitle = getString(R.string.instructions),
+            instructionMessage = getString(R.string.number_addition_instruction),
+        )
+
+        // Ukryj elementy gry na starcie
+        targetNumberText.visibility = View.GONE
+        numberGrid.visibility = View.GONE
+
+        // Sprawdzenie, czy gra jest uruchamiana po raz pierwszy
         if (savedInstanceState == null) {
-            countdownManager.startCountdown()
+            countdownManager.startCountdown() // Rozpoczyna odliczanie początkowe
         } else {
-            restoreGameState(savedInstanceState)
+            restoreGameState(savedInstanceState) // Przywraca stan gry
+        }
+
+        // Ustaw layout na startową orientację
+        updateLayoutForOrientation()
+    }
+
+    // Dostosowuje layout do bieżącej orientacji
+    private fun updateLayoutForOrientation() {
+        val currentConfig = resources.configuration
+        val constraintLayout = findViewById<ConstraintLayout>(R.id.rootLayout)
+        val constraintSet = ConstraintSet()
+        constraintSet.clone(constraintLayout)
+
+        if (currentConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            // liczba z lewej, plansza z prawej
+            constraintSet.clear(R.id.numberGrid, ConstraintSet.TOP)
+            constraintSet.clear(R.id.targetNumberText, ConstraintSet.BOTTOM)
+
+            constraintSet.connect(R.id.targetNumberText, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
+            constraintSet.connect(R.id.targetNumberText, ConstraintSet.END, R.id.numberGrid, ConstraintSet.START)
+            constraintSet.connect(R.id.targetNumberText, ConstraintSet.TOP, R.id.gameTimerProgressBar, ConstraintSet.BOTTOM)
+            constraintSet.connect(R.id.targetNumberText, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
+
+            constraintSet.connect(R.id.numberGrid, ConstraintSet.START, R.id.targetNumberText, ConstraintSet.END)
+            constraintSet.connect(R.id.numberGrid, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
+            constraintSet.connect(R.id.numberGrid, ConstraintSet.TOP, R.id.gameTimerProgressBar, ConstraintSet.BOTTOM)
+            constraintSet.connect(R.id.numberGrid, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
+
+        } else {
+            // pionowo: liczba nad planszą
+            constraintSet.clear(R.id.numberGrid, ConstraintSet.START)
+            constraintSet.clear(R.id.targetNumberText, ConstraintSet.END)
+
+            constraintSet.connect(R.id.targetNumberText, ConstraintSet.TOP, R.id.gameTimerProgressBar, ConstraintSet.BOTTOM)
+            constraintSet.connect(R.id.targetNumberText, ConstraintSet.BOTTOM, R.id.numberGrid, ConstraintSet.TOP)
+            constraintSet.connect(R.id.targetNumberText, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
+            constraintSet.connect(R.id.targetNumberText, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
+
+            constraintSet.connect(R.id.numberGrid, ConstraintSet.TOP, R.id.targetNumberText, ConstraintSet.BOTTOM)
+            constraintSet.connect(R.id.numberGrid, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
+            constraintSet.connect(R.id.numberGrid, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
+            constraintSet.connect(R.id.numberGrid, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
+        }
+
+        constraintSet.applyTo(constraintLayout)
+        constraintLayout.requestLayout()
+    }
+
+    // Zapisuje stan gry, gdy aktywność jest pauzowana lub niszczona
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt("level", level)
+        outState.putIntegerArrayList("numbers", ArrayList(numbers))
+        outState.putString("targetNumber", targetNumberText.text.toString())
+        outState.putInt("pauseOverlayVisibility", pauseOverlay.visibility)
+        outState.putInt("countdownTextVisibility", countdownText.visibility)
+        outState.putInt("numberGridVisibility", numberGrid.visibility)
+        outState.putInt("pauseButtonVisibility", pauseButton.visibility)
+        outState.putInt("countdownIndex", countdownManager.getIndex())
+        outState.putBoolean("countdownInProgress", countdownManager.isInProgress())
+        outState.putLong("timerRemainingTimeMs", timerProgressBar.getRemainingTimeSeconds() * 1000L)
+        outState.putBoolean("timerIsRunning", timerProgressBar.isRunning())
+        outState.putBoolean("isGameActive", isGameActive)
+        starManager.saveState(outState)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        timerProgressBar.cancel() // Zatrzymaj CountDownTimer
+        countdownManager.cancel() // Usuń handlery odliczania
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (!isGameEnding && !pauseMenu.isPaused && !isChangingConfigurations) {
+            pauseMenu.pause()
         }
     }
 
-    private fun setupPauseMenu() {
-        pauseOverlay.findViewById<Button>(R.id.btnResume).setOnClickListener {
-            pauseOverlay.visibility = View.GONE
-            timerProgressBar.start()
-            numberGrid.isEnabled = true
-        }
-        pauseOverlay.findViewById<Button>(R.id.btnRestart).setOnClickListener {
-            pauseOverlay.visibility = View.GONE
-            starCount = 0
-            updateStarCountUI()
-            countdownManager.startCountdown()
-        }
-        pauseOverlay.findViewById<Button>(R.id.btnExit).setOnClickListener {
-            finish()
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        updateLayoutForOrientation()
+
+        // Przelicz siatkę przycisków, jeśli gra jest aktywna (dopasuj do nowej orientacji)
+        if (isGameActive && numberGrid.isVisible) {
+            setupNumberGrid()
         }
     }
 
+    // Rozpoczyna nowy poziom gry
     private fun startLevel() {
-        targetNumberText.background = getDrawable(R.drawable.circle_bg)
+        isGameActive = true
+        targetNumberText.background = AppCompatResources.getDrawable(this, R.drawable.circle_bg)
         numberGrid.isEnabled = true
 
         when (level) {
@@ -137,7 +248,7 @@ class NumberAdditionActivity : BaseActivity() {
         setupNumberGrid()
     }
 
-
+    // Generuje nowe liczby na siatce w zależności od poziomu
     private fun generateNumbers() {
         numbers.clear()
         val gridSize = when (level) {
@@ -150,7 +261,7 @@ class NumberAdditionActivity : BaseActivity() {
         }
     }
 
-
+    // Generuje docelową sumę na podstawie możliwych kombinacji liczb
     private fun generateTarget(): Boolean {
         val availableNumbers = numbers.filter { it != -1 }
         if (availableNumbers.size < numbersToSelect()) return false
@@ -181,37 +292,39 @@ class NumberAdditionActivity : BaseActivity() {
         return true
     }
 
-
+    // Tworzy siatkę przycisków z liczbami – wywoływane tylko przy starcie poziomu
     private fun setupNumberGrid() {
+        if (numbers.isEmpty()) return
         numberGrid.removeAllViews()
-        val displayMetrics = resources.displayMetrics
-        val screenWidth = displayMetrics.widthPixels
-        val screenHeight = displayMetrics.heightPixels
-
         val (cols, rows) = when (level) {
             1 -> 4 to 3
             2 -> 4 to 4
             else -> 4 to 3
         }
+        numberGrid.columnCount = cols
+        numberGrid.rowCount = rows
 
-        val margin = 16 * 2
+        val displayMetrics = resources.displayMetrics
+        val screenWidth = displayMetrics.widthPixels
+        val screenHeight = displayMetrics.heightPixels
+        val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        val margin = if (isLandscape) 32 * 2 else 16 * 2
         val buttonWidth = (screenWidth / cols) - margin
         val buttonHeight = (screenHeight / rows) - margin
         val buttonSize = minOf(buttonWidth, buttonHeight)
 
-        numberGrid.columnCount = cols
-        numberGrid.rowCount = rows
+        val buttonMargin = if (isLandscape) 12 else 8
+        val textSizeMultiplier = if (isLandscape) 0.22f else 0.28f
 
         for (i in numbers.indices) {
             val button = MaterialButton(this).apply {
-                text = if (numbers[i] == -1) "" else numbers[i].toString()
                 layoutParams = GridLayout.LayoutParams().apply {
                     width = buttonSize
                     height = buttonSize
-                    setMargins(12, 12, 12, 12)
+                    setMargins(buttonMargin, buttonMargin, buttonMargin, buttonMargin)
                 }
-                textSize = (buttonSize * 0.3f) / resources.displayMetrics.scaledDensity
-                setTextColor(Color.BLACK)
+                textSize = buttonSize * textSizeMultiplier / resources.displayMetrics.density
+                setPadding(0, 0, 0, 0)
                 shapeAppearanceModel = shapeAppearanceModel
                     .toBuilder()
                     .setAllCorners(CornerFamily.ROUNDED, buttonSize * 0.15f)
@@ -220,20 +333,25 @@ class NumberAdditionActivity : BaseActivity() {
 
             if (numbers[i] == -1) {
                 button.isEnabled = false
-                button.backgroundTintList = ColorStateList.valueOf(Color.LTGRAY)
+                button.text = ""
                 button.setTextColor(Color.DKGRAY)
+                button.setBackgroundColor(Color.LTGRAY)
             } else {
-                button.setOnClickListener { handleNumberClick(button, i) }
-                button.backgroundTintList = ColorStateList.valueOf(Color.WHITE)
+                button.text = numbers[i].toString()
                 button.setTextColor(Color.BLACK)
+                button.setBackgroundColor(Color.WHITE)
+                button.isEnabled = true
+                button.setOnClickListener { handleNumberClick(button, i) }
             }
 
             numberGrid.addView(button)
         }
     }
 
+    // Obsługuje kliknięcie przycisku z liczbą
+    private fun handleNumberClick(button: MaterialButton, index: Int) {
+        if (pauseMenu.isPaused || !numberGrid.isEnabled) return // Ignoruj kliknięcia podczas pauzy
 
-    private fun handleNumberClick(button: Button, index: Int) {
         if (selectedButtons.contains(button)) {
             selectedButtons.remove(button)
             button.setBackgroundColor(Color.WHITE)
@@ -257,16 +375,15 @@ class NumberAdditionActivity : BaseActivity() {
                     btn.text = ""
                     btn.isEnabled = false
                     btn.setBackgroundColor(Color.LTGRAY)
+                    btn.setOnClickListener(null)
                 }
-                starCount += 1
-                updateStarCountUI()
+                starManager.increment()
                 selectedButtons.clear()
 
                 if (!generateTarget()) {
                     proceedToNextLevel()
                     return
                 }
-                setupNumberGrid()
             } else {
                 selectedButtons.forEach { btn -> btn.setBackgroundColor(Color.RED) }
                 Handler(Looper.getMainLooper()).postDelayed({
@@ -275,19 +392,16 @@ class NumberAdditionActivity : BaseActivity() {
                 }, 1000)
             }
         }
-
     }
 
-    private fun updateStarCountUI() {
-        starCountText.text = starCount.toString()
-    }
-
+    // Zwraca liczbę liczb do wybrania w zależności od poziomu
     private fun numbersToSelect(): Int {
         return if (level < 3) 2 else 3
     }
 
-
+    // Przechodzi do następnego poziomu
     private fun proceedToNextLevel() {
+        isGameActive = true
         if (timerProgressBar.getRemainingTimeSeconds() > 0) {
             level = when (level) {
                 1 -> 2
@@ -302,51 +416,71 @@ class NumberAdditionActivity : BaseActivity() {
         }
     }
 
-
+    // Kończy grę
     private fun endGame() {
-        targetNumberText.background = null
-        targetNumberText.text = "Koniec!"
-        numberGrid.removeAllViews()
-
-        val message = TextView(this)
-        message.text = "Gratulacje! Twój wynik: $starCount"
-        message.textSize = 24f
-        message.layoutParams = GridLayout.LayoutParams().apply {
-            width = GridLayout.LayoutParams.WRAP_CONTENT
-            height = GridLayout.LayoutParams.WRAP_CONTENT
-            setMargins(8, 8, 8, 8)
-        }
-        numberGrid.addView(message)
-        timerProgressBar.pause()
+        isGameActive = false
+        isGameEnding = true
+        Toast.makeText(this, "Koniec gry!", Toast.LENGTH_LONG).show()
+        numberGrid.isEnabled = false
+        pauseOverlay.visibility = View.GONE
+        finish()
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putInt("level", level)
-        outState.putIntegerArrayList("numbers", ArrayList(numbers))
-        outState.putInt("remainingTime", timerProgressBar.getRemainingTimeSeconds())
-        outState.putBoolean("countdownInProgress", countdownManager.isInProgress())
-        outState.putInt("countdownIndex", countdownManager.getIndex())
-        outState.putInt("starCount", starCount)
-    }
-
+    // Przywraca stan gry z zapisanego Bundle
     private fun restoreGameState(savedInstanceState: Bundle) {
+        isGameActive = savedInstanceState.getBoolean("isGameActive", false)
         level = savedInstanceState.getInt("level", 1)
         numbers.clear()
         numbers.addAll(savedInstanceState.getIntegerArrayList("numbers") ?: mutableListOf())
-        remainingTime = savedInstanceState.getLong("remainingTime", 60)
-        starCount = savedInstanceState.getInt("starCount", 0)
-        updateStarCountUI()
+        val target = savedInstanceState.getString("targetNumber", "")
+        pauseOverlay.visibility = savedInstanceState.getInt("pauseOverlayVisibility")
+        countdownText.visibility = savedInstanceState.getInt("countdownTextVisibility")
+        numberGrid.visibility = savedInstanceState.getInt("numberGridVisibility")
+        pauseButton.visibility = savedInstanceState.getInt("pauseButtonVisibility")
+        starManager.restoreState(savedInstanceState)
 
-        timerProgressBar.setTotalTime((remainingTime / 1000).toInt())
-
-        val countdownInProgress = savedInstanceState.getBoolean("countdownInProgress", false)
         val countdownIndex = savedInstanceState.getInt("countdownIndex", 0)
-        if (countdownInProgress) {
-            countdownManager.startCountdown(countdownIndex)
-        } else {
-            startLevel()
+        val countdownInProgress = savedInstanceState.getBoolean("countdownInProgress", false)
+
+        // Przywracanie stanu timera
+        val timerRemainingTimeMs = savedInstanceState.getLong("timerRemainingTimeMs", 60 * 1000L)
+        val timerIsRunning = savedInstanceState.getBoolean("timerIsRunning", false)
+
+        timerProgressBar.setRemainingTimeMs(timerRemainingTimeMs.coerceAtLeast(1L))
+
+        if (timerIsRunning && pauseOverlay.visibility != View.VISIBLE) {
             timerProgressBar.start()
         }
+
+        // Odtwarzanie stanu gry
+        if (!countdownInProgress) {
+            when (level) {
+                1 -> {
+                    numberGrid.columnCount = 4
+                    numberGrid.rowCount = 3
+                }
+                2 -> {
+                    numberGrid.columnCount = 4
+                    numberGrid.rowCount = 4
+                }
+                else -> {
+                    numberGrid.columnCount = 4
+                    numberGrid.rowCount = 3
+                }
+            }
+            targetNumberText.text = target
+            targetNumberText.background = AppCompatResources.getDrawable(this, R.drawable.circle_bg)
+            setupNumberGrid()
+            numberGrid.isEnabled = true
+            targetNumberText.visibility = View.VISIBLE
+            numberGrid.visibility = View.VISIBLE
+            isGameActive = true
+        } else {
+            isGameActive = false
+            countdownManager.startCountdown(countdownIndex)
+        }
+
+        pauseMenu.syncWithOverlay()
+        selectedButtons.clear()
     }
 }

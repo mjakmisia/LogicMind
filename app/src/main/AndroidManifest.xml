@@ -42,7 +42,7 @@
 
         <activity
             android:name=".activities.NumberAdditionActivity"
-            android:configChanges="locale|uiMode|screenSize|orientation|keyboardHidden"
+            android:configChanges="orientation|screenSize|keyboardHidden"
             android:exported="false"/>
 
         <activity
