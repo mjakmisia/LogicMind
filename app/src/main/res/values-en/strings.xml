@@ -57,6 +57,32 @@
     <string name="restart">Restart</string>
     <string name="how_to_play">How to play</string>
     <string name="leave">Leave</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="password_8_digits">Minimum of 8 characters</string>
+    <string name="password_capital_letter">At least 1 uppercase letter</string>
+    <string name="password_number">At least 1 number</string>
+    <string name="log_in">Log in</string>
+    <string name="register">Register</string>
+    <string name="guest">Continue as guest</string>
+    <string name="game_statistics">Games statistics</string>
+    <string name="avg_reaction_time">Average reaction time</string>
+    <string name="accuracy">Accuracy</string>
+    <string name="total_points">Total points</string>
+    <string name="highest_score">Highest score</string>
+    <string name="avg_reaction_time_value">Average reaction time: %1$s</string>
+    <string name="accuracy_value">Accuracy: %1$s%%</string>
+    <string name="total_points_value">Total points: %1$s</string>
+    <string name="highest_score_value">Highest score: %1$s</string>
+    <string name="no_data">No data</string>
+    <string name="memory_game1">Color Sequence</string>
+    <string name="memory_game2">Memory Game</string>
+    <string name="attention_game1">Word Search</string>
+    <string name="attention_game2">Left or Right</string>
+    <string name="reasoning_game1">Number Addition</string>
+    <string name="reasoning_game2">Path Change</string>
+    <string name="coordination_game1">Cards on the Roads</string>
+    <string name="coordination_game2">Symbol Race</string>
 
     <!-- GAME INTRO DESCRIPTIONS -->
 

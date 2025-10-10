@@ -4,17 +4,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5">
+    android:background="?attr/colorOnBackground">
 
-    <!-- Scrollowalna część (cała zawartość statystyk) -->
+    <!-- Scrollowalna część -->
     <ScrollView
         android:id="@+id/statisticsScrollView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -22,278 +22,597 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Tytuł -->
+            <!-- Nagłówek -->
             <TextView
                 android:id="@+id/tvStatisticsTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="70dp"
-                android:layout_marginBottom="12dp"
-                android:text="Statystyki Gier"
+                android:layout_marginTop="60dp"
+                android:text="@string/game_statistics"
                 android:textColor="?attr/text_dark"
-                android:textSize="28sp"
+                android:textSize="30sp"
                 android:textStyle="bold" />
 
-            <!-- ========================== -->
-            <!-- Sekcja: Koordynacja -->
-            <!-- ========================== -->
+            <!-- ================= Kategoria: Koordynacja ================= -->
             <TextView
                 android:id="@+id/tvCoordinationHeader"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:text="Koordynacja"
-                android:textColor="#000"
-                android:textSize="20sp"
+                android:layout_marginTop="40dp"
+                android:text="@string/category_coordination"
+                android:textColor="?attr/text_dark"
+                android:textSize="25sp"
                 android:textStyle="bold" />
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="10dp"
-                app:cardElevation="3dp">
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                android:background="@drawable/bg_coordination">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
+                    android:orientation="horizontal"
                     android:padding="12dp">
 
-                    <TextView
-                        android:id="@+id/tvCoordinationReaction"
-                        android:layout_width="wrap_content"
+                    <!-- Gra 1 -->
+                    <LinearLayout
+                        android:id="@+id/layoutCoordinationGame1"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="Średni czas reakcji: 1.1s"
-                        android:textColor="#444"
-                        android:textSize="16sp" />
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/tvCoordinationAccuracy"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="Poprawność odpowiedzi: 88%"
-                        android:textColor="#444"
-                        android:textSize="16sp" />
+                        <TextView
+                            android:id="@+id/tvCoordinationGame1Title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/coordination_game1"
+                            android:textColor="?attr/text_dark"
+                            android:textSize="18sp" />
 
-                    <TextView
-                        android:id="@+id/tvCoordinationTotal"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="Łączna ilość punktów: 1350"
-                        android:textColor="#444"
-                        android:textSize="16sp" />
+                        <LinearLayout
+                            android:id="@+id/layoutCoordinationGame1Stats"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:orientation="vertical"
+                            android:visibility="gone">
 
-                    <TextView
-                        android:id="@+id/tvCoordinationBest"
-                        android:layout_width="wrap_content"
+                            <TextView
+                                android:id="@+id/tvCoordinationGame1Reaction"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/avg_reaction_time_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/tvCoordinationGame1Accuracy"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/accuracy_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/tvCoordinationGame1Total"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/total_points_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/tvCoordinationGame1Best"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/highest_score_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Gra 2 -->
+                    <LinearLayout
+                        android:id="@+id/layoutCoordinationGame2"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="Najwyższy wynik: 260"
-                        android:textColor="#444"
-                        android:textSize="16sp" />
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:paddingStart="8dp">
+
+                        <TextView
+                            android:id="@+id/tvCoordinationGame2Title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/coordination_game2"
+                            android:textColor="?attr/text_dark"
+                            android:textSize="18sp" />
+
+                        <LinearLayout
+                            android:id="@+id/layoutCoordinationGame2Stats"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:orientation="vertical"
+                            android:visibility="gone">
+
+                            <TextView
+                                android:id="@+id/tvCoordinationGame2Reaction"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/avg_reaction_time_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/tvCoordinationGame2Accuracy"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/accuracy_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/tvCoordinationGame2Total"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/total_points_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/tvCoordinationGame2Best"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/highest_score_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+                    </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-        <!-- ========================== -->
-        <!-- Sekcja: Skupienie -->
-        <!-- ========================== -->
-        <TextView
-            android:id="@+id/tvFocusHeader"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Skupienie"
-            android:textColor="#000"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            <!-- ================= Kategoria: Pamięć ================= -->
+            <TextView
+                android:id="@+id/tvMemoryHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/category_memory"
+                android:textColor="?attr/text_dark"
+                android:textSize="25sp"
+                android:textStyle="bold" />
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            app:cardCornerRadius="10dp"
-            app:cardElevation="3dp">
-
-            <LinearLayout
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="12dp">
+                android:layout_marginTop="8dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                android:background="@drawable/bg_memory">
 
-                <TextView
-                    android:id="@+id/tvFocusReaction"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Średni czas reakcji: 1.0s"
-                    android:textColor="#444"
-                    android:textSize="16sp" />
+                    android:orientation="horizontal"
+                    android:padding="12dp">
 
-                <TextView
-                    android:id="@+id/tvFocusAccuracy"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Poprawność odpowiedzi: 91%"
-                    android:textColor="#444"
-                    android:textSize="16sp" />
+                    <!-- Gra 1 -->
+                    <LinearLayout
+                        android:id="@+id/layoutMemoryGame1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/tvFocusTotal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Łączna ilość punktów: 1550"
-                    android:textColor="#444"
-                    android:textSize="16sp" />
+                        <TextView
+                            android:id="@+id/tvMemoryGame1Title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/memory_game1"
+                            android:textColor="?attr/text_dark"
+                            android:textSize="18sp" />
 
-                <TextView
-                    android:id="@+id/tvFocusBest"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Najwyższy wynik: 280"
-                    android:textColor="#444"
-                    android:textSize="16sp" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
+                        <LinearLayout
+                            android:id="@+id/layoutMemoryGame1Stats"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:orientation="vertical"
+                            android:visibility="gone">
 
-        <!-- ========================== -->
-        <!-- Sekcja: Pamięć -->
-        <!-- ========================== -->
-        <TextView
-            android:id="@+id/tvMemoryHeader"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Pamięć"
-            android:textColor="#000"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+                            <TextView
+                                android:id="@+id/tvMemoryGame1Reaction"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/avg_reaction_time_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            app:cardCornerRadius="10dp"
-            app:cardElevation="3dp">
+                            <TextView
+                                android:id="@+id/tvMemoryGame1Accuracy"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/accuracy_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
 
-            <LinearLayout
+                            <TextView
+                                android:id="@+id/tvMemoryGame1Total"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/total_points_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/tvMemoryGame1Best"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/highest_score_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Gra 2 -->
+                    <LinearLayout
+                        android:id="@+id/layoutMemoryGame2"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:paddingStart="8dp">
+
+                        <TextView
+                            android:id="@+id/tvMemoryGame2Title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/memory_game2"
+                            android:textColor="?attr/text_dark"
+                            android:textSize="18sp" />
+
+                        <LinearLayout
+                            android:id="@+id/layoutMemoryGame2Stats"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:orientation="vertical"
+                            android:visibility="gone">
+
+                            <TextView
+                                android:id="@+id/tvMemoryGame2Reaction"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/avg_reaction_time_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/tvMemoryGame2Accuracy"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/accuracy_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/tvMemoryGame2Total"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/total_points_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/tvMemoryGame2Best"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/highest_score_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ================= Kategoria: Skupienie ================= -->
+            <TextView
+                android:id="@+id/tvAttentionHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/category_attention"
+                android:textColor="?attr/text_dark"
+                android:textSize="25sp"
+                android:textStyle="bold" />
+
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="12dp">
+                android:layout_marginTop="8dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                android:background="@drawable/bg_attention">
 
-                <TextView
-                    android:id="@+id/tvMemoryReaction"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Średni czas reakcji: 1.4s"
-                    android:textColor="#444"
-                    android:textSize="16sp" />
+                    android:orientation="horizontal"
+                    android:padding="12dp">
 
-                <TextView
-                    android:id="@+id/tvMemoryAccuracy"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Poprawność odpowiedzi: 76%"
-                    android:textColor="#444"
-                    android:textSize="16sp" />
+                    <!-- Gra 1 -->
+                    <LinearLayout
+                        android:id="@+id/layoutAttentionGame1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/tvMemoryTotal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Łączna ilość punktów: 980"
-                    android:textColor="#444"
-                    android:textSize="16sp" />
+                        <TextView
+                            android:id="@+id/tvAttentionGame1Title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/attention_game1"
+                            android:textColor="?attr/text_dark"
+                            android:textSize="18sp" />
 
-                <TextView
-                    android:id="@+id/tvMemoryBest"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Najwyższy wynik: 210"
-                    android:textColor="#444"
-                    android:textSize="16sp" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
+                        <LinearLayout
+                            android:id="@+id/layoutAttentionGame1Stats"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:orientation="vertical"
+                            android:visibility="gone">
 
-        <!-- ========================== -->
-        <!-- Sekcja: Rozwiązywanie problemów -->
-        <!-- ========================== -->
-        <TextView
-            android:id="@+id/tvLogicHeader"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Rozwiązywanie problemów"
-            android:textColor="#000"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+                            <TextView
+                                android:id="@+id/tvAttentionGame1Reaction"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/avg_reaction_time_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="80dp"
-            app:cardCornerRadius="10dp"
-            app:cardElevation="3dp">
+                            <TextView
+                                android:id="@+id/tvAttentionGame1Accuracy"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/accuracy_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
 
-            <LinearLayout
+                            <TextView
+                                android:id="@+id/tvAttentionGame1Total"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/total_points_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/tvAttentionGame1Best"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/highest_score_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Gra 2 -->
+                    <LinearLayout
+                        android:id="@+id/layoutAttentionGame2"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:paddingStart="8dp">
+
+                        <TextView
+                            android:id="@+id/tvAttentionGame2Title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/attention_game2"
+                            android:textColor="?attr/text_dark"
+                            android:textSize="18sp" />
+
+                        <LinearLayout
+                            android:id="@+id/layoutAttentionGame2Stats"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:orientation="vertical"
+                            android:visibility="gone">
+
+                            <TextView
+                                android:id="@+id/tvAttentionGame2Reaction"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/avg_reaction_time_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/tvAttentionGame2Accuracy"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/accuracy_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/tvAttentionGame2Total"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/total_points_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/tvAttentionGame2Best"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/highest_score_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ================= Kategoria: Rozwiązywanie problemów ================= -->
+            <TextView
+                android:id="@+id/tvReasoningHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/category_reasoning"
+                android:textColor="?attr/text_dark"
+                android:textSize="25sp"
+                android:textStyle="bold" />
+
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="12dp">
+                android:layout_marginTop="8dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                android:background="@drawable/bg_reasoning">
 
-                <TextView
-                    android:id="@+id/tvLogicReaction"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Średni czas reakcji: 1.3s"
-                    android:textColor="#444"
-                    android:textSize="16sp" />
+                    android:orientation="horizontal"
+                    android:padding="12dp">
 
-                <TextView
-                    android:id="@+id/tvLogicAccuracy"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Poprawność odpowiedzi: 82%"
-                    android:textColor="#444"
-                    android:textSize="16sp" />
+                    <!-- Gra 1 -->
+                    <LinearLayout
+                        android:id="@+id/layoutReasoningGame1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/tvLogicTotal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Łączna ilość punktów: 1200"
-                    android:textColor="#444"
-                    android:textSize="16sp" />
+                        <TextView
+                            android:id="@+id/tvReasoningGame1Title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/reasoning_game1"
+                            android:textColor="?attr/text_dark"
+                            android:textSize="18sp" />
 
-                <TextView
-                    android:id="@+id/tvLogicBest"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Najwyższy wynik: 240"
-                    android:textColor="#444"
-                    android:textSize="16sp" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-            </LinearLayout>
+                        <LinearLayout
+                            android:id="@+id/layoutReasoningGame1Stats"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:orientation="vertical"
+                            android:visibility="gone">
+
+                            <TextView
+                                android:id="@+id/tvReasoningGame1Reaction"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/avg_reaction_time_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/tvReasoningGame1Accuracy"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/accuracy_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/tvReasoningGame1Total"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/total_points_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/tvReasoningGame1Best"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/highest_score_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Gra 2 -->
+                    <LinearLayout
+                        android:id="@+id/layoutReasoningGame2"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:paddingStart="8dp">
+
+                        <TextView
+                            android:id="@+id/tvReasoningGame2Title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/reasoning_game2"
+                            android:textColor="?attr/text_dark"
+                            android:textSize="18sp" />
+
+                        <LinearLayout
+                            android:id="@+id/layoutReasoningGame2Stats"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:orientation="vertical"
+                            android:visibility="gone">
+
+                            <TextView
+                                android:id="@+id/tvReasoningGame2Reaction"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/avg_reaction_time_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/tvReasoningGame2Accuracy"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/accuracy_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/tvReasoningGame2Total"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/total_points_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/tvReasoningGame2Best"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/highest_score_value"
+                                android:textColor="?attr/text_dark"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
     </ScrollView>
 
-
-    <!-- Bottom navigation -->
+    <!-- Dolne menu -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
         android:layout_width="0dp"

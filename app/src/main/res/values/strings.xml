@@ -57,6 +57,32 @@
     <string name="restart">Zagraj ponownie</string>
     <string name="how_to_play">Jak grać</string>
     <string name="leave">Opuść grę</string>
+    <string name="email">Email</string>
+    <string name="password">Hasło</string>
+    <string name="password_8_digits">Min. 8 znaków</string>
+    <string name="password_capital_letter">Co najmniej jedna duża litera</string>
+    <string name="password_number">Co najmniej jedna cyfra</string>
+    <string name="log_in">Zaloguj się</string>
+    <string name="register">Zarejestruj się</string>
+    <string name="guest">Kontynuuj jako gość</string>
+    <string name="game_statistics">Statystyki gier</string>
+    <string name="avg_reaction_time">Średni czas reakcji</string>
+    <string name="accuracy">Poprawność odpowiedzi</string>
+    <string name="total_points">Łączna ilość punktów</string>
+    <string name="highest_score">Najwyższy wynik</string>
+    <string name="avg_reaction_time_value">Średni czas reakcji: %1$s</string>
+    <string name="accuracy_value">Poprawność: %1$s%%</string>
+    <string name="total_points_value">Łączna liczba punktów: %1$s</string>
+    <string name="highest_score_value">Najlepszy wynik: %1$s</string>
+    <string name="no_data">Brak danych</string>
+    <string name="memory_game1">Color Sequence</string>
+    <string name="memory_game2">Memory Game</string>
+    <string name="attention_game1">Word Search</string>
+    <string name="attention_game2">Left or Right</string>
+    <string name="reasoning_game1">Number Addition</string>
+    <string name="reasoning_game2">Path Change</string>
+    <string name="coordination_game1">Cards on the Roads</string>
+    <string name="coordination_game2">Symbol Race</string>
 
     <!-- OPISY GIER DO INTRO -->
 

@@ -9,7 +9,7 @@
 
     <TextView
         android:id="@+id/tvTitle"
-        android:text="LogicMind"
+        android:text="@string/app_name"
         android:textSize="32sp"
         android:textStyle="bold"
         android:layout_marginBottom="32dp"
@@ -18,14 +18,14 @@
 
     <EditText
         android:id="@+id/etEmail"
-        android:hint="Email"
+        android:hint="@string/email"
         android:inputType="textEmailAddress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
     <EditText
         android:id="@+id/etPassword"
-        android:hint="Hasło"
+        android:hint="@string/password"
         android:inputType="textPassword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -41,7 +41,7 @@
 
         <TextView
             android:id="@+id/tvLength"
-            android:text="Min. 8 znaków"
+            android:text="@string/password_8_digits"
             android:textColor="@android:color/holo_red_dark"
             android:textSize="12sp"
             android:layout_width="match_parent"
@@ -49,7 +49,7 @@
 
         <TextView
             android:id="@+id/tvUppercase"
-            android:text="Co najmniej 1 duża litera"
+            android:text="@string/password_capital_letter"
             android:textColor="@android:color/holo_red_dark"
             android:textSize="12sp"
             android:layout_width="match_parent"
@@ -57,7 +57,7 @@
 
         <TextView
             android:id="@+id/tvDigit"
-            android:text="Co najmniej 1 cyfra"
+            android:text="@string/password_8_digits"
             android:textColor="@android:color/holo_red_dark"
             android:textSize="12sp"
             android:layout_width="match_parent"
@@ -66,23 +66,25 @@
 
     <Button
         android:id="@+id/btnLogin"
-        android:text="Zaloguj się"
+        android:text="@string/log_in"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"/>
 
     <Button
         android:id="@+id/btnRegister"
-        android:text="Zarejestruj się"
+        android:text="@string/register"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"/>
 
     <Button
         android:id="@+id/btnGuest"
-        android:text="Kontynuuj jako gość"
+        android:text="@string/guest"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:textColor="?attr/text_dark"
         android:layout_marginTop="24dp"/>
 
 </LinearLayout>

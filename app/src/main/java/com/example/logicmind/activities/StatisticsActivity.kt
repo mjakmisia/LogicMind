@@ -2,83 +2,51 @@ package com.example.logicmind.activities
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.ProgressBar
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.logicmind.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import androidx.core.view.isGone
 
 class StatisticsActivity : BaseActivity() {
 
+    // Firebase: autoryzacja i baza danych
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
 
-    // Kategorie
-    private lateinit var tvCoordinationReaction: TextView
-    private lateinit var tvCoordinationAccuracy: TextView
-    private lateinit var tvCoordinationTotal: TextView
-    private lateinit var tvCoordinationBest: TextView
-
-    private lateinit var tvFocusReaction: TextView
-    private lateinit var tvFocusAccuracy: TextView
-    private lateinit var tvFocusTotal: TextView
-    private lateinit var tvFocusBest: TextView
-
-    private lateinit var tvMemoryReaction: TextView
-    private lateinit var tvMemoryAccuracy: TextView
-    private lateinit var tvMemoryTotal: TextView
-    private lateinit var tvMemoryBest: TextView
-
-    private lateinit var tvLogicReaction: TextView
-    private lateinit var tvLogicAccuracy: TextView
-    private lateinit var tvLogicTotal: TextView
-    private lateinit var tvLogicBest: TextView
-
+    // Dolne menu nawigacyjne
     private lateinit var bottomNav: BottomNavigationView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_statistics)
 
+        // Inicjalizacja Firebase
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
-        // Powiązania z widokiem (przykład dla 4 kategorii)
-        tvCoordinationReaction = findViewById(R.id.tvCoordinationReaction)
-        tvCoordinationAccuracy = findViewById(R.id.tvCoordinationAccuracy)
-        tvCoordinationTotal = findViewById(R.id.tvCoordinationTotal)
-        tvCoordinationBest = findViewById(R.id.tvCoordinationBest)
-
-        tvFocusReaction = findViewById(R.id.tvFocusReaction)
-        tvFocusAccuracy = findViewById(R.id.tvFocusAccuracy)
-        tvFocusTotal = findViewById(R.id.tvFocusTotal)
-        tvFocusBest = findViewById(R.id.tvFocusBest)
-
-        tvMemoryReaction = findViewById(R.id.tvMemoryReaction)
-        tvMemoryAccuracy = findViewById(R.id.tvMemoryAccuracy)
-        tvMemoryTotal = findViewById(R.id.tvMemoryTotal)
-        tvMemoryBest = findViewById(R.id.tvMemoryBest)
-
-        tvLogicReaction = findViewById(R.id.tvLogicReaction)
-        tvLogicAccuracy = findViewById(R.id.tvLogicAccuracy)
-        tvLogicTotal = findViewById(R.id.tvLogicTotal)
-        tvLogicBest = findViewById(R.id.tvLogicBest)
-
+        // Inicjalizacja dolnego menu
         bottomNav = findViewById(R.id.bottomNavigationView)
-
-        // Dolne menu
         setupBottomMenu()
 
+        // Ustawienie kliknięć do rozwijania statystyk
+        setupExpandableStats()
+
+        // Pobranie danych użytkownika (lub wyświetlenie pustych / testowych danych)
         val user = auth.currentUser
         if (user != null) {
             loadUserStats(user.uid)
         } else {
-            displayEmptyStats()
+            displayMockData()
         }
     }
 
+    /**
+     * Konfiguracja dolnego menu nawigacyjnego
+     */
     private fun setupBottomMenu() {
         bottomNav.selectedItemId = R.id.nav_statistics
 
@@ -102,103 +70,133 @@ class StatisticsActivity : BaseActivity() {
         }
     }
 
+    /**
+     * Funkcja pozwalająca rozwijać i zwijać statystyki po kliknięciu w tytuł gry.
+     * Każdy wpis to para: (layout gry, układ statystyk dla tej gry)
+     */
+    private fun setupExpandableStats() {
+        val pairs = listOf(
+            // --- KATEGORIA: COORDINATION ---
+            R.id.layoutCoordinationGame1 to R.id.layoutCoordinationGame1Stats,
+            R.id.layoutCoordinationGame2 to R.id.layoutCoordinationGame2Stats,
+
+            // --- KATEGORIA: ATTENTION ---
+            R.id.layoutAttentionGame1 to R.id.layoutAttentionGame1Stats,
+            R.id.layoutAttentionGame2 to R.id.layoutAttentionGame2Stats,
+
+            // --- KATEGORIA: MEMORY ---
+            R.id.layoutMemoryGame1 to R.id.layoutMemoryGame1Stats,
+            R.id.layoutMemoryGame2 to R.id.layoutMemoryGame2Stats,
+
+            // --- KATEGORIA: REASONING ---
+            R.id.layoutReasoningGame1 to R.id.layoutReasoningGame1Stats,
+            R.id.layoutReasoningGame2 to R.id.layoutReasoningGame2Stats
+        )
+
+        // Dla każdej pary ustawiamy kliknięcie w layout gry
+        pairs.forEach { (layoutId, statsId) ->
+            val layout = findViewById<LinearLayout>(layoutId)
+            val stats = findViewById<LinearLayout>(statsId)
+
+            layout.setOnClickListener {
+                // Jeśli statystyki są ukryte → pokaż, jeśli widoczne → ukryj
+                stats.visibility =
+                    if (stats.isGone) LinearLayout.VISIBLE else LinearLayout.GONE
+            }
+        }
+    }
+
+
+    /**
+     * Wczytuje dane statystyk użytkownika z Firestore
+     * Struktura danych powinna wyglądać np. tak:
+     * userStats/{uid}/coordination_game1_reaction = "1.2s"
+     */
     private fun loadUserStats(uid: String) {
-        val docRef = db.collection("userStats").document(uid)
-        docRef.get()
-            .addOnSuccessListener { document ->
-                if (document != null && document.exists()) {
-                    // Dane z Firebase (jeśli są)
-                    val data = document.data ?: return@addOnSuccessListener
+        db.collection("userStats").document(uid).get()
+            .addOnSuccessListener { doc ->
+                if (doc != null && doc.exists()) {
+                    val data = doc.data ?: return@addOnSuccessListener
 
-                    setStatsForCategory(
-                        "Koordynacja",
-                        tvCoordinationReaction, tvCoordinationAccuracy,
-                        tvCoordinationTotal, tvCoordinationBest,
-                        data["coordinationReaction"]?.toString(),
-                        data["coordinationAccuracy"]?.toString(),
-                        data["coordinationTotal"]?.toString(),
-                        data["coordinationBest"]?.toString()
+                    // === KATEGORIA: KOORDYNACJA ===
+                    setStatsForGame(
+                        R.id.tvCoordinationGame1Reaction,
+                        R.id.tvCoordinationGame1Accuracy,
+                        R.id.tvCoordinationGame1Total,
+                        R.id.tvCoordinationGame1Best,
+                        data["coordination_game1_reaction"],
+                        data["coordination_game1_accuracy"],
+                        data["coordination_game1_total"],
+                        data["coordination_game1_best"]
                     )
 
-                    setStatsForCategory(
-                        "Skupienie",
-                        tvFocusReaction, tvFocusAccuracy,
-                        tvFocusTotal, tvFocusBest,
-                        data["focusReaction"]?.toString(),
-                        data["focusAccuracy"]?.toString(),
-                        data["focusTotal"]?.toString(),
-                        data["focusBest"]?.toString()
+                    setStatsForGame(
+                        R.id.tvCoordinationGame2Reaction,
+                        R.id.tvCoordinationGame2Accuracy,
+                        R.id.tvCoordinationGame2Total,
+                        R.id.tvCoordinationGame2Best,
+                        data["coordination_game2_reaction"],
+                        data["coordination_game2_accuracy"],
+                        data["coordination_game2_total"],
+                        data["coordination_game2_best"]
                     )
 
-                    setStatsForCategory(
-                        "Pamięć",
-                        tvMemoryReaction, tvMemoryAccuracy,
-                        tvMemoryTotal, tvMemoryBest,
-                        data["memoryReaction"]?.toString(),
-                        data["memoryAccuracy"]?.toString(),
-                        data["memoryTotal"]?.toString(),
-                        data["memoryBest"]?.toString()
-                    )
-
-                    setStatsForCategory(
-                        "Rozwiązywanie problemów",
-                        tvLogicReaction, tvLogicAccuracy,
-                        tvLogicTotal, tvLogicBest,
-                        data["logicReaction"]?.toString(),
-                        data["logicAccuracy"]?.toString(),
-                        data["logicTotal"]?.toString(),
-                        data["logicBest"]?.toString()
-                    )
+                    // TODO: Dodaj kolejne kategorie: Attention, Memory, Reasoning
                 } else {
+                    // Jeśli nie ma danych, pokaż testowe wartości
                     displayMockData()
                 }
             }
             .addOnFailureListener {
+                // Jeśli wystąpi błąd, również pokazujemy dane przykładowe
                 displayMockData()
             }
     }
 
-    private fun setStatsForCategory(
-        category: String,
-        reaction: TextView, accuracy: TextView, total: TextView, best: TextView,
-        reactionValue: String?, accuracyValue: String?, totalValue: String?, bestValue: String?
+    /**
+     * Ustawia wartości statystyk dla pojedynczej gry.
+     * Każda gra ma 4 wskaźniki: czas reakcji, poprawność, punkty, najlepszy wynik.
+     */
+    private fun setStatsForGame(
+        reactionId: Int, accuracyId: Int, totalId: Int, bestId: Int,
+        reactionValue: Any?, accuracyValue: Any?, totalValue: Any?, bestValue: Any?
     ) {
-        reaction.text = "Średni czas reakcji: ${reactionValue ?: "N/A"}"
-        accuracy.text = "Poprawność odpowiedzi: ${accuracyValue ?: "N/A"}%"
-        total.text = "Łączna liczba punktów: ${totalValue ?: "0"}"
-        best.text = "Najlepszy wynik: ${bestValue ?: "0"}"
+        findViewById<TextView>(reactionId).text =
+            getString(R.string.avg_reaction_time_value, reactionValue ?: "N/A")
+
+        findViewById<TextView>(accuracyId).text =
+            getString(R.string.accuracy_value, accuracyValue ?: "N/A")
+
+        findViewById<TextView>(totalId).text =
+            getString(R.string.total_points_value, totalValue ?: "0")
+
+        findViewById<TextView>(bestId).text =
+            getString(R.string.highest_score_value, bestValue ?: "0")
     }
 
-    private fun displayEmptyStats() {
-        val fields = listOf(
-            tvCoordinationReaction, tvCoordinationAccuracy, tvCoordinationTotal, tvCoordinationBest,
-            tvFocusReaction, tvFocusAccuracy, tvFocusTotal, tvFocusBest,
-            tvMemoryReaction, tvMemoryAccuracy, tvMemoryTotal, tvMemoryBest,
-            tvLogicReaction, tvLogicAccuracy, tvLogicTotal, tvLogicBest
-        )
-        fields.forEach { it.text = "Brak danych" }
-    }
-
+    /**
+     * Wyświetla dane przykładowe (mockowe),
+     * używane gdy użytkownik nie ma jeszcze zapisanych wyników.
+     */
     private fun displayMockData() {
-        // Dane przykładowe (możesz później pobrać z bazy)
-        tvCoordinationReaction.text = "Średni czas reakcji: 1.2s"
-        tvCoordinationAccuracy.text = "Poprawność: 88%"
-        tvCoordinationTotal.text = "Łączna liczba punktów: 1350"
-        tvCoordinationBest.text = "Najlepszy wynik: 260"
+        // Kategoria: Koordynacja - Gra 1
+        findViewById<TextView>(R.id.tvCoordinationGame1Reaction).text =
+            getString(R.string.avg_reaction_time_value, "1.2s")
+        findViewById<TextView>(R.id.tvCoordinationGame1Accuracy).text =
+            getString(R.string.accuracy_value, "88")
+        findViewById<TextView>(R.id.tvCoordinationGame1Total).text =
+            getString(R.string.total_points_value, "1350")
+        findViewById<TextView>(R.id.tvCoordinationGame1Best).text =
+            getString(R.string.highest_score_value, "260")
 
-        tvFocusReaction.text = "Średni czas reakcji: 1.1s"
-        tvFocusAccuracy.text = "Poprawność: 85%"
-        tvFocusTotal.text = "Łączna liczba punktów: 1200"
-        tvFocusBest.text = "Najlepszy wynik: 240"
-
-        tvMemoryReaction.text = "Średni czas reakcji: 1.3s"
-        tvMemoryAccuracy.text = "Poprawność: 90%"
-        tvMemoryTotal.text = "Łączna liczba punktów: 1420"
-        tvMemoryBest.text = "Najlepszy wynik: 300"
-
-        tvLogicReaction.text = "Średni czas reakcji: 1.0s"
-        tvLogicAccuracy.text = "Poprawność: 83%"
-        tvLogicTotal.text = "Łączna liczba punktów: 1300"
-        tvLogicBest.text = "Najlepszy wynik: 250"
+        // Kategoria: Koordynacja - Gra 2
+        findViewById<TextView>(R.id.tvCoordinationGame2Reaction).text =
+            getString(R.string.avg_reaction_time_value, "1.1s")
+        findViewById<TextView>(R.id.tvCoordinationGame2Accuracy).text =
+            getString(R.string.accuracy_value, "85")
+        findViewById<TextView>(R.id.tvCoordinationGame2Total).text =
+            getString(R.string.total_points_value, "1200")
+        findViewById<TextView>(R.id.tvCoordinationGame2Best).text =
+            getString(R.string.highest_score_value, "240")
     }
 }
