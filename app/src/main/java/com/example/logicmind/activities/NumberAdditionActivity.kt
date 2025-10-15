@@ -20,7 +20,6 @@ import com.google.android.material.shape.CornerFamily
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import android.content.res.Configuration
-import androidx.core.view.isVisible
 
 class NumberAdditionActivity : BaseActivity() {
 
@@ -39,6 +38,7 @@ class NumberAdditionActivity : BaseActivity() {
     private var level = 1 // Aktualny poziom gry
     private var isGameEnding = false // Flaga końca gry
     private var isGameActive = false // Flaga, czy gra jest w trakcie
+    private var isShowingError = false  // Flaga blokująca kliki podczas błędu
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,7 +57,7 @@ class NumberAdditionActivity : BaseActivity() {
         starManager.init(findViewById(R.id.starCountText))
 
         // Inicjalizacja paska czasu
-        timerProgressBar.setTotalTime(60) // Ustaw czas na 1 minutę
+        timerProgressBar.setTotalTime(60) // Ustaw czas na 1 minuty
         timerProgressBar.setOnFinishCallback {
             runOnUiThread {
                 isGameEnding = true
@@ -196,6 +196,8 @@ class NumberAdditionActivity : BaseActivity() {
         outState.putLong("timerRemainingTimeMs", timerProgressBar.getRemainingTimeSeconds() * 1000L)
         outState.putBoolean("timerIsRunning", timerProgressBar.isRunning())
         outState.putBoolean("isGameActive", isGameActive)
+        outState.putIntegerArrayList("selectedIndices", ArrayList(selectedButtons.mapNotNull { numberGrid.indexOfChild(it).takeIf { it >= 0 } }))
+        outState.putBoolean("isShowingError", isShowingError)
         starManager.saveState(outState)
     }
 
@@ -209,16 +211,6 @@ class NumberAdditionActivity : BaseActivity() {
         super.onPause()
         if (!isGameEnding && !pauseMenu.isPaused && !isChangingConfigurations) {
             pauseMenu.pause()
-        }
-    }
-
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        updateLayoutForOrientation()
-
-        // Przelicz siatkę przycisków, jeśli gra jest aktywna (dopasuj do nowej orientacji)
-        if (isGameActive && numberGrid.isVisible) {
-            setupNumberGrid()
         }
     }
 
@@ -237,9 +229,13 @@ class NumberAdditionActivity : BaseActivity() {
                 numberGrid.columnCount = 4
                 numberGrid.rowCount = 4
             }
-            else -> {
+            3 -> {
                 numberGrid.columnCount = 4
                 numberGrid.rowCount = 3
+            }
+            else -> {
+                numberGrid.columnCount = 4
+                numberGrid.rowCount = 4
             }
         }
 
@@ -254,7 +250,8 @@ class NumberAdditionActivity : BaseActivity() {
         val gridSize = when (level) {
             1 -> 12   // 4x3
             2 -> 16   // 4x4
-            else -> 12 // 4x3
+            3 -> 12   // 4x3
+            else -> 16 // 4x4
         }
         repeat(gridSize) {
             numbers.add((1..9).random())
@@ -299,7 +296,8 @@ class NumberAdditionActivity : BaseActivity() {
         val (cols, rows) = when (level) {
             1 -> 4 to 3
             2 -> 4 to 4
-            else -> 4 to 3
+            3 -> 4 to 3
+            else -> 4 to 4
         }
         numberGrid.columnCount = cols
         numberGrid.rowCount = rows
@@ -351,6 +349,7 @@ class NumberAdditionActivity : BaseActivity() {
     // Obsługuje kliknięcie przycisku z liczbą
     private fun handleNumberClick(button: MaterialButton, index: Int) {
         if (pauseMenu.isPaused || !numberGrid.isEnabled) return // Ignoruj kliknięcia podczas pauzy
+        if (isShowingError) return // Zablokuj podczas błędu
 
         if (selectedButtons.contains(button)) {
             selectedButtons.remove(button)
@@ -386,10 +385,10 @@ class NumberAdditionActivity : BaseActivity() {
                 }
             } else {
                 selectedButtons.forEach { btn -> btn.setBackgroundColor(Color.RED) }
-                Handler(Looper.getMainLooper()).postDelayed({
-                    selectedButtons.forEach { btn -> btn.setBackgroundColor(Color.WHITE) }
-                    selectedButtons.clear()
-                }, 1000)
+                isShowingError = true
+                runDelayed(1000) {
+                    resetError() // Reset po opóźnieniu
+                }
             }
         }
     }
@@ -401,12 +400,15 @@ class NumberAdditionActivity : BaseActivity() {
 
     // Przechodzi do następnego poziomu
     private fun proceedToNextLevel() {
+
         isGameActive = true
         if (timerProgressBar.getRemainingTimeSeconds() > 0) {
+            timerProgressBar.addTime(15)  // Dodaj 30s bonusu za level
             level = when (level) {
                 1 -> 2
                 2 -> 3
-                else -> 3
+                3 -> 4
+                else -> 4
             }
             generateNumbers()
             generateTarget()
@@ -424,6 +426,38 @@ class NumberAdditionActivity : BaseActivity() {
         numberGrid.isEnabled = false
         pauseOverlay.visibility = View.GONE
         finish()
+    }
+
+    // Uruchamia akcję z opóźnieniem, uwzględniając pauzę – jeśli gra jest wstrzymana, akcja zostanie wykonana po wznowieniu
+    private fun runDelayed(delay: Long, action: () -> Unit) {
+        var remaining = delay
+        val handler = Handler(Looper.getMainLooper())
+        val interval = 16L // ~60fps, aby odliczanie było płynne
+
+        val runnable = object : Runnable {
+            override fun run() {
+                if (pauseMenu.isPaused) {
+                    // Gra w pauzie – nie zmniejszamy remaining, czekamy do wznowienia
+                    handler.postDelayed(this, interval)
+                    return
+                }
+
+                remaining -= interval
+                if (remaining <= 0) {
+                    action() // Wykonanie akcji po upłynięciu czasu
+                } else {
+                    handler.postDelayed(this, interval) // Kolejna iteracja
+                }
+            }
+        }
+        handler.postDelayed(runnable, interval)
+    }
+
+    // Resetuje błędne zaznaczenia (biały kolor + clear)
+    private fun resetError() {
+        selectedButtons.forEach { btn -> btn.setBackgroundColor(Color.WHITE) }
+        selectedButtons.clear()
+        isShowingError = false  // Odblokuj po animacji
     }
 
     // Przywraca stan gry z zapisanego Bundle
@@ -463,24 +497,49 @@ class NumberAdditionActivity : BaseActivity() {
                     numberGrid.columnCount = 4
                     numberGrid.rowCount = 4
                 }
-                else -> {
+                3 -> {
                     numberGrid.columnCount = 4
                     numberGrid.rowCount = 3
+                }
+                else -> {
+                    numberGrid.columnCount = 4
+                    numberGrid.rowCount = 4
                 }
             }
             targetNumberText.text = target
             targetNumberText.background = AppCompatResources.getDrawable(this, R.drawable.circle_bg)
             setupNumberGrid()
+
+            // Odtwórz zaznaczone przyciski na podstawie zapisanych indeksów
+            val savedSelectedIndices = savedInstanceState.getIntegerArrayList("selectedIndices") ?: ArrayList()
+            selectedButtons.clear()
+            savedSelectedIndices.forEach { index ->
+                if (index >= 0 && index < numberGrid.childCount) {
+                    val btn = numberGrid.getChildAt(index) as? MaterialButton
+                    if (btn != null && btn.isEnabled && numbers[index] != -1) {  // Sprawdź, czy przycisk jest aktywny
+                        selectedButtons.add(btn)
+                        btn.setBackgroundColor(Color.rgb(106, 27, 154))  // Przywróć kolor zaznaczenia (fioletowy)
+                    }
+                }
+            }
+
+            // Odtwórz stan błędu po restore, jeśli był aktywny
+            isShowingError = savedInstanceState.getBoolean("isShowingError", false)
+            if (isShowingError && selectedButtons.isNotEmpty()) {
+                selectedButtons.forEach { it.setBackgroundColor(Color.RED) }
+                runDelayed(1000) { resetError() }  // Kontynuuj błąd po restore
+            }
+
             numberGrid.isEnabled = true
             targetNumberText.visibility = View.VISIBLE
             numberGrid.visibility = View.VISIBLE
             isGameActive = true
+            updateLayoutForOrientation()
         } else {
             isGameActive = false
             countdownManager.startCountdown(countdownIndex)
         }
 
         pauseMenu.syncWithOverlay()
-        selectedButtons.clear()
     }
 }
