@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.widget.Toast
 import android.util.Patterns
 import com.example.logicmind.databinding.ActivityWelcomeBinding
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import android.text.Editable
@@ -15,6 +17,7 @@ class WelcomeActivity : BaseActivity() {
 
     private lateinit var binding: ActivityWelcomeBinding
     private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,6 +74,7 @@ class WelcomeActivity : BaseActivity() {
         setContentView(binding.root)
 
         auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
 
         // Jeśli użytkownik jest już zalogowany
         //if (auth.currentUser != null) goToMain()
@@ -140,12 +144,79 @@ class WelcomeActivity : BaseActivity() {
     }
 
     private fun registerUser(email: String, password: String) {
+        val username = binding.etEmail.text.toString().substringBefore("@") // np. z emaila
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
-                if (task.isSuccessful) goToMain()
-                else showToast("Błąd rejestracji: ${task.exception?.message}")
+                if (task.isSuccessful) {
+                    val userId = auth.currentUser!!.uid
+
+                    // Tworzymy dokument użytkownika w Firestore
+                    val userData = hashMapOf(
+                        "username" to username,
+                        "email" to email,
+                        "createdAt" to FieldValue.serverTimestamp(),
+                        "streak" to 0,
+                        "statistics" to hashMapOf(
+                            "avgReactionTime" to 0.0,
+                            "avgAccuracy" to 0.0,
+                            "avgScore" to 0,
+                            "totalStars" to 0
+                        )
+                    )
+
+                    db.collection("users").document(userId)
+                        .set(userData)
+                        .addOnSuccessListener {
+                            // Dodanie kategorii i gier
+                            createDefaultCategoriesAndGames(userId)
+
+                            // Wyświetlenie komunikatu o sukcesie
+                            Toast.makeText(this, "Rejestracja powiodła się!", Toast.LENGTH_SHORT).show()
+
+                            // Automatyczne przejście do głównej aktywności
+                            goToMain()
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "Błąd przy zapisie użytkownika: $e", Toast.LENGTH_SHORT).show()
+                        }
+                } else {
+                    Toast.makeText(this, "Błąd rejestracji: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                }
             }
     }
+
+
+    private fun createDefaultCategoriesAndGames(userId: String) {
+        val categories = listOf("Koordynacja", "Rozwiazywanie_problemow", "Skupienie", "Pamiec")
+        val defaultGames = mapOf(
+            "Koordynacja" to listOf("Cards_on_the_Roads", "Symbol_Race"),
+            "Rozwiazywanie_problemow" to listOf("Number_Addition", "Path_Change"),
+            "Skupienie" to listOf("Word_Search", "Left_or_Right"),
+            "Pamiec" to listOf("Color_Sequence", "Memory_Game")
+        )
+
+        for (category in categories) {
+            val catRef = db.collection("users").document(userId)
+                .collection("categories").document(category)
+
+            val catData = hashMapOf("description" to "")
+            catRef.set(catData)
+
+            for (game in defaultGames[category]!!) {
+                val gameData = hashMapOf(
+                    "bestScore" to 0,
+                    "avgReactionTime" to 0.0,
+                    "accuracy" to 0.0,
+                    "starsEarned" to 0,
+                    "lastPlayed" to null,
+                    "gamesPlayed" to 0
+                )
+                catRef.collection("games").document(game).set(gameData)
+            }
+        }
+    }
+
+
 
     private fun goToMain() {
         startActivity(Intent(this, MainActivity::class.java))

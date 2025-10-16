@@ -3,11 +3,11 @@
     <color name="category_pink_dark_mode">#EF476F</color>
     <color name="category_pink_light_mode">#F0577B</color>
     <color name="category_yellow_dark_mode">#FFD166</color>
-    <color name="category_yellow_light_mode">#ffd572</color>
+    <color name="category_yellow_light_mode">#FFD572</color>
     <color name="category_green_dark_mode">#06D6A0</color>
-    <color name="category_green_light_mode">#06ecaf</color>
+    <color name="category_green_light_mode">#06ECAF</color>
     <color name="category_blue_dark_mode">#118AB2</color>
-    <color name="category_blue_light_mode">#139bc8</color>
+    <color name="category_blue_light_mode">#139BC8</color>
     <color name="purple_light_mode">#AC92EC</color>
     <color name="purple_dark_mode">#967BDC</color>
     <color name="purple_500">#FF6200EE</color>

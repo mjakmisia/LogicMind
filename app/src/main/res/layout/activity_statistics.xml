@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -38,7 +37,7 @@
                 android:id="@+id/tvCoordinationHeader"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="40dp"
+                android:layout_marginTop="20dp"
                 android:text="@string/category_coordination"
                 android:textColor="?attr/text_dark"
                 android:textSize="25sp"
@@ -49,8 +48,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
-                android:background="@drawable/bg_coordination">
+                app:cardElevation="4dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -193,8 +191,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
-                android:background="@drawable/bg_memory">
+                app:cardElevation="4dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -337,8 +334,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
-                android:background="@drawable/bg_attention">
+                app:cardElevation="4dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -481,8 +477,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
-                android:background="@drawable/bg_reasoning">
+                app:cardElevation="4dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -618,15 +613,15 @@
         android:layout_width="0dp"
         android:layout_height="100dp"
         android:background="?attr/colorOnBackgroundMenu"
+        app:itemIconSize="40dp"
         app:itemIconTint="@color/selector_nav_item_color"
-        app:itemTextColor="@color/selector_nav_item_color"
         app:itemTextAppearanceActive="@style/BottomNavigationViewText"
         app:itemTextAppearanceInactive="@style/BottomNavigationViewText"
+        app:itemTextColor="@color/selector_nav_item_color"
+        app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:menu="@menu/bottom_nav_menu"
-        app:itemIconSize="40dp"
-        app:labelVisibilityMode="labeled" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/bottom_nav_menu" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
