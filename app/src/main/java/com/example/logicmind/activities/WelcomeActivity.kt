@@ -143,7 +143,7 @@ class WelcomeActivity : BaseActivity() {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) goToMain()
-                else showToast("Błąd rejestracji: ${task.exception?.message}")
+                else showToast("Błąd rejestracjiiiii: ${task.exception?.message}")
             }
     }
 
