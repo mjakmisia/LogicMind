@@ -42,7 +42,6 @@
 
         <activity
             android:name=".activities.NumberAdditionActivity"
-            android:configChanges="orientation|screenSize|keyboardHidden"
             android:exported="false"/>
 
         <activity
