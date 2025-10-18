@@ -32,12 +32,11 @@ class NumberAdditionActivity : BaseActivity() {
     private lateinit var timerProgressBar: GameTimerProgressBar // Pasek postępu czasu gry
     private lateinit var starManager: StarManager // Manager gwiazdek
     private lateinit var pauseMenu: PauseMenu // Menu pauzy gry
-
     private val numbers = mutableListOf<Int>() // Lista liczb na siatce
     private val selectedButtons = mutableListOf<MaterialButton>() // Wybrane przyciski
     private var level = 1 // Aktualny poziom gry
     private var isGameEnding = false // Flaga końca gry
-    private var isGameActive = false // Flaga, czy gra jest w trakcie
+    private var isGameActive = false // Flaga, sprawdzająca czy gra jest w trakcie
     private var isShowingError = false  // Flaga blokująca kliki podczas błędu
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,7 +56,7 @@ class NumberAdditionActivity : BaseActivity() {
         starManager.init(findViewById(R.id.starCountText))
 
         // Inicjalizacja paska czasu
-        timerProgressBar.setTotalTime(60) // Ustaw czas na 1 minuty
+        timerProgressBar.setTotalTime(90) // Ustaw czas na 1,5 minuty
         timerProgressBar.setOnFinishCallback {
             runOnUiThread {
                 isGameEnding = true
@@ -97,7 +96,7 @@ class NumberAdditionActivity : BaseActivity() {
                 if (pauseMenu.isPaused) pauseMenu.resume()
                 level = 1
                 starManager.reset()
-                timerProgressBar.reset() // Resetuje timer
+                timerProgressBar.reset()
 
                 // Czyszczenie siatki i stanów
                 numberGrid.removeAllViews()
@@ -119,7 +118,7 @@ class NumberAdditionActivity : BaseActivity() {
             onPause = {
                 timerProgressBar.pause()
             },
-            onExit = { finish() }, // Kończy aktywność
+            onExit = { finish() },
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.number_addition_instruction),
         )
@@ -147,7 +146,7 @@ class NumberAdditionActivity : BaseActivity() {
         constraintSet.clone(constraintLayout)
 
         if (currentConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            // liczba z lewej, plansza z prawej
+            // poziomo: liczba z lewej, plansza z prawej
             constraintSet.clear(R.id.numberGrid, ConstraintSet.TOP)
             constraintSet.clear(R.id.targetNumberText, ConstraintSet.BOTTOM)
 
@@ -196,15 +195,15 @@ class NumberAdditionActivity : BaseActivity() {
         outState.putLong("timerRemainingTimeMs", timerProgressBar.getRemainingTimeSeconds() * 1000L)
         outState.putBoolean("timerIsRunning", timerProgressBar.isRunning())
         outState.putBoolean("isGameActive", isGameActive)
-        outState.putIntegerArrayList("selectedIndices", ArrayList(selectedButtons.mapNotNull { numberGrid.indexOfChild(it).takeIf { it >= 0 } }))
+        outState.putIntegerArrayList("selectedIndices", ArrayList(selectedButtons.mapNotNull { it -> numberGrid.indexOfChild(it).takeIf { it >= 0 } }))
         outState.putBoolean("isShowingError", isShowingError)
         starManager.saveState(outState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        timerProgressBar.cancel() // Zatrzymaj CountDownTimer
-        countdownManager.cancel() // Usuń handlery odliczania
+        timerProgressBar.cancel()
+        countdownManager.cancel()
     }
 
     override fun onPause() {
@@ -220,24 +219,9 @@ class NumberAdditionActivity : BaseActivity() {
         targetNumberText.background = AppCompatResources.getDrawable(this, R.drawable.circle_bg)
         numberGrid.isEnabled = true
 
-        when (level) {
-            1 -> {
-                numberGrid.columnCount = 4
-                numberGrid.rowCount = 3
-            }
-            2 -> {
-                numberGrid.columnCount = 4
-                numberGrid.rowCount = 4
-            }
-            3 -> {
-                numberGrid.columnCount = 4
-                numberGrid.rowCount = 3
-            }
-            else -> {
-                numberGrid.columnCount = 4
-                numberGrid.rowCount = 4
-            }
-        }
+        val (cols, rows) = getGridDimensions(level)
+        numberGrid.columnCount = cols
+        numberGrid.rowCount = rows
 
         generateNumbers()
         generateTarget()
@@ -247,12 +231,7 @@ class NumberAdditionActivity : BaseActivity() {
     // Generuje nowe liczby na siatce w zależności od poziomu
     private fun generateNumbers() {
         numbers.clear()
-        val gridSize = when (level) {
-            1 -> 12   // 4x3
-            2 -> 16   // 4x4
-            3 -> 12   // 4x3
-            else -> 16 // 4x4
-        }
+        val gridSize = getGridSize(level)
         repeat(gridSize) {
             numbers.add((1..9).random())
         }
@@ -265,19 +244,35 @@ class NumberAdditionActivity : BaseActivity() {
 
         val possibleSums = mutableListOf<Int>()
 
-        if (numbersToSelect() == 2) {
-            for (i in availableNumbers.indices) {
-                for (j in i + 1 until availableNumbers.size) {
-                    possibleSums.add(availableNumbers[i] + availableNumbers[j])
+        when (numbersToSelect()) {
+            2 -> {
+                for (i in availableNumbers.indices) {
+                    for (j in i + 1 until availableNumbers.size) {
+                        possibleSums.add(availableNumbers[i] + availableNumbers[j])
+                    }
                 }
             }
-        } else { // 3 liczby
-            for (i in availableNumbers.indices) {
-                for (j in i + 1 until availableNumbers.size) {
-                    for (k in j + 1 until availableNumbers.size) {
-                        possibleSums.add(
-                            availableNumbers[i] + availableNumbers[j] + availableNumbers[k]
-                        )
+            3 -> {
+                for (i in availableNumbers.indices) {
+                    for (j in i + 1 until availableNumbers.size) {
+                        for (k in j + 1 until availableNumbers.size) {
+                            possibleSums.add(
+                                availableNumbers[i] + availableNumbers[j] + availableNumbers[k]
+                            )
+                        }
+                    }
+                }
+            }
+            4 -> {
+                for (i in availableNumbers.indices) {
+                    for (j in i + 1 until availableNumbers.size) {
+                        for (k in j + 1 until availableNumbers.size) {
+                            for (l in k + 1 until availableNumbers.size) {
+                                possibleSums.add(
+                                    availableNumbers[i] + availableNumbers[j] + availableNumbers[k] + availableNumbers[l]
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -293,12 +288,7 @@ class NumberAdditionActivity : BaseActivity() {
     private fun setupNumberGrid() {
         if (numbers.isEmpty()) return
         numberGrid.removeAllViews()
-        val (cols, rows) = when (level) {
-            1 -> 4 to 3
-            2 -> 4 to 4
-            3 -> 4 to 3
-            else -> 4 to 4
-        }
+        val (cols, rows) = getGridDimensions(level)
         numberGrid.columnCount = cols
         numberGrid.rowCount = rows
 
@@ -386,7 +376,7 @@ class NumberAdditionActivity : BaseActivity() {
             } else {
                 selectedButtons.forEach { btn -> btn.setBackgroundColor(Color.RED) }
                 isShowingError = true
-                runDelayed(1000) {
+                runDelayed {
                     resetError() // Reset po opóźnieniu
                 }
             }
@@ -395,7 +385,11 @@ class NumberAdditionActivity : BaseActivity() {
 
     // Zwraca liczbę liczb do wybrania w zależności od poziomu
     private fun numbersToSelect(): Int {
-        return if (level < 3) 2 else 3
+        return when {
+            level < 4 -> 2
+            level < 7 -> 3
+            else -> 4
+        }
     }
 
     // Przechodzi do następnego poziomu
@@ -403,13 +397,8 @@ class NumberAdditionActivity : BaseActivity() {
 
         isGameActive = true
         if (timerProgressBar.getRemainingTimeSeconds() > 0) {
-            timerProgressBar.addTime(15)  // Dodaj 30s bonusu za level
-            level = when (level) {
-                1 -> 2
-                2 -> 3
-                3 -> 4
-                else -> 4
-            }
+            timerProgressBar.addTime(20)  // Dodaj 20s bonusu za level
+            level = (level + 1).coerceAtMost(9)
             generateNumbers()
             generateTarget()
             setupNumberGrid()
@@ -428,9 +417,25 @@ class NumberAdditionActivity : BaseActivity() {
         finish()
     }
 
+    // Zwraca wymiary gridu (cols, rows) dla levelu
+    private fun getGridDimensions(level: Int): Pair<Int, Int> = when (level) {
+        1, 4, 7 -> 4 to 3   // 4x3
+        2, 5, 8 -> 4 to 4   // 4x4
+        3, 6, 9 -> 4 to 5   // 4x5
+        else -> 4 to 5
+    }
+
+    // Zwraca rozmiar gridu (liczba pól) dla levelu
+    private fun getGridSize(level: Int): Int = when (level) {
+        1, 4, 7 -> 12
+        2, 5, 8 -> 16
+        3, 6, 9 -> 20
+        else -> 20
+    }
+
     // Uruchamia akcję z opóźnieniem, uwzględniając pauzę – jeśli gra jest wstrzymana, akcja zostanie wykonana po wznowieniu
-    private fun runDelayed(delay: Long, action: () -> Unit) {
-        var remaining = delay
+    private fun runDelayed(action: () -> Unit) {
+        var remaining = 1000L
         val handler = Handler(Looper.getMainLooper())
         val interval = 16L // ~60fps, aby odliczanie było płynne
 
@@ -488,24 +493,9 @@ class NumberAdditionActivity : BaseActivity() {
 
         // Odtwarzanie stanu gry
         if (!countdownInProgress) {
-            when (level) {
-                1 -> {
-                    numberGrid.columnCount = 4
-                    numberGrid.rowCount = 3
-                }
-                2 -> {
-                    numberGrid.columnCount = 4
-                    numberGrid.rowCount = 4
-                }
-                3 -> {
-                    numberGrid.columnCount = 4
-                    numberGrid.rowCount = 3
-                }
-                else -> {
-                    numberGrid.columnCount = 4
-                    numberGrid.rowCount = 4
-                }
-            }
+            val (cols, rows) = getGridDimensions(level)
+            numberGrid.columnCount = cols
+            numberGrid.rowCount = rows
             targetNumberText.text = target
             targetNumberText.background = AppCompatResources.getDrawable(this, R.drawable.circle_bg)
             setupNumberGrid()
@@ -527,7 +517,7 @@ class NumberAdditionActivity : BaseActivity() {
             isShowingError = savedInstanceState.getBoolean("isShowingError", false)
             if (isShowingError && selectedButtons.isNotEmpty()) {
                 selectedButtons.forEach { it.setBackgroundColor(Color.RED) }
-                runDelayed(1000) { resetError() }  // Kontynuuj błąd po restore
+                runDelayed { resetError() }  // Kontynuuj błąd po restore
             }
 
             numberGrid.isEnabled = true
