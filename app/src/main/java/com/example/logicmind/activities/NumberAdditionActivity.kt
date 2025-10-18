@@ -226,6 +226,8 @@ class NumberAdditionActivity : BaseActivity() {
         generateNumbers()
         generateTarget()
         setupNumberGrid()
+
+        showLevelInstruction()
     }
 
     // Generuje nowe liczby na siatce w zależności od poziomu
@@ -296,20 +298,25 @@ class NumberAdditionActivity : BaseActivity() {
         val screenWidth = displayMetrics.widthPixels
         val screenHeight = displayMetrics.heightPixels
         val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-        val margin = if (isLandscape) 32 * 2 else 16 * 2
+        val margin = if (isLandscape) {
+            if (rows > 4) 16 * 2 else 32 * 2
+        } else 16 * 2
         val buttonWidth = (screenWidth / cols) - margin
         val buttonHeight = (screenHeight / rows) - margin
         val buttonSize = minOf(buttonWidth, buttonHeight)
 
-        val buttonMargin = if (isLandscape) 12 else 8
-        val textSizeMultiplier = if (isLandscape) 0.22f else 0.28f
+        val horizontalMargin = if (isLandscape) 12 else 8
+        val verticalMargin = if (isLandscape && rows > 4) 4 else if (isLandscape) 12 else 8
+        val textSizeMultiplier = if (isLandscape) {
+            if (rows > 4) 0.28f else 0.26f
+        } else 0.28f
 
         for (i in numbers.indices) {
             val button = MaterialButton(this).apply {
                 layoutParams = GridLayout.LayoutParams().apply {
                     width = buttonSize
                     height = buttonSize
-                    setMargins(buttonMargin, buttonMargin, buttonMargin, buttonMargin)
+                    setMargins(horizontalMargin, verticalMargin, horizontalMargin, verticalMargin)
                 }
                 textSize = buttonSize * textSizeMultiplier / resources.displayMetrics.density
                 setPadding(0, 0, 0, 0)
@@ -392,6 +399,19 @@ class NumberAdditionActivity : BaseActivity() {
         }
     }
 
+    // Pokazuje Toast z instrukcją
+    private fun showLevelInstruction() {
+        val toastMessage = when (level) {
+            1 -> "Wybierz 2 liczby, aby suma dała cel!"
+            4 -> "Wybierz 3 liczby, aby suma dała cel!"
+            7 -> "Wybierz 4 liczby, aby suma dała cel!"
+            else -> null
+        }
+        toastMessage?.let {
+            Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+        }
+    }
+
     // Przechodzi do następnego poziomu
     private fun proceedToNextLevel() {
 
@@ -402,6 +422,7 @@ class NumberAdditionActivity : BaseActivity() {
             generateNumbers()
             generateTarget()
             setupNumberGrid()
+            showLevelInstruction()
         } else {
             endGame()
         }
@@ -482,7 +503,7 @@ class NumberAdditionActivity : BaseActivity() {
         val countdownInProgress = savedInstanceState.getBoolean("countdownInProgress", false)
 
         // Przywracanie stanu timera
-        val timerRemainingTimeMs = savedInstanceState.getLong("timerRemainingTimeMs", 60 * 1000L)
+        val timerRemainingTimeMs = savedInstanceState.getLong("timerRemainingTimeMs", 90 * 1000L)
         val timerIsRunning = savedInstanceState.getBoolean("timerIsRunning", false)
 
         timerProgressBar.setRemainingTimeMs(timerRemainingTimeMs.coerceAtLeast(1L))
@@ -499,6 +520,7 @@ class NumberAdditionActivity : BaseActivity() {
             targetNumberText.text = target
             targetNumberText.background = AppCompatResources.getDrawable(this, R.drawable.circle_bg)
             setupNumberGrid()
+            showLevelInstruction()
 
             // Odtwórz zaznaczone przyciski na podstawie zapisanych indeksów
             val savedSelectedIndices = savedInstanceState.getIntegerArrayList("selectedIndices") ?: ArrayList()
