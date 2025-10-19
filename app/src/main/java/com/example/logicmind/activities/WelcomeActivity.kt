@@ -1,6 +1,9 @@
 package com.example.logicmind.activities
 
+import android.app.AlertDialog
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.widget.Toast
 import android.util.Patterns
@@ -11,7 +14,14 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
+import android.view.Gravity
+import android.view.View
+import android.view.WindowManager
+import android.widget.Button
+import android.widget.EditText
 import androidx.core.content.ContextCompat
+import com.example.logicmind.R
 
 class WelcomeActivity : BaseActivity() {
 
@@ -31,7 +41,10 @@ class WelcomeActivity : BaseActivity() {
                 // Minimalna długość 8
                 if (password.length >= 8) {
                     binding.tvLength.setTextColor(
-                        ContextCompat.getColor(this@WelcomeActivity, android.R.color.holo_green_dark)
+                        ContextCompat.getColor(
+                            this@WelcomeActivity,
+                            android.R.color.holo_green_dark
+                        )
                     )
                 } else {
                     binding.tvLength.setTextColor(
@@ -42,7 +55,10 @@ class WelcomeActivity : BaseActivity() {
                 // Przynajmniej 1 duża litera
                 if (password.any { it.isUpperCase() }) {
                     binding.tvUppercase.setTextColor(
-                        ContextCompat.getColor(this@WelcomeActivity, android.R.color.holo_green_dark)
+                        ContextCompat.getColor(
+                            this@WelcomeActivity,
+                            android.R.color.holo_green_dark
+                        )
                     )
                 } else {
                     binding.tvUppercase.setTextColor(
@@ -53,7 +69,10 @@ class WelcomeActivity : BaseActivity() {
                 // Przynajmniej 1 cyfra
                 if (password.any { it.isDigit() }) {
                     binding.tvDigit.setTextColor(
-                        ContextCompat.getColor(this@WelcomeActivity, android.R.color.holo_green_dark)
+                        ContextCompat.getColor(
+                            this@WelcomeActivity,
+                            android.R.color.holo_green_dark
+                        )
                     )
                 } else {
                     binding.tvDigit.setTextColor(
@@ -61,6 +80,7 @@ class WelcomeActivity : BaseActivity() {
                     )
                 }
             }
+
             override fun afterTextChanged(s: Editable?) {}
         })
 
@@ -94,7 +114,7 @@ class WelcomeActivity : BaseActivity() {
                 return@setOnClickListener
             }
 
-            loginOrRegister(email, password)
+            loginUser(email, password)
         }
 
         binding.btnRegister.setOnClickListener {
@@ -111,7 +131,8 @@ class WelcomeActivity : BaseActivity() {
                 return@setOnClickListener
             }
 
-            registerUser(email, password)
+            //okienko do wpisania loginu
+            showUsernameDialog(email, password)
         }
 
 
@@ -124,27 +145,52 @@ class WelcomeActivity : BaseActivity() {
         }
     }
 
-    // Funkcja logowania z automatycznym sprawdzeniem istnienia użytkownika
-    private fun loginOrRegister(email: String, password: String) {
-        auth.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener { loginTask ->
-                if (loginTask.isSuccessful) {
-                    goToMain()
-                } else {
-                    // Jeśli użytkownik nie istnieje, zarejestruj go
-                    if (loginTask.exception is FirebaseAuthUserCollisionException ||
-                        loginTask.exception?.message?.contains("no user") == true
-                    ) {
-                        registerUser(email, password)
-                    } else {
-                        showToast("Błąd logowania: ${loginTask.exception?.message}")
-                    }
-                }
+
+    private fun showUsernameDialog(email: String, password: String) {
+        // gotowy layout dialogu
+        val dialogView: View = layoutInflater.inflate(R.layout.dialog_username, null)
+        val input = dialogView.findViewById<EditText>(R.id.etUsername)
+        val btnCancel = dialogView.findViewById<Button>(R.id.btnCancel)
+        val btnProceed = dialogView.findViewById<Button>(R.id.btnProceed)
+
+        // utorzenie AlertDialog
+        val dialog = AlertDialog.Builder(this, R.style.CustomDialogStyle)
+            .setView(dialogView)
+            .create()
+
+        dialog.show()
+
+        // ustawia tło
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.window?.decorView?.setPadding(0, 0, 0, 0)
+
+        // Dopasowanie szerokości i wyśrodkowanie
+        val params = dialog.window?.attributes
+        params?.width = WindowManager.LayoutParams.WRAP_CONTENT
+        params?.height = WindowManager.LayoutParams.WRAP_CONTENT
+        params?.gravity = Gravity.CENTER
+        dialog.window?.attributes = params
+
+        // Obsługa przycisków
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        btnProceed.setOnClickListener {
+            val username = input.text.toString().trim()
+            if (username.isEmpty()) {
+                input.error = "Login nie może być pusty"
+            } else {
+                dialog.dismiss()
+                registerUser(username, email, password)
             }
+        }
     }
 
-    private fun registerUser(email: String, password: String) {
-        val username = binding.etEmail.text.toString().substringBefore("@") // np. z emaila
+
+
+    private fun registerUser(username: String, email: String, password: String) {
+
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -164,6 +210,7 @@ class WelcomeActivity : BaseActivity() {
                         )
                     )
 
+                    Log.d("REGISTER", "MÓJ LOG ------ Saving userId: $userId, username: $username")
                     db.collection("users").document(userId)
                         .set(userData)
                         .addOnSuccessListener {
@@ -171,19 +218,42 @@ class WelcomeActivity : BaseActivity() {
                             createDefaultCategoriesAndGames(userId)
 
                             // Wyświetlenie komunikatu o sukcesie
-                            Toast.makeText(this, "Rejestracja powiodła się!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "Rejestracja powiodła się!", Toast.LENGTH_SHORT)
+                                .show()
 
                             // Automatyczne przejście do głównej aktywności
                             goToMain()
                         }
                         .addOnFailureListener { e ->
-                            Toast.makeText(this, "Błąd przy zapisie użytkownika: $e", Toast.LENGTH_SHORT).show()
+                            Log.e("REGISTER", "MÓJ LOG ---- Błąd zapisu użytkownika do Firestore: ${e.message}")
+                            Toast.makeText(
+                                this,
+                                "Błąd przy zapisie użytkownika: $e",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                 } else {
-                    Toast.makeText(this, "Błąd rejestracji: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "Błąd rejestracji: ${task.exception?.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
     }
+    private fun loginUser(email: String, password: String) {
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    binding.tvErrorMessage.visibility = android.view.View.GONE
+                    goToMain()
+                } else {
+                    binding.tvErrorMessage.text = "Nieprawidłowy e-mail lub hasło"
+                    binding.tvErrorMessage.visibility = android.view.View.VISIBLE
+                }
+            }
+    }
+
 
 
     private fun createDefaultCategoriesAndGames(userId: String) {
@@ -201,6 +271,12 @@ class WelcomeActivity : BaseActivity() {
 
             val catData = hashMapOf("description" to "")
             catRef.set(catData)
+                .addOnSuccessListener {
+                    Log.d("REGISTER", "MÓJ LOG ----- Kategoria $category zapisana dla userId: $userId")
+                }
+                .addOnFailureListener { e ->
+                    Log.e("REGISTER", "MÓJ LOG ----- Błąd zapisu kategorii $category: ${e.message}")
+                }
 
             for (game in defaultGames[category]!!) {
                 val gameData = hashMapOf(
@@ -212,10 +288,15 @@ class WelcomeActivity : BaseActivity() {
                     "gamesPlayed" to 0
                 )
                 catRef.collection("games").document(game).set(gameData)
+                    .addOnSuccessListener {
+                        Log.d("REGISTER", "MÓJ LOG ----- Gra $game zapisana w kategorii $category")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("REGISTER", "MÓJ LOG ----- Błąd zapisu gry $game: ${e.message}")
+                    }
             }
         }
     }
-
 
 
     private fun goToMain() {
@@ -232,6 +313,7 @@ class WelcomeActivity : BaseActivity() {
         val regex = Regex("^(?=.*[A-Z])(?=.*\\d).{8,}$")
         return regex.matches(password)
     }
+
     private fun isEmailValid(email: String): Boolean {
         return Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
