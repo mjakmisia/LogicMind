@@ -9,11 +9,13 @@ import android.widget.Toast
 import androidx.gridlayout.widget.GridLayout
 import android.media.AudioAttributes
 import android.media.SoundPool
+import android.util.Log
 import com.example.logicmind.R
 import com.example.logicmind.common.GameCountdownManager
 import com.example.logicmind.common.GameTimerProgressBar
 import com.example.logicmind.common.PauseMenu
 import com.example.logicmind.common.StarManager
+import com.google.firebase.database.FirebaseDatabase
 
 class CardMatchActivity : BaseActivity() {
 
@@ -110,6 +112,7 @@ class CardMatchActivity : BaseActivity() {
                 gridLayout.isEnabled = false
                 cards.forEach { it.view.isEnabled = false }
                 pauseOverlay.visibility = View.GONE
+                onGameFinished()
                 finish()
             }
         }
@@ -151,7 +154,9 @@ class CardMatchActivity : BaseActivity() {
                     timerProgressBar.pause()
                 }
             }, // Zatrzymuje timer podczas pauzy pod warunkiem że nie jesteśmy w preview
-            onExit = { finish() }, // Kończy aktywność
+            onExit = {
+                onGameFinished()
+                finish() }, // Kończy aktywność
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.card_match_instruction),
         )
@@ -161,6 +166,18 @@ class CardMatchActivity : BaseActivity() {
             countdownManager.startCountdown() // Rozpoczyna odliczanie początkowe
         } else {
             restoreGameState(savedInstanceState) // Przywraca stan gry
+        }
+    }
+
+    /**
+     * Wywoływane po zakończeniu gry, aktualizuje pole lastPlayed w Firebase
+     */
+    private fun onGameFinished() {
+        val user = auth.currentUser
+        if (user != null) {
+            updateLastPlayed("Pamiec", "Memory_Game", user.uid)
+        } else {
+            Log.w("GAME", "Brak zalogowanego użytkownika, lastPlayed nie zaktualizowany")
         }
     }
 
@@ -545,4 +562,5 @@ class CardMatchActivity : BaseActivity() {
             pauseMenu.pause()
         }
     }
+
 }

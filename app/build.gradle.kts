@@ -51,17 +51,19 @@ dependencies {
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.material)
+
     //implementation(libs.google.firebase.auth.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.androidx.gridlayout)
 
-    // Firebase – używamy BoM i tylko potrzebnych bibliotek
+    // Firebase BOM – zarządza wersjami
     implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.auth.ktx)       // Firebase Auth
-    implementation(libs.firebase.firestore.ktx)  // Firestore (statystyki)
-    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.auth.ktx)           // Firebase Auth
+    implementation(libs.firebase.database.ktx)       // Realtime Database (jedyna zależność dla bazy)
+    implementation(libs.firebase.analytics)          // Analytics
+
     // Add the dependencies for any other desired Firebase products
     // https://firebase.google.com/docs/android/setup#available-libraries
 }
