@@ -31,7 +31,8 @@ object GameConfigProvider {
                 colorRes = R.color.category_green_dark_mode,
                 nameRes = R.string.category_memory,
                 games = listOf(
-                    GameOption("color_sequence", R.string.color_sequence, R.drawable.image_color_sequence, null),
+                    GameOption("color_sequence", R.string.color_sequence, R.drawable.image_color_sequence,
+                        GameIntroActivity::class.java),
                     GameOption("card_match", R.string.card_match, R.drawable.image_card_match,
                         GameIntroActivity::class.java)
                 )
