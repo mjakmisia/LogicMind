@@ -30,6 +30,15 @@ object GameIntroProvider {
                 gameActivity = CardMatchActivity::class.java,
                 instructionRes = R.string.card_match_instruction
             )
+            "color_sequence" -> GameIntroConfig(
+                colorRes = R.color.category_green_dark_mode,
+                titleRes = R.string.color_sequence,
+                imageRes = R.drawable.image_color_sequence,
+                sections = listOf(
+                ),
+                gameActivity = ColorSequenceActivity::class.java,
+                instructionRes = R.string.color_sequence_instruction
+            )
             "number_addition" -> GameIntroConfig(
                 colorRes = R.color.category_pink_dark_mode,
                 titleRes = R.string.number_addition,

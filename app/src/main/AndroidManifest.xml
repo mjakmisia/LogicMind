@@ -45,6 +45,10 @@
             android:exported="false"/>
 
         <activity
+            android:name=".activities.ColorSequenceActivity"
+            android:exported="false"/>
+
+        <activity
             android:name=".activities.MainActivity"
             android:exported="true">
         </activity>
