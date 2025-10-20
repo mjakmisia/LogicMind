@@ -20,6 +20,7 @@ import com.google.android.material.shape.CornerFamily
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import android.content.res.Configuration
+import android.util.Log
 
 class NumberAdditionActivity : BaseActivity() {
 
@@ -63,6 +64,7 @@ class NumberAdditionActivity : BaseActivity() {
                 Toast.makeText(this, "Czas minął! Koniec gry!", Toast.LENGTH_LONG).show()
                 numberGrid.isEnabled = false
                 pauseOverlay.visibility = View.GONE
+                onGameFinished()
                 finish()
             }
         }
@@ -118,7 +120,9 @@ class NumberAdditionActivity : BaseActivity() {
             onPause = {
                 timerProgressBar.pause()
             },
-            onExit = { finish() },
+            onExit = {
+                onGameFinished()
+                finish() },
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.number_addition_instruction),
         )
@@ -435,6 +439,7 @@ class NumberAdditionActivity : BaseActivity() {
         Toast.makeText(this, "Koniec gry!", Toast.LENGTH_LONG).show()
         numberGrid.isEnabled = false
         pauseOverlay.visibility = View.GONE
+        onGameFinished()
         finish()
     }
 
@@ -553,5 +558,17 @@ class NumberAdditionActivity : BaseActivity() {
         }
 
         pauseMenu.syncWithOverlay()
+    }
+
+    /**
+     * Wywoływane po zakończeniu gry, aktualizuje pole lastPlayed w Firebase
+     */
+    private fun onGameFinished() {
+        val user = auth.currentUser
+        if (user != null) {
+            updateLastPlayed("Rozwiazywanie_problemow", "Number_Addition", user.uid)
+        } else {
+            Log.w("GAME", "Brak zalogowanego użytkownika, lastPlayed nie zaktualizowany")
+        }
     }
 }
