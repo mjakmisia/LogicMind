@@ -83,6 +83,11 @@
     <string name="reasoning_game2">Path Change</string>
     <string name="coordination_game1">Cards on the Roads</string>
     <string name="coordination_game2">Symbol Race</string>
+    <string name="login_prompt_text">Zaloguj się, żeby zobaczyć profil użytkownika</string>
+    <string name="login_button_text">ZALOGUJ SIĘ!</string>
+    <string name="give_your_username">Podaj swój login</string>
+    <string name="username">login</string>
+
 
     <!-- OPISY GIER DO INTRO -->
 

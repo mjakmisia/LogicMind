@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -15,7 +16,6 @@ import java.util.Calendar
 
 class ProfileActivity : BaseActivity() {
 
-    //private lateinit var auth: FirebaseAuth
     private lateinit var database: FirebaseDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,7 +25,6 @@ class ProfileActivity : BaseActivity() {
         supportActionBar?.hide()
 
         // Inicjalizacja Firebase
-        auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance("https://logicmind-default-rtdb.europe-west1.firebasedatabase.app")
 
         // Inicjalizacja dolnego menu
@@ -67,12 +66,47 @@ class ProfileActivity : BaseActivity() {
 
         arrows[dayOfWeek]?.visibility = View.VISIBLE
 
+        Log.d("PROFILE", "Aktualny użytkownik: ${FirebaseAuth.getInstance().currentUser?.uid ?: "brak"}")
+
+        // Odwołania do widoków
+        val scrollView = findViewById<View>(R.id.scrollView)
+        val textLoginPrompt = findViewById<TextView>(R.id.textLoginPrompt)
+        val buttonLogin = findViewById<Button>(R.id.buttonLogin)
+
+        // Na start ukryj wszystkie widoki
+        scrollView.visibility = View.GONE
+        textLoginPrompt.visibility = View.GONE
+        buttonLogin.visibility = View.GONE
+
         // Pobranie danych użytkownika
-        val user = auth.currentUser
+        val user = FirebaseAuth.getInstance().currentUser
         if (user != null) {
+            // Użytkownik zalogowany → pokaż profil i pobierz dane
+            scrollView.visibility = View.VISIBLE
             loadUserData(user.uid)
         } else {
-            Toast.makeText(this, "Brak zalogowanego użytkownika", Toast.LENGTH_SHORT).show()
+            // Użytkownik niezalogowany → pokaż komunikat i przycisk logowania
+            showLoginPrompt()
+        }
+    }
+
+    /**
+     * Pokazuje komunikat i przycisk, gdy użytkownik nie jest zalogowany
+     */
+    private fun showLoginPrompt() {
+        val scrollView = findViewById<View>(R.id.scrollView)
+        val textLoginPrompt = findViewById<TextView>(R.id.textLoginPrompt)
+        val buttonLogin = findViewById<Button>(R.id.buttonLogin)
+
+        // Ukryj główną zawartość profilu
+        scrollView.visibility = View.GONE
+
+        // Pokaż komunikat i przycisk logowania
+        textLoginPrompt.visibility = View.VISIBLE
+        buttonLogin.visibility = View.VISIBLE
+
+        // Po kliknięciu — przekieruj do WelcomeActivity
+        buttonLogin.setOnClickListener {
             startActivity(Intent(this, WelcomeActivity::class.java))
             finish()
         }
@@ -90,24 +124,21 @@ class ProfileActivity : BaseActivity() {
                     val currentStreak = snapshot.child("streak").value as? Long ?: 0
                     val bestStreak = snapshot.child("bestStreak").value as? Long ?: 0
 
-                    // Ustaw wartości w widokach
                     findViewById<TextView>(R.id.textUsername).text = username
                     findViewById<TextView>(R.id.textCurrentStreak).text = "$currentStreak dni"
                     findViewById<TextView>(R.id.textBestStreak).text = "$bestStreak dni"
                 } else {
                     Log.e("PROFILE", "Brak danych użytkownika w bazie dla UID: $uid")
-                    Toast.makeText(this, "Nie znaleziono danych użytkownika", Toast.LENGTH_SHORT).show()
-                    // Ustaw domyślne wartości
-                    findViewById<TextView>(R.id.textUsername).text = "Gość"
-                    findViewById<TextView>(R.id.textCurrentStreak).text = "0 dni"
-                    findViewById<TextView>(R.id.textBestStreak).text = "0 dni"
+                    // Wyloguj użytkownika i pokaż widok logowania
+                    FirebaseAuth.getInstance().signOut()
+                    showLoginPrompt()
                 }
             }
             .addOnFailureListener { e ->
                 Log.e("PROFILE", "Błąd pobierania danych użytkownika: ${e.message}")
                 Toast.makeText(this, "Błąd pobierania danych: ${e.message}", Toast.LENGTH_SHORT).show()
                 // Ustaw domyślne wartości w razie błędu
-                findViewById<TextView>(R.id.textUsername).text = "Gość"
+                findViewById<TextView>(R.id.textUsername).text = "Błąd pobierania danych użytkownik"
                 findViewById<TextView>(R.id.textCurrentStreak).text = "0 dni"
                 findViewById<TextView>(R.id.textBestStreak).text = "0 dni"
             }

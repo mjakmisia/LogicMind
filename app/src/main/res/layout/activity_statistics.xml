@@ -8,6 +8,7 @@
     <!-- Scrollowalna część -->
     <ScrollView
         android:id="@+id/statisticsScrollView"
+
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
@@ -615,6 +616,41 @@
 
         </LinearLayout>
     </ScrollView>
+
+    <!-- Widok dla niezalogowanego użytkownika -->
+    <LinearLayout
+        android:id="@+id/layoutNotLoggedIn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_bias="0.5">
+
+        <TextView
+            android:id="@+id/tvLoginPrompt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Zaloguj się, aby zobaczyć statystyki"
+            android:textSize="20sp"
+            android:textColor="?attr/text_dark"
+            android:gravity="center"
+            android:layout_marginBottom="24dp"/>
+
+        <Button
+            android:id="@+id/buttonLogin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Zaloguj się"
+            android:textSize="18sp"
+            android:background="@drawable/bg_rounded_light_gray"
+            android:textColor="?attr/colorOnPrimary"/>
+    </LinearLayout>
+
 
     <!-- Dolne menu -->
     <com.google.android.material.bottomnavigation.BottomNavigationView

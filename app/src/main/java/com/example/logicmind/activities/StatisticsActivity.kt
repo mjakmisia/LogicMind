@@ -2,7 +2,11 @@ package com.example.logicmind.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.view.View
+import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.logicmind.R
@@ -19,6 +23,8 @@ class StatisticsActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_statistics)
 
+        supportActionBar?.hide()
+
         auth = FirebaseAuth.getInstance()
         //trzeba podac url do bazy w regionie bo inaczej uzywa domyślnej bazy w us
         db = FirebaseDatabase.getInstance("https://logicmind-default-rtdb.europe-west1.firebasedatabase.app")
@@ -26,19 +32,64 @@ class StatisticsActivity : BaseActivity() {
         bottomNav = findViewById(R.id.bottomNavigationView)
         setupBottomMenu()
 
-        // kliknięcia do rozwijania statystyk
-        setupExpandableStats()
-
-        // Pobranie danych użytkownika
+        val layoutLoggedIn = findViewById<ScrollView>(R.id.statisticsScrollView)
+        val layoutNotLoggedIn = findViewById<LinearLayout>(R.id.layoutNotLoggedIn)
+        val buttonLogin = findViewById<Button>(R.id.buttonLogin)
         val user = auth.currentUser
+
+        // Na start ukryj wszystkie widoki
+        layoutLoggedIn.visibility = View.GONE
+        layoutNotLoggedIn.visibility = View.GONE
+        buttonLogin.visibility = View.GONE
+
+        // Debugowanie: Logowanie stanu użytkownika
+        Log.d("StatisticsActivity", "User: ${user?.uid ?: "null"}")
+
         if (user != null) {
+            // Zalogowany użytkownik
+            Log.d("StatisticsActivity", "Showing logged-in view")
+            layoutLoggedIn.visibility = View.VISIBLE
+            layoutNotLoggedIn.visibility = View.GONE
+
+            setupExpandableStats()
             loadUserStats(user.uid)
             loadLastPlayedGame(user.uid)
         } else {
-            displayMockData()
-            findViewById<TextView>(R.id.tvLastPlayedGame)?.text = "Ostatnio zagrana gra: Brak"
+            // Niezalogowany użytkownik
+            Log.d("StatisticsActivity", "Showing not logged-in view")
+            showLoginPrompt()
+        }
+
+        buttonLogin.setOnClickListener {
+            startActivity(Intent(this, WelcomeActivity::class.java))
         }
     }
+
+    /**
+     * Pokazuje komunikat i przycisk, gdy użytkownik nie jest zalogowany
+     */
+    private fun showLoginPrompt() {
+        val layoutLoggedIn = findViewById<ScrollView>(R.id.statisticsScrollView)
+        val layoutNotLoggedIn = findViewById<LinearLayout>(R.id.layoutNotLoggedIn)
+        val buttonLogin = findViewById<Button>(R.id.buttonLogin)
+
+        // Ukryj główną zawartość statystyk
+        layoutLoggedIn.visibility = View.GONE
+
+        // Pokaż komunikat i przycisk logowania
+        layoutNotLoggedIn.visibility = View.VISIBLE
+        buttonLogin.visibility = View.VISIBLE
+
+        // Po kliknięciu — przekieruj do WelcomeActivity
+        buttonLogin.setOnClickListener {
+            startActivity(Intent(this, WelcomeActivity::class.java))
+            finish()
+        }
+
+        // Ustaw domyślny tekst dla tvLastPlayedGame
+        findViewById<TextView>(R.id.tvLastPlayedGame)?.text = "Ostatnio zagrana gra: Brak"
+    }
+
 
     /**
      * Konfiguracja dolnego menu nawigacyjnego

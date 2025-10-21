@@ -35,6 +35,8 @@
     <color name="purple">#FFBB86FC</color>
     <color name="purple_darker">#584076</color>
     <color name="gray2">#888888</color>
+    <color name="gray3">#CCCCCC</color>
+    <color name="gray_for_cardview">#353535</color>
     <color name="almost_white">#DCDBDB</color>
     <color name="picker_gray">#444444</color>
 

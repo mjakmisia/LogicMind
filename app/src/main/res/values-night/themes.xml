@@ -8,6 +8,7 @@
         <item name="text">@color/white</item>
         <item name="text_light">@color/light_grey</item>
         <item name="text_category">@color/white</item>
+        <item name="cardview">@color/gray_for_cardview</item>
 
         <item name="colorOnBackground">@color/background_dark</item>
         <item name="colorOnBackground_transparent">@color/background_dark_transparent</item>
