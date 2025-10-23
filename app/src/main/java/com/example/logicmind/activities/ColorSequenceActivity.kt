@@ -24,41 +24,41 @@ import com.example.logicmind.common.StarManager
 import kotlin.random.Random
 
 class ColorSequenceActivity : BaseActivity() {
-    private var keyButtons: List<KeyButton> = emptyList() // Lista klawiszy z ich widokami i indeksami
-    private var currentSequence = mutableListOf<Int>()    // Sekwencja pokazana przez grę
-    private var userSequence = mutableListOf<Int>()       // Sekwencja wpisana przez gracza
+    private var keyButtons: List<KeyButton> = emptyList()   // Lista klawiszy z ich widokami i indeksami
+    private var currentSequence = mutableListOf<Int>()      // Sekwencja pokazana przez grę
+    private var userSequence = mutableListOf<Int>()         // Sekwencja wpisana przez gracza
 
     //Flagi
-    private var isShowingSequence = false                 // Flaga: gra pokazuje sekwencję - timer zatrzymany
-    private var isUserTurn = false                        // Flaga: tura gracza do wpisania sekwencji - timer działa
-    private var isGameEnding = false                      // Flaga zakończenia gry
+    private var isShowingSequence = false     // Flaga: gra pokazuje sekwencję
+    private var isUserTurn = false            // Flaga: tura gracza do wpisania sekwencji
+    private var isGameEnding = false          // Flaga zakończenia gry
 
     // Parametry sekwencji
-    private var currentLevel = 1                          // Aktualny poziom gry
-    private var numKeys = 0                               // Liczba aktywnych klawiszy (4/6/8)
-    private var currentSeqLength = 0                      // Aktualna długość sekwencji do zapamiętania
-    private var sequenceShowIndex = 0                     // Indeks aktualnie odtwarzanego klawisza w sekwencji
+    private var currentLevel = 1           // Aktualny poziom gry
+    private var numKeys = 0                // Liczba klawiszy
+    private var currentSeqLength = 0       // Aktualna długość sekwencji do zapamiętania
+    private var sequenceShowIndex = 0      // Indeks aktualnie odtwarzanego klawisza w sekwencji
 
     // UI elementy gry
-    private lateinit var gridLayout: GridLayout           // Siatka do wyświetlania kolorowych klawiszy
-    private lateinit var countdownText: TextView          // Pole tekstowe dla odliczania 3-2-1
-    private lateinit var pauseButton: ImageButton         // Przycisk pauzy w prawym górnym rogu
-    private lateinit var pauseOverlay: ConstraintLayout   // Nakładka z menu pauzy
+    private lateinit var gridLayout: GridLayout                  // Siatka do wyświetlania klawiszy
+    private lateinit var countdownText: TextView                 // Pole tekstowe dla odliczania
+    private lateinit var pauseButton: ImageButton                // Przycisk pauzy
+    private lateinit var pauseOverlay: ConstraintLayout          // Nakładka z menu pauzy
     private lateinit var timerProgressBar: GameTimerProgressBar  // Pasek postępu czasu gry
-    private lateinit var starManager: StarManager         // Manager gwiazdek
-    private lateinit var pauseMenu: PauseMenu             // Menu pauzy gry
-    private lateinit var countdownManager: GameCountdownManager // Manager odliczania początkowego
+    private lateinit var starManager: StarManager                // Manager gwiazdek
+    private lateinit var pauseMenu: PauseMenu                    // Menu pauzy gry
+    private lateinit var countdownManager: GameCountdownManager  // Manager odliczania początkowego
 
     // Pola dla SoundPool – obsługa dźwięków
-    private lateinit var soundPool: SoundPool             // Player dla dźwięków nut muzycznych
-    private lateinit var sequenceHandler: Handler         // Handler do opóźnień i animacji sekwencji
-    private val soundIds = mutableMapOf<Int, Int>()       // Mapa indeks dźwięku -> ID w SoundPool
-    private var sequenceDelayRemaining: Long = 0L         // Pozostały czas opóźnienia
+    private lateinit var soundPool: SoundPool          // Player dla dźwięków nut muzycznych
+    private lateinit var sequenceHandler: Handler      // Handler do opóźnień i animacji sekwencji
+    private val soundIds = mutableMapOf<Int, Int>()    // Mapa indeks dźwięku -> ID w SoundPool
+    private var sequenceDelayRemaining: Long = 0L      // Pozostały czas opóźnienia
 
     // Mapowanie klawiszy na dźwięki
-    private val soundOrder4 = listOf(2, 5, 7, 1)              // 4 klawisze: C E G B
-    private val soundOrder6 = listOf(2, 5, 6, 7, 1, 3)        // 6 klawiszy: C E F G B C (wyższe C)
-    private val soundOrder8 = listOf(2, 4, 5, 6, 7, 0, 1, 3)  // 8 klawiszy: C D E F G A B C (wyższe C)
+    private val soundOrder4 = listOf(2, 5, 7, 1)              // C E G B
+    private val soundOrder6 = listOf(2, 5, 6, 7, 1, 3)        // C E F G B C (wyższe C)
+    private val soundOrder8 = listOf(2, 4, 5, 6, 7, 0, 1, 3)  // C D E F G A B C (wyższe C)
 
     // Klasy danych pomocnicze
     private data class KeyButton(val view: Button, val index: Int) // Klawisz z widokiem i indeksem
@@ -162,6 +162,7 @@ class ColorSequenceActivity : BaseActivity() {
                 }
                 if (isUserTurn) {
                     gridLayout.isEnabled = true
+                    keyButtons.forEach { it.view.isEnabled = true }
                 }
             }, // Wznawia timer po pauzie
             onPause = {
@@ -169,16 +170,109 @@ class ColorSequenceActivity : BaseActivity() {
                     timerProgressBar.pause()
                 }
                 gridLayout.isEnabled = false
+                keyButtons.forEach { it.view.isEnabled = false }
             }, // Zatrzymuje timer podczas pauzy
             onExit = {
-                finish() }, // Kończy aktywność
+                finish() },
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.color_sequence_instruction),
         )
-        countdownManager.startCountdown()
+
+        // Sprawdzenie, czy gra jest uruchamiana po raz pierwszy
+        if (savedInstanceState == null) {
+            countdownManager.startCountdown() // Rozpoczyna odliczanie początkowe
+        } else {
+            restoreGameState(savedInstanceState) // Przywraca stan gry
+        }
     }
 
-    // Inicjalizuje nową grę na danym poziomie
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt("currentLevel", currentLevel)
+        outState.putInt("numKeys", numKeys)
+        outState.putInt("currentSeqLength", currentSeqLength)
+        outState.putInt("sequenceShowIndex", sequenceShowIndex)
+        outState.putBoolean("isShowingSequence", isShowingSequence)
+        outState.putBoolean("isUserTurn", isUserTurn)
+        outState.putIntArray("currentSequence", currentSequence.toIntArray())
+        outState.putIntArray("userSequence", userSequence.toIntArray())
+        outState.putInt("pauseOverlayVisibility", pauseOverlay.visibility)
+        outState.putInt("countdownTextVisibility", countdownText.visibility)
+        outState.putInt("gridLayoutVisibility", gridLayout.visibility)
+        outState.putInt("pauseButtonVisibility", pauseButton.visibility)
+        outState.putLong("timerRemainingTimeMs", timerProgressBar.getRemainingTimeSeconds() * 1000L)
+        outState.putBoolean("timerIsRunning", timerProgressBar.isRunning())
+        outState.putInt("countdownIndex", countdownManager.getIndex())
+        outState.putBoolean("countdownInProgress", countdownManager.isInProgress())
+        outState.putLong("sequenceDelayRemaining", sequenceDelayRemaining)
+        starManager.saveState(outState)
+    }
+
+    private fun restoreGameState(savedInstanceState: Bundle) {
+        // Przywracanie zmiennych
+        currentLevel = savedInstanceState.getInt("currentLevel", 1)
+        numKeys = savedInstanceState.getInt("numKeys", 4)
+        currentSeqLength = savedInstanceState.getInt("currentSeqLength", 1)
+        sequenceShowIndex = savedInstanceState.getInt("sequenceShowIndex", 0)
+        isShowingSequence = savedInstanceState.getBoolean("isShowingSequence", false)
+        isUserTurn = savedInstanceState.getBoolean("isUserTurn", false)
+        currentSequence = savedInstanceState.getIntArray("currentSequence")?.toMutableList() ?: mutableListOf()
+        userSequence = savedInstanceState.getIntArray("userSequence")?.toMutableList() ?: mutableListOf()
+        pauseOverlay.visibility = savedInstanceState.getInt("pauseOverlayVisibility")
+        countdownText.visibility = savedInstanceState.getInt("countdownTextVisibility")
+        gridLayout.visibility = savedInstanceState.getInt("gridLayoutVisibility")
+        pauseButton.visibility = savedInstanceState.getInt("pauseButtonVisibility")
+        sequenceDelayRemaining = savedInstanceState.getLong("sequenceDelayRemaining", 0L)
+        starManager.restoreState(savedInstanceState)
+
+        // Przywracanie stanu timera
+        val timerRemainingTimeMs = savedInstanceState.getLong("timerRemainingTimeMs", BASE_TIME_SECONDS * 1000L)
+        val timerIsRunning = savedInstanceState.getBoolean("timerIsRunning", false)
+        timerProgressBar.setRemainingTimeMs(timerRemainingTimeMs.coerceAtLeast(1L))
+
+        // Przywracanie odliczania początkowego
+        val countdownIndex = savedInstanceState.getInt("countdownIndex", 0)
+        val countdownInProgress = savedInstanceState.getBoolean("countdownInProgress", false)
+
+        // Odtwarzanie planszy gry
+        if (numKeys != 0) {
+            keyButtons = createKeys(numKeys)
+        }
+
+        // Synchronizacja menu pauzy
+        pauseMenu.syncWithOverlay()
+
+        // Wznowienie odliczania, jeśli było aktywne
+        if (countdownInProgress) {
+            countdownManager.startCountdown(countdownIndex)
+            return
+        }
+
+        // Wznowienie timera, jeśli gra była aktywna
+        if (timerIsRunning && !isShowingSequence && pauseOverlay.visibility != View.VISIBLE) {
+            timerProgressBar.start()
+        }
+
+        // Wznowienie pokazu sekwencji lub tury gracza
+        if (isShowingSequence && sequenceDelayRemaining > 0) {
+            gridLayout.isEnabled = false
+            keyButtons.forEach { it.view.isEnabled = false }
+            runDelayed(sequenceDelayRemaining, {
+                highlightKey(currentSequence[sequenceShowIndex], false)
+                sequenceShowIndex++
+                playSequenceStep()
+            })
+        } else if (isShowingSequence) {
+            gridLayout.isEnabled = false
+            keyButtons.forEach { it.view.isEnabled = false }
+            showSequence()
+        } else if (isUserTurn) {
+            gridLayout.isEnabled = true
+            keyButtons.forEach { it.view.isEnabled = true }
+        }
+    }
+
+    // Inicjalizuje nową grę na podanym poziomie
     private fun startNewGame() {
         // Upewnij się że menu pauzy jest schowane
         if (pauseMenu.isPaused) {
@@ -204,16 +298,16 @@ class ColorSequenceActivity : BaseActivity() {
 
     // Pobiera konfigurację sekwencji dla danego poziomu
     private fun getSequenceConfig(level: Int): SequenceConfig = when (level) {
-        1 -> SequenceConfig(4, 1, 1, 6)   // Lvl 1: 4 klawisze, sekwencje 1→2→3→4→5→6
-        2 -> SequenceConfig(4, 1, 1, 8)   // Lvl 2: 4 klawisze, sekwencje 1→2→3→4→5→6→7→8
-        3 -> SequenceConfig(4, 2, 2, 10)  // Lvl 3: 4 klawisze, sekwencje 2→4→6→8→10
-        4 -> SequenceConfig(6, 1, 1, 6)   // Lvl 4: 6 klawiszy, sekwencje 1→2→3→4→5→6
-        5 -> SequenceConfig(6, 1, 1, 8)   // Lvl 5: 6 klawiszy, sekwencje 1→2→3→4→5→6→7→8
-        6 -> SequenceConfig(6, 2, 2, 10)  // Lvl 6: 6 klawiszy, sekwencje 2→4→6→8→10
-        7 -> SequenceConfig(8, 1, 1, 6)   // Lvl 7: 8 klawiszy, sekwencje 1→2→3→4→5→6
-        8 -> SequenceConfig(8, 1, 1, 8)   // Lvl 8: 8 klawiszy, sekwencje 1→2→3→4→5→6→7→8
-        9 -> SequenceConfig(8, 2, 2, 10)  // Lvl 9: 8 klawiszy, sekwencje 2→4→6→8→10
-        else -> SequenceConfig(8, 2, 2, 10) // Lvl 10+: 8 klawiszy, sekwencje 2→4→6→8→10
+        1 -> SequenceConfig(4, 1, 1, 6)   // 1→2→3→4→5→6
+        2 -> SequenceConfig(4, 1, 1, 8)   // 1→2→3→4→5→6→7→8
+        3 -> SequenceConfig(4, 2, 2, 10)  // 2→4→6→8→10
+        4 -> SequenceConfig(6, 1, 1, 6)   // 1→2→3→4→5→6
+        5 -> SequenceConfig(6, 1, 1, 8)   // 1→2→3→4→5→6→7→8
+        6 -> SequenceConfig(6, 2, 2, 10)  // 2→4→6→8→10
+        7 -> SequenceConfig(8, 1, 1, 6)   // 1→2→3→4→5→6
+        8 -> SequenceConfig(8, 1, 1, 8)   // 1→2→3→4→5→6→7→8
+        9 -> SequenceConfig(8, 2, 2, 10)  // 2→4→6→8→10
+        else -> SequenceConfig(8, 2, 2, 10) // 2→4→6→8→10
     }
 
     // Pobiera kolory klawiszy
@@ -263,7 +357,7 @@ class ColorSequenceActivity : BaseActivity() {
             else -> 4
         }
         gridLayout.columnCount = cols
-        gridLayout.rowCount = 2  // Zawsze 2 rzędy dla ujednolicenia
+        gridLayout.rowCount = 2
 
         gridLayout.clipToPadding = false
         gridLayout.clipChildren = false
@@ -289,9 +383,9 @@ class ColorSequenceActivity : BaseActivity() {
                     columnSpec = GridLayout.spec(i % cols, 1f)
                     setMargins(16, 16, 16, 16)
                 }
-                isEnabled = false
+                isEnabled = isUserTurn && !isShowingSequence
 
-                elevation = 8f  // Dodany cień
+                elevation = 8f  // Cień
             }
 
             button.setOnClickListener {
@@ -335,6 +429,7 @@ class ColorSequenceActivity : BaseActivity() {
         isUserTurn = false
         isShowingSequence = true
         gridLayout.isEnabled = false
+        keyButtons.forEach { it.view.isEnabled = false }
         timerProgressBar.pause()
         sequenceShowIndex = 0
         playSequenceStep()
@@ -370,7 +465,7 @@ class ColorSequenceActivity : BaseActivity() {
         timerProgressBar.start()
     }
 
-    // Obsługuje kliknięcie klawisza przez gracza
+    // Obsługuje kliknięcie klawisza
     private fun onKeyPress(keyIndex: Int) {
         val soundOrder = getSoundOrder(numKeys)
         val soundIndex = soundOrder[keyIndex]
@@ -380,7 +475,7 @@ class ColorSequenceActivity : BaseActivity() {
 
         userSequence.add(keyIndex)
 
-        // Sprawdź błąd - po każdym kliknięciu
+        // Sprawdź błąd (po każdym kliknięciu)
         if (userSequence.size > currentSequence.size ||
             userSequence[userSequence.size - 1] != currentSequence[userSequence.size - 1]) {
             checkUserSequence()
@@ -397,6 +492,7 @@ class ColorSequenceActivity : BaseActivity() {
     private fun checkUserSequence() {
         isUserTurn = false
         gridLayout.isEnabled = false
+        keyButtons.forEach { it.view.isEnabled = false }
         timerProgressBar.pause()
 
         if (userSequence == currentSequence) {
@@ -418,8 +514,7 @@ class ColorSequenceActivity : BaseActivity() {
                 currentSequence.clear()
             }
 
-            // dodaj krok (1 lub 2 nowe kolory, jeśli to możliwe)
-            generateNewSequence()
+            generateNewSequence() // Dodaj krok
 
             runDelayed(1500L, { showSequence() })
         } else {
@@ -478,6 +573,7 @@ class ColorSequenceActivity : BaseActivity() {
                 sequenceDelayRemaining = remaining.coerceAtLeast(0L)
                 if (remaining <= 0) {
                     action() // Wykonanie akcji po upłynięciu czasu
+                    sequenceDelayRemaining = 0L
                 } else {
                     sequenceHandler.postDelayed(this, interval) // Kolejna iteracja
                 }
