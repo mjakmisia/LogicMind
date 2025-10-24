@@ -7,6 +7,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import java.util.Locale
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 
 /**
  * BaseActivity
@@ -44,6 +46,20 @@ open class BaseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Ustawiamy pełny ekran i pozwalamy layoutowi wchodzić w wycięcia (notch)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.attributes.layoutInDisplayCutoutMode =
+            android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+
+        // Ukrywamy paski systemowe
+        val insetsController = WindowInsetsControllerCompat(window, window.decorView)
+        insetsController.hide(androidx.core.view.WindowInsetsCompat.Type.statusBars() or
+                androidx.core.view.WindowInsetsCompat.Type.navigationBars())
+        insetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+
+
         // Inicjalizacja Firebase w każdej aktywności
         auth = FirebaseAuth.getInstance()
         db = FirebaseDatabase.getInstance("https://logicmind-default-rtdb.europe-west1.firebasedatabase.app")

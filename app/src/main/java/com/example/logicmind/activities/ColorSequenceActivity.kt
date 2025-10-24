@@ -41,7 +41,7 @@ class ColorSequenceActivity : BaseActivity() {
 
     // UI elementy gry
     private lateinit var gridLayout: GridLayout                  // Siatka do wyświetlania klawiszy
-    private lateinit var countdownText: TextView                 // Pole tekstowe dla odliczania
+    private lateinit var countdownText: TextView                 // Pole tekstowe odliczania
     private lateinit var pauseButton: ImageButton                // Przycisk pauzy
     private lateinit var pauseOverlay: ConstraintLayout          // Nakładka z menu pauzy
     private lateinit var timerProgressBar: GameTimerProgressBar  // Pasek postępu czasu gry
@@ -63,10 +63,10 @@ class ColorSequenceActivity : BaseActivity() {
     // Klasy danych pomocnicze
     private data class KeyButton(val view: Button, val index: Int) // Klawisz z widokiem i indeksem
     private data class SequenceConfig(
-        val numKeys: Int,      // Liczba klawiszy
-        val startLength: Int,  // Początkowa długość sekwencji
-        val step: Int,         // Krok zwiększania długości
-        val maxLength: Int     // Maksymalna długość sekwencji
+        val numKeys: Int,
+        val startLength: Int,
+        val step: Int,
+        val maxLength: Int
     )
 
     companion object {
@@ -140,7 +140,7 @@ class ColorSequenceActivity : BaseActivity() {
                 findViewById<ImageView>(R.id.starIcon),
                 timerProgressBar),
             onCountdownFinished = {
-                currentLevel = 7
+                currentLevel = 1
                 starManager.reset()
                 startNewGame()
             }
@@ -259,11 +259,11 @@ class ColorSequenceActivity : BaseActivity() {
         if (isShowingSequence && sequenceDelayRemaining > 0) {
             gridLayout.isEnabled = false
             keyButtons.forEach { it.view.isEnabled = false }
-            runDelayed(sequenceDelayRemaining, {
+            runDelayed(sequenceDelayRemaining) {
                 highlightKey(currentSequence[sequenceShowIndex], false)
                 sequenceShowIndex++
                 playSequenceStep()
-            })
+            }
         } else if (isShowingSequence) {
             gridLayout.isEnabled = false
             keyButtons.forEach { it.view.isEnabled = false }
@@ -317,22 +317,22 @@ class ColorSequenceActivity : BaseActivity() {
         4 -> listOf(
             Color.RED,              // Czerwony
             Color.YELLOW,           // Żółty
-            Color.GREEN,            // Zielony
-            Color.BLUE              // Niebieski
+            Color.rgb(84, 237, 56), // Zielony
+            Color.rgb(18, 26, 255), // Niebieski
         )
         6 -> listOf(
-            Color.RED,              // Czerwony
-            Color.rgb(255, 165, 0), // Pomarańczowy
-            Color.YELLOW,           // Żółty
-            Color.GREEN,            // Zielony
-            Color.BLUE,             // Niebieski
-            Color.rgb(128, 0, 128)  // Fioletowy
+            Color.RED,               // Czerwony
+            Color.rgb(255, 165, 0),  // Pomarańczowy
+            Color.YELLOW,            // Żółty
+            Color.rgb(84, 237, 56),  // Zielony
+            Color.rgb(18, 26, 255),  // Niebieski
+            Color.rgb(124, 9, 181)   // Fiolet
         )
         else -> listOf(
             Color.rgb(234, 83, 185), // Różowy
-            Color.RED,                                   // Czerwony
+            Color.RED,               // Czerwony
             Color.rgb(255, 165, 0),  // Pomarańczowy
-            Color.YELLOW,                                // Żółty
+            Color.YELLOW,            // Żółty
             Color.rgb(84, 237, 56),  // Zielony
             Color.rgb(78, 255, 242), // Cyan
             Color.rgb(18, 26, 255),  // Niebieski
@@ -450,11 +450,11 @@ class ColorSequenceActivity : BaseActivity() {
         highlightKey(keyIndex, true)
         playKeySound(soundIndex)
 
-        runDelayed(500L, {
+        runDelayed(500L) {
             highlightKey(keyIndex, false)
             sequenceShowIndex++
-            runDelayed(200L, { playSequenceStep() })
-        })
+            runDelayed(200L) { playSequenceStep() }
+        }
     }
 
     // Kończy pokaz sekwencji, rozpoczyna turę gracza
@@ -518,12 +518,12 @@ class ColorSequenceActivity : BaseActivity() {
 
             generateNewSequence() // Dodaj krok
 
-            runDelayed(1500L, { showSequence() })
+            runDelayed(1500L) { showSequence() }
         } else {
             // Błędna sekwencja - powtórz
             Toast.makeText(this, "Błąd! Powtórka sekwencji.", Toast.LENGTH_SHORT).show()
             userSequence.clear()
-            runDelayed(1500L, { showSequence() })
+            runDelayed(1500L) { showSequence() }
         }
     }
 
@@ -532,31 +532,32 @@ class ColorSequenceActivity : BaseActivity() {
         soundIds[soundIndex]?.let { soundPool.play(it, 1.0f, 1.0f, 1, 0, 1.0f) }
     }
 
-    // Podświetla klawisz (animacja skalowania + jaśniejszy kolor)
+    // Podświetla klawisz (animacja skalowania + efekt wblaknięcia)
     private fun highlightKey(keyIndex: Int, highlight: Boolean) {
         val button = keyButtons[keyIndex].view
         val bg = button.background as GradientDrawable
         val colors = getKeyColors(numKeys)
 
         if (highlight) {
-            // Podświetlenie: jaśniejszy kolor + skalowanie
-            bg.setColor(makeLighter(colors[keyIndex]))
-            ObjectAnimator.ofFloat(button, "scaleX", 1f, 1.1f).setDuration(150).start()
-            ObjectAnimator.ofFloat(button, "scaleY", 1f, 1.1f).setDuration(150).start()
+            // Kliknięcie – kolor bardziej wblakły, efekt naciśnięcia
+            bg.setColor(makeFaded(colors[keyIndex]))
+            ObjectAnimator.ofFloat(button, "scaleX", 1f, 0.95f).setDuration(100).start()
+            ObjectAnimator.ofFloat(button, "scaleY", 1f, 0.95f).setDuration(100).start()
         } else {
-            // Powrót do normalnego stanu
+            // Powrót do oryginalnego koloru
             bg.setColor(colors[keyIndex])
-            ObjectAnimator.ofFloat(button, "scaleX", 1.1f, 1f).setDuration(150).start()
-            ObjectAnimator.ofFloat(button, "scaleY", 1.1f, 1f).setDuration(150).start()
+            ObjectAnimator.ofFloat(button, "scaleX", 0.95f, 1f).setDuration(150).start()
+            ObjectAnimator.ofFloat(button, "scaleY", 0.95f, 1f).setDuration(150).start()
         }
     }
 
-    // Tworzy jaśniejszą wersję koloru do podświetlenia
-    private fun makeLighter(color: Int): Int {
-        val r = (Color.red(color) * 1.3f).coerceAtMost(255f).toInt()
-        val g = (Color.green(color) * 1.3f).coerceAtMost(255f).toInt()
-        val b = (Color.blue(color) * 1.3f).coerceAtMost(255f).toInt()
-        return Color.rgb(r, g, b)
+    // Tworzy "wyblakłą" wersję koloru
+    private fun makeFaded(color: Int): Int {
+        val hsv = FloatArray(3)
+        Color.colorToHSV(color, hsv)
+        hsv[1] *= 0.8f // nasycenie
+        hsv[2] *= 1.1f // jasność
+        return Color.HSVToColor(hsv)
     }
 
     // Uruchamia akcję z opóźnieniem, uwzględniając pauzę
