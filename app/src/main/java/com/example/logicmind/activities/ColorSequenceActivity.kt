@@ -139,7 +139,7 @@ class ColorSequenceActivity : BaseActivity() {
                 findViewById<ImageView>(R.id.starIcon),
                 timerProgressBar),
             onCountdownFinished = {
-                currentLevel = 1
+                currentLevel = 7
                 starManager.reset()
                 startNewGame()
             }
@@ -327,14 +327,14 @@ class ColorSequenceActivity : BaseActivity() {
             Color.rgb(128, 0, 128)  // Fioletowy
         )
         else -> listOf(
-            Color.MAGENTA,          // Magenta
-            Color.RED,              // Czerwony
-            Color.rgb(255, 165, 0), // Pomarańczowy
-            Color.YELLOW,           // Żółty
-            Color.GREEN,            // Zielony
-            Color.CYAN,             // Cyan
-            Color.BLUE,             // Niebieski
-            Color.rgb(128, 0, 128)  // Fiolet
+            Color.rgb(234, 83, 185), // Różowy
+            Color.RED,                                   // Czerwony
+            Color.rgb(255, 165, 0),  // Pomarańczowy
+            Color.YELLOW,                                // Żółty
+            Color.rgb(84, 237, 56),  // Zielony
+            Color.rgb(78, 255, 242), // Cyan
+            Color.rgb(18, 26, 255),  // Niebieski
+            Color.rgb(124, 9, 181)   // Fiolet
         )
     }
 
