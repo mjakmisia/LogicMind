@@ -112,7 +112,7 @@ class CardMatchActivity : BaseActivity() {
                 gridLayout.isEnabled = false
                 cards.forEach { it.view.isEnabled = false }
                 pauseOverlay.visibility = View.GONE
-                onGameFinished()
+                onGameFinished(GameKeys.CATEGORY_MEMORY, GameKeys.GAME_CARD_MATCH, getString(R.string.card_match))
                 finish()
             }
         }
@@ -155,7 +155,7 @@ class CardMatchActivity : BaseActivity() {
                 }
             }, // Zatrzymuje timer podczas pauzy pod warunkiem że nie jesteśmy w preview
             onExit = {
-                onGameFinished()
+                onGameFinished(GameKeys.CATEGORY_MEMORY, GameKeys.GAME_CARD_MATCH, getString(R.string.card_match))
                 finish() }, // Kończy aktywność
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.card_match_instruction),
@@ -169,17 +169,6 @@ class CardMatchActivity : BaseActivity() {
         }
     }
 
-    /**
-     * Wywoływane po zakończeniu gry, aktualizuje pole lastPlayed w Firebase
-     */
-    private fun onGameFinished() {
-        val user = auth.currentUser
-        if (user != null) {
-            updateLastPlayed("Pamiec", "Memory_Game", user.uid)
-        } else {
-            Log.w("GAME", "Brak zalogowanego użytkownika, lastPlayed nie zaktualizowany")
-        }
-    }
 
     // Zapisuje stan gry, gdy aktywność jest pauzowana lub niszczona
     override fun onSaveInstanceState(outState: Bundle) {

@@ -37,7 +37,7 @@
                 android:id="@+id/tvLastPlayedGame"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Ostatnio zagrana gra: Brak"
+                android:text="Ostatnio zagrana gra (layout): Brak"
                 android:textSize="20sp"
                 android:textColor="?attr/text_dark"
                 android:layout_marginTop="28dp"/>

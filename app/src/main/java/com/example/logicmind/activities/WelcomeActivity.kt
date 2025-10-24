@@ -24,8 +24,6 @@ import com.google.firebase.database.FirebaseDatabase
 class WelcomeActivity : BaseActivity() {
 
     private lateinit var binding: ActivityWelcomeBinding
-    //private lateinit var auth: FirebaseAuth
-    private lateinit var database: FirebaseDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +31,7 @@ class WelcomeActivity : BaseActivity() {
         setContentView(binding.root)
 
         auth = FirebaseAuth.getInstance()
-        database = FirebaseDatabase.getInstance("https://logicmind-default-rtdb.europe-west1.firebasedatabase.app")
+        db = FirebaseDatabase.getInstance("https://logicmind-default-rtdb.europe-west1.firebasedatabase.app")
 
         // hasło – walidacja
         binding.etPassword.addTextChangedListener(object : TextWatcher {
@@ -146,7 +144,7 @@ class WelcomeActivity : BaseActivity() {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val userId = auth.currentUser!!.uid
-                    val userRef = database.getReference("users").child(userId)
+                    val userRef = db.getReference("users").child(userId)
 
                     val userData = mapOf(
                         "username" to username,
@@ -185,13 +183,25 @@ class WelcomeActivity : BaseActivity() {
     }
 
     private fun createDefaultCategoriesAndGames(userId: String) {
-        val userRef = database.getReference("users").child(userId)
-        val categories = listOf("Koordynacja", "Rozwiazywanie_problemow", "Skupienie", "Pamiec")
+        val userRef = db.getReference("users").child(userId)
+        val categories = listOf(GameKeys.CATEGORY_COORDINATION, GameKeys.CATEGORY_REASONING, GameKeys.CATEGORY_FOCUS, GameKeys.CATEGORY_MEMORY)
         val defaultGames = mapOf(
-            "Koordynacja" to listOf("Cards_on_the_Roads", "Symbol_Race"),
-            "Rozwiazywanie_problemow" to listOf("Number_Addition", "Path_Change"),
-            "Skupienie" to listOf("Word_Search", "Left_or_Right"),
-            "Pamiec" to listOf("Color_Sequence", "Memory_Game")
+            GameKeys.CATEGORY_COORDINATION to listOf(
+                GameKeys.GAME_ROAD_DASH,
+                GameKeys.GAME_SYMBOL_RACE
+            ),
+            GameKeys.CATEGORY_REASONING to listOf(
+                GameKeys.GAME_NUMBER_ADDITION,
+                GameKeys.GAME_PATH_CHANGE
+            ),
+            GameKeys.CATEGORY_FOCUS to listOf(
+                GameKeys.GAME_WORD_SEARCH,
+                GameKeys.GAME_FRUIT_SORT
+            ),
+            GameKeys.CATEGORY_MEMORY to listOf(
+                GameKeys.GAME_COLOR_SEQUENCE,
+                GameKeys.GAME_CARD_MATCH
+            )
         )
 
         for (category in categories) {

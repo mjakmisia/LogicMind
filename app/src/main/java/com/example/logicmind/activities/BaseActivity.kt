@@ -49,13 +49,13 @@ open class BaseActivity : AppCompatActivity() {
     }
 
     /**
-     * Aktualizuje pole lastPlayed dla danej gry w Realtime Database
+     * Aktualizuje pole lastPlayed dla danej gry
      *
      * @param category Kategoria gry (np. "Koordynacja", "Skupienie")
      * @param gameName Nazwa gry (np. "Cards_on_the_Roads", "Word_Search")
      * @param uid Identyfikator użytkownika z Firebase Authentication
-     */
-    protected fun updateLastPlayed(category: String, gameName: String, uid: String) {
+
+    protected fun updateLastPlayed(category: String, gameName: String, uid: String, onSuccess: (() -> Unit)? = null) {
         // Aktualizacja pola lastPlayed w bazie z bieżącym timestampem
         db.getReference("users").child(uid).child("categories").child(category).child("games").child(gameName)
             .child("lastPlayed")
@@ -63,10 +63,64 @@ open class BaseActivity : AppCompatActivity() {
             .addOnSuccessListener {
                 // Logowanie sukcesu aktualizacji
                 Log.d("GAME", "Zaktualizowano lastPlayed dla $gameName")
+                onSuccess?.invoke() // wywołanie aktywonsci dopiero po zapisie
             }
             .addOnFailureListener { e ->
                 // Logowanie błędu w przypadku niepowodzenia
                 Log.e("GAME", "Błąd aktualizacji lastPlayed dla $gameName: ${e.message}")
             }
     }
+     */
+
+    /**
+     * Ustawia daną grę jako lastPlayed w bazie
+     *
+     * Unit - odpowiednik void w Kotlinie, ? - opcjonalna funkcja
+     */
+    protected fun onGameFinished(categoryKey: String, gameKey: String, displayName: String, onSuccess: (() -> Unit)? = null){
+        val user = auth.currentUser
+
+        if (user != null){
+            val uid = user.uid
+            //zapis do bazy danych - operacja asynchroniczna, czyli nie blokuje wątku głównego
+            val dbRef = db.getReference("users").child(uid).child("categories").child(categoryKey)
+                .child("games").child(gameKey)
+
+            val timestamp = System.currentTimeMillis()
+
+            dbRef.child("lastPlayed").setValue(timestamp)
+                .addOnSuccessListener {
+                    Log.d("GAME_DEBUG", "Zaktualizowano lastPlayed dla $gameKey")
+                    onSuccess?.invoke() //callback - domyślnie null
+                    //używa się aby wykonać akcję dopiero po zapisie do bazy
+                }
+                .addOnFailureListener{ e ->
+                    Log.e("GAME_DEBUG", "Błąd aktualizacji lastPlayed dla $gameKey", e)
+                }
+        } else {
+            Log.w("GAME_DEBUG", "Brak zalogowanego użytkownika, lastPlayed nie zaktualizowany")
+        }
+    }
+
+    /*
+    Stałe używane do dostępu do kategorii i gier w bazie danych Firebase.
+    Nazwy muszą zgadzać się z tym co jest w bazie
+     */
+    object GameKeys {
+        const val CATEGORY_MEMORY = "Pamiec"
+        const val CATEGORY_FOCUS = "Skupienie"
+        const val CATEGORY_COORDINATION = "Koordynacja"
+        const val CATEGORY_REASONING = "Rozwiazywanie_problemow"
+
+        const val GAME_CARD_MATCH = "card_match"
+        const val GAME_COLOR_SEQUENCE = "color_sequence"
+        const val GAME_WORD_SEARCH = "word_search"
+        const val GAME_SYMBOL_RACE = "symbol_race"
+        const val GAME_FRUIT_SORT = "fruit_sort"
+        const val GAME_NUMBER_ADDITION = "number_addition"
+        const val GAME_PATH_CHANGE = "path_change"
+        const val GAME_ROAD_DASH = "road_dash"
+
+    }
+
 }
