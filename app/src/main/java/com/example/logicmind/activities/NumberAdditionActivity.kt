@@ -64,8 +64,7 @@ class NumberAdditionActivity : BaseActivity() {
                 Toast.makeText(this, "Czas minął! Koniec gry!", Toast.LENGTH_LONG).show()
                 numberGrid.isEnabled = false
                 pauseOverlay.visibility = View.GONE
-                onGameFinished(GameKeys.CATEGORY_REASONING, GameKeys.GAME_NUMBER_ADDITION, getString(R.string.number_addition),
-                    onSuccess = { Toast.makeText(this, "Gra zapisana do lastPlayed", Toast.LENGTH_LONG).show() } )
+                onGameFinished(GameKeys.CATEGORY_REASONING, GameKeys.GAME_NUMBER_ADDITION, getString(R.string.number_addition))
                 finish()
             }
         }

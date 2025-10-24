@@ -1,5 +1,4 @@
 package com.example.logicmind.activities
-
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -8,11 +7,8 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import com.example.logicmind.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
 import androidx.core.view.isGone
 
 class StatisticsActivity : BaseActivity() {
@@ -279,16 +275,16 @@ class StatisticsActivity : BaseActivity() {
         )
 
         //Słownik tłumaczący nazwy gier do wyświetlenia dla użytkownika
-        val gameDisplayNames = mapOf(
-            "road_dash" to "Unikanie przeszkód",
-            "symbol_race" to "Wyścig symboli",
-            "word_search" to "Wyszukiwanie słów",
-            "fruit_sort" to "Sortowanie owoców",
-            "color_sequence" to "Kolorowa sekwencja",
-            "card_match" to "Dopasowywanie kart",
-            "number_addition" to "Dodawanie liczb",
-            "path_change" to "Zmiana ścieżki"
-        )
+//        val gameDisplayNames = mapOf(
+//            "road_dash" to "Unikanie przeszkód",
+//            "symbol_race" to "Wyścig symboli",
+//            "word_search" to "Wyszukiwanie słów",
+//            "fruit_sort" to "Sortowanie owoców",
+//            "color_sequence" to "Kolorowa sekwencja",
+//            "card_match" to "Dopasowywanie kart",
+//            "number_addition" to "Dodawanie liczb",
+//            "path_change" to "Zmiana ścieżki"
+//        )
 
         var latestGameKey: String? = null
         var latestTimestamp: Long? = null
@@ -339,7 +335,7 @@ class StatisticsActivity : BaseActivity() {
     private fun updateLastPlayedText(gameKey: String?){ //gameKey - klucz zapisany w Firebase
         val textView = findViewById<TextView>(R.id.tvLastPlayedGame)
         if(gameKey == null){
-            textView.text = "Ostatnio zagrana gra (Aktywność): Brak"
+            textView.text = "Ostatnio zagrana gra: Brak"
             return
         }
 
@@ -374,89 +370,4 @@ class StatisticsActivity : BaseActivity() {
             getString(R.string.highest_score_value, bestValue ?: "0")
     }
 
-    /**
-     * Wyświetla dane przykładowe (mockowe),
-     * używane gdy użytkownik nie ma jeszcze zapisanych wyników.
-     */
-    private fun displayMockData() {
-        // Kategoria: Koordynacja - Gra 1
-        findViewById<TextView>(R.id.tvCoordinationGame1Reaction).text =
-            getString(R.string.avg_reaction_time_value, "1.2s")
-        findViewById<TextView>(R.id.tvCoordinationGame1Accuracy).text =
-            getString(R.string.accuracy_value, "88")
-        findViewById<TextView>(R.id.tvCoordinationGame1Total).text =
-            getString(R.string.total_points_value, "1350")
-        findViewById<TextView>(R.id.tvCoordinationGame1Best).text =
-            getString(R.string.highest_score_value, "260")
-
-        // Kategoria: Koordynacja - Gra 2
-        findViewById<TextView>(R.id.tvCoordinationGame2Reaction).text =
-            getString(R.string.avg_reaction_time_value, "1.1s")
-        findViewById<TextView>(R.id.tvCoordinationGame2Accuracy).text =
-            getString(R.string.accuracy_value, "85")
-        findViewById<TextView>(R.id.tvCoordinationGame2Total).text =
-            getString(R.string.total_points_value, "1200")
-        findViewById<TextView>(R.id.tvCoordinationGame2Best).text =
-            getString(R.string.highest_score_value, "240")
-
-        // Kategoria: Skupienie - Gra 1
-        findViewById<TextView>(R.id.tvAttentionGame1Reaction).text =
-            getString(R.string.avg_reaction_time_value, "1.3s")
-        findViewById<TextView>(R.id.tvAttentionGame1Accuracy).text =
-            getString(R.string.accuracy_value, "90")
-        findViewById<TextView>(R.id.tvAttentionGame1Total).text =
-            getString(R.string.total_points_value, "1500")
-        findViewById<TextView>(R.id.tvAttentionGame1Best).text =
-            getString(R.string.highest_score_value, "280")
-
-        // Kategoria: Skupienie - Gra 2
-        findViewById<TextView>(R.id.tvAttentionGame2Reaction).text =
-            getString(R.string.avg_reaction_time_value, "1.0s")
-        findViewById<TextView>(R.id.tvAttentionGame2Accuracy).text =
-            getString(R.string.accuracy_value, "87")
-        findViewById<TextView>(R.id.tvAttentionGame2Total).text =
-            getString(R.string.total_points_value, "1300")
-        findViewById<TextView>(R.id.tvAttentionGame2Best).text =
-            getString(R.string.highest_score_value, "250")
-
-        // Kategoria: Pamięć - Gra 1
-        findViewById<TextView>(R.id.tvMemoryGame1Reaction).text =
-            getString(R.string.avg_reaction_time_value, "1.5s")
-        findViewById<TextView>(R.id.tvMemoryGame1Accuracy).text =
-            getString(R.string.accuracy_value, "85")
-        findViewById<TextView>(R.id.tvMemoryGame1Total).text =
-            getString(R.string.total_points_value, "1400")
-        findViewById<TextView>(R.id.tvMemoryGame1Best).text =
-            getString(R.string.highest_score_value, "270")
-
-        // Kategoria: Pamięć - Gra 2
-        findViewById<TextView>(R.id.tvMemoryGame2Reaction).text =
-            getString(R.string.avg_reaction_time_value, "1.4s")
-        findViewById<TextView>(R.id.tvMemoryGame2Accuracy).text =
-            getString(R.string.accuracy_value, "89")
-        findViewById<TextView>(R.id.tvMemoryGame2Total).text =
-            getString(R.string.total_points_value, "1450")
-        findViewById<TextView>(R.id.tvMemoryGame2Best).text =
-            getString(R.string.highest_score_value, "275")
-
-        // Kategoria: Rozwiązywanie problemów - Gra 1
-        findViewById<TextView>(R.id.tvReasoningGame1Reaction).text =
-            getString(R.string.avg_reaction_time_value, "1.6s")
-        findViewById<TextView>(R.id.tvReasoningGame1Accuracy).text =
-            getString(R.string.accuracy_value, "86")
-        findViewById<TextView>(R.id.tvReasoningGame1Total).text =
-            getString(R.string.total_points_value, "1600")
-        findViewById<TextView>(R.id.tvReasoningGame1Best).text =
-            getString(R.string.highest_score_value, "290")
-
-        // Kategoria: Rozwiązywanie problemów - Gra 2
-        findViewById<TextView>(R.id.tvReasoningGame2Reaction).text =
-            getString(R.string.avg_reaction_time_value, "1.7s")
-        findViewById<TextView>(R.id.tvReasoningGame2Accuracy).text =
-            getString(R.string.accuracy_value, "84")
-        findViewById<TextView>(R.id.tvReasoningGame2Total).text =
-            getString(R.string.total_points_value, "1550")
-        findViewById<TextView>(R.id.tvReasoningGame2Best).text =
-            getString(R.string.highest_score_value, "285")
-    }
 }

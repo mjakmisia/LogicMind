@@ -24,19 +24,20 @@ open class BaseActivity : AppCompatActivity() {
     protected lateinit var db: FirebaseDatabase
 
     override fun attachBaseContext(newBase: Context) {
-        // Pobieramy aktualnie zapisany język z ustawień aplikacji
+        // aktualnie zapisany język z ustawień
+        //MODE_PRIVATE - tylko dla tej aplikacji (nie dla innychna urządzeniu)
         val sharedPrefs = newBase.getSharedPreferences("Settings", MODE_PRIVATE)
         val lang = sharedPrefs.getString("My_Lang", "pl") ?: "pl"
 
-        // Tworzymy obiekt Locale dla wybranego języka
+        //obiekt Locale dla wybranego języka
         val locale = Locale(lang)
         Locale.setDefault(locale)
 
-        // Modyfikujemy konfigurację kontekstu tak, aby używała naszego języka
+        //modyfikacja konfiguracji kontekstu tak, aby używała wybranego języka
         val config = Configuration(newBase.resources.configuration)
         config.setLocale(locale)
 
-        // Tworzymy nowy kontekst z naszą konfiguracją i przekazujemy go do AppCompatActivity
+        //nowy kontekst z konfiguracją i przekazuje go do AppCompatActivity
         val context = newBase.createConfigurationContext(config)
         super.attachBaseContext(context)
     }
@@ -48,29 +49,6 @@ open class BaseActivity : AppCompatActivity() {
         db = FirebaseDatabase.getInstance("https://logicmind-default-rtdb.europe-west1.firebasedatabase.app")
     }
 
-    /**
-     * Aktualizuje pole lastPlayed dla danej gry
-     *
-     * @param category Kategoria gry (np. "Koordynacja", "Skupienie")
-     * @param gameName Nazwa gry (np. "Cards_on_the_Roads", "Word_Search")
-     * @param uid Identyfikator użytkownika z Firebase Authentication
-
-    protected fun updateLastPlayed(category: String, gameName: String, uid: String, onSuccess: (() -> Unit)? = null) {
-        // Aktualizacja pola lastPlayed w bazie z bieżącym timestampem
-        db.getReference("users").child(uid).child("categories").child(category).child("games").child(gameName)
-            .child("lastPlayed")
-            .setValue(System.currentTimeMillis())
-            .addOnSuccessListener {
-                // Logowanie sukcesu aktualizacji
-                Log.d("GAME", "Zaktualizowano lastPlayed dla $gameName")
-                onSuccess?.invoke() // wywołanie aktywonsci dopiero po zapisie
-            }
-            .addOnFailureListener { e ->
-                // Logowanie błędu w przypadku niepowodzenia
-                Log.e("GAME", "Błąd aktualizacji lastPlayed dla $gameName: ${e.message}")
-            }
-    }
-     */
 
     /**
      * Ustawia daną grę jako lastPlayed w bazie
@@ -93,12 +71,89 @@ open class BaseActivity : AppCompatActivity() {
                     Log.d("GAME_DEBUG", "Zaktualizowano lastPlayed dla $gameKey")
                     onSuccess?.invoke() //callback - domyślnie null
                     //używa się aby wykonać akcję dopiero po zapisie do bazy
+                    updateStreak() //wywołanie tutaj aby nie powtarzać kodu
                 }
                 .addOnFailureListener{ e ->
                     Log.e("GAME_DEBUG", "Błąd aktualizacji lastPlayed dla $gameKey", e)
                 }
         } else {
             Log.w("GAME_DEBUG", "Brak zalogowanego użytkownika, lastPlayed nie zaktualizowany")
+        }
+    }
+
+    /**
+     * Aktualizuje streak oraz bestStreak użytkownika w bazie
+     */
+    protected fun updateStreak() {
+        val user = auth.currentUser
+
+        if (user != null) {
+            val uid = user.uid
+            val userRef = db.getReference("users").child(uid)
+
+            userRef.get().addOnSuccessListener { snapshot ->
+                //pobieramy aktualny streak i bestStreak
+                val streak = (snapshot.child("streak").value as? Long ?: 0L).toInt()
+                val bestStreak = (snapshot.child("bestStreak").value as? Long ?: 0L).toInt()
+                val lastPlayTimestamp = snapshot.child("lastPlayDate").getValue(Long::class.java)
+
+                val today = java.util.Calendar.getInstance()
+
+                val isSameDay = lastPlayTimestamp?.let {
+                    val lastPlayDay = java.util.Calendar.getInstance().apply { timeInMillis = it }
+                    lastPlayDay.get(java.util.Calendar.YEAR) == today.get(java.util.Calendar.YEAR) &&
+                            lastPlayDay.get(java.util.Calendar.DAY_OF_YEAR) == today.get(java.util.Calendar.DAY_OF_YEAR)
+
+                } ?: false
+
+                val newStreak = if (isSameDay) {
+                    streak // gra w tym samym dniu - pozostaje bez zmian
+                } else {
+                    if (lastPlayTimestamp != null) {
+                        val lastPlayDay = java.util.Calendar.getInstance()
+                            .apply { timeInMillis = lastPlayTimestamp }
+                        val diffDays =
+                            today.get(java.util.Calendar.DAY_OF_YEAR) - lastPlayDay.get(java.util.Calendar.DAY_OF_YEAR)
+                        val diffYears =
+                            today.get(java.util.Calendar.YEAR) - lastPlayDay.get(java.util.Calendar.YEAR)
+                        if (diffDays == 1 && diffYears == 0) {
+                            // user zagrał następnego dnia – zwiększ streak
+                            streak + 1
+                        } else {
+                            // Przerwa w grze – resetuj streak
+                            1
+                        }
+                    } else {
+                        // Pierwsza gra usera ever
+                        1
+                    }
+                }
+
+                //zapisanie do bazy
+                userRef.child("streak").setValue(newStreak)
+                    .addOnSuccessListener {
+                        Log.d("STREAK_DEBUG", "Zaktualizowano streak dla $uid")
+                    }
+                    .addOnFailureListener{
+                        Log.e("STREAK_DEBUG", "Błąd aktualizacji streak dla $uid", it)
+                    }
+
+                if(newStreak > bestStreak){
+                    userRef.child("bestStreak").setValue(newStreak)
+                        .addOnSuccessListener {
+                            Log.d("STREAK_DEBUG", "Zaktualizowano bestStreak dla $uid")
+                        }
+                        .addOnFailureListener{
+                            Log.e("STREAK_DEBUG", "Błąd aktualizacji bestStreak dla $uid", it)
+                        }
+                }
+                //aktualizacja lastPlayDate
+                userRef.child("lastPlayDate").setValue(today.timeInMillis)
+                Log.d("STREAK_DEBUG", "Nowy streak:  $newStreak, BestStreak: $bestStreak")
+
+            }.addOnFailureListener{ e ->
+                Log.e("STREAK_DEBUG", "Błąd pobierania danych użytkownika", e)
+            }
         }
     }
 

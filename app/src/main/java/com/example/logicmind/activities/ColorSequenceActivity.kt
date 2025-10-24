@@ -125,6 +125,7 @@ class ColorSequenceActivity : BaseActivity() {
                 gridLayout.isEnabled = false
                 keyButtons.forEach { it.view.isEnabled = false }
                 pauseOverlay.visibility = View.GONE
+                onGameFinished(GameKeys.CATEGORY_MEMORY, GameKeys.GAME_COLOR_SEQUENCE, getString(R.string.color_sequence))
                 finish()
             }
         }
@@ -173,6 +174,7 @@ class ColorSequenceActivity : BaseActivity() {
                 keyButtons.forEach { it.view.isEnabled = false }
             }, // Zatrzymuje timer podczas pauzy
             onExit = {
+                onGameFinished(GameKeys.CATEGORY_MEMORY, GameKeys.GAME_COLOR_SEQUENCE, getString(R.string.color_sequence))
                 finish() },
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.color_sequence_instruction),
