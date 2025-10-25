@@ -13,7 +13,7 @@ import com.example.logicmind.common.GameTimerProgressBar
 import com.example.logicmind.common.PauseMenu
 import com.example.logicmind.common.StarManager
 
-class SymbolRaceActivity : BaseActivity() {
+class PathChangeActivity : BaseActivity() {
 
     private lateinit var gridLayout: GridLayout // Siatka do wyświetlania elementów
     private lateinit var countdownText: TextView // Pole tekstowe dla odliczania

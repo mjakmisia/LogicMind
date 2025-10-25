@@ -41,11 +41,19 @@
             android:exported="false" />
 
         <activity
+            android:name=".activities.ColorSequenceActivity"
+            android:exported="false"/>
+
+        <activity
             android:name=".activities.NumberAdditionActivity"
             android:exported="false"/>
 
         <activity
-            android:name=".activities.ColorSequenceActivity"
+            android:name=".activities.PathChangeActivity"
+            android:exported="false"/>
+
+        <activity
+            android:name=".activities.SymbolRaceActivity"
             android:exported="false"/>
 
         <activity

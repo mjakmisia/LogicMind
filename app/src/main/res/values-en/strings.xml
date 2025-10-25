@@ -98,17 +98,17 @@
     <string name="cm_desc_working_memory">Boost your ability to temporarily hold information in your mind</string>
 
     <string name="cm_section_selective_attention">Selective Attention</string>
-    <string name="cm_desc_selective_attention">Enhance your focus on the right task while ignoring distractions</string>
+    <string name="cm_desc_selective_attention">Enhance your focus on the main task while ignoring distractions</string>
 
-    <!-- Word Search -->
-    <string name="ws_section_active_vocab">Active Vocabulary</string>
-    <string name="ws_desc_active_vocab">Learn new words and expand your vocabulary</string>
+    <!-- Color Sequence -->
+    <string name="cs_section_working_memory">Working Memory</string>
+    <string name="cs_desc_working_memory">Improve your ability to hold and update information in your mind</string>
 
-    <string name="ws_section_attention">Focus</string>
-    <string name="ws_desc_attention">Maintain concentration on your goal despite distractions</string>
+    <string name="cs_section_selective_attention">Selective Attention</string>
+    <string name="cs_desc_selective_attention">Enhance your focus on the main task while ignoring distractions</string>
 
-    <string name="ws_section_mind_speed">Mental Speed</string>
-    <string name="ws_desc_mind_speed">Reduce the time needed to complete mental tasks</string>
+    <string name="cs_section_visual_auditory_sync">Visual–Auditory Coordination</string>
+    <string name="cs_desc_visual_auditory_sync">Strengthen cooperation between your senses by combining colors and sounds into one whole</string>
 
     <!-- Number Addition -->
     <string name="na_section_number_memory">Numerical Memory</string>
@@ -120,10 +120,32 @@
     <string name="na_section_calculation">Calculation Skills</string>
     <string name="na_desc_calculation">Practice fast arithmetic and logical reasoning</string>
 
+    <!-- Path Change -->
+
+    <!-- Word Search -->
+    <string name="ws_section_active_vocab">Active Vocabulary</string>
+    <string name="ws_desc_active_vocab">Learn new words and expand your vocabulary</string>
+
+    <string name="ws_section_attention">Focus</string>
+    <string name="ws_desc_attention">Maintain concentration on your goal despite distractions</string>
+
+    <string name="ws_section_mind_speed">Mental Speed</string>
+    <string name="ws_desc_mind_speed">Reduce the time needed to complete mental tasks</string>
+
+    <!-- Symbol Race -->
+
+
     <!-- HELP DIALOG -->
-    <string name="card_match_instruction">Find matching fruits and pair them up, avoiding bombs! You have 90 seconds to collect as many stars as possible.\n\nHow to play:\n• At the start of each level, cards are shown for 2 seconds - memorize as many as you can before they flip over.\n• Tap cards to reveal them - you need to select two to check for a match.\n• Matching pairs stay revealed permanently, non-matching ones flip back after a moment.\n• Watch out for bombs: tapping a bomb costs 10 seconds!\n\nBonuses:\n• Earn a star for each matched pair.\n• Completing a level adds 30 seconds to the timer and advances to a harder board.</string>
-    <string name="color_sequence_instruction">Instructions will go here.</string>
-    <string name="number_addition_instruction">Select numbers so that their sum equals the target! You have 90 seconds to collect as many stars as possible.\n\nHow to play:\n• Each level requires a specific number of tiles to match - starting with two numbers, getting harder as you progress.\n• Tap the number buttons (1-9) to select them - purple color indicates selection.\n• After selecting the required number, check the sum: a matching combination turns gray permanently, an incorrect one flashes red and resets after a moment.\n• Some levels have extra unnecessary tiles - they aren\'t needed to find the sum.\n\nBonuses:\n• Earn a star for each correctly found sum.\n• Completing a level adds 20 seconds to the timer and advances to a harder level (larger grid or more numbers to choose).</string>
+    <string name="card_match_instruction">Find matching pairs of fruits while avoiding bombs! You have 90 seconds to earn as many stars as you can.\n\nHow to play:\n• At the start of each level, the cards are shown for 2 seconds – try to remember as many as possible before they flip over.\n• Tap cards to reveal them – select two to see if they match.\n• Matching pairs stay uncovered; mismatched ones flip back after a moment.\n• Watch out for bombs! Hitting one will cost you 10 seconds.\n\nBonuses:\n• Earn a star for every correctly matched pair.\n• Gain an extra 30 seconds for completing a level.</string>
+    <string name="color_sequence_instruction">Repeat the shown sequence of colored buttons! You have 90 seconds to earn as many stars as you can.\n\nHow to play:\n• At the start of each round, a sequence of buttons is shown – each one has a unique color and sound.\n• After the preview, repeat the sequence by tapping the buttons in the same order.\n• If you make a mistake, the sequence will replay automatically.\n• The timer pauses during the preview and runs only during your turn.\n\nBonuses:\n• Earn a star for every correctly repeated sequence.\n• Gain an extra 15 seconds for completing a level.</string>
+
+    <string name="number_addition_instruction">Select numbers whose sum equals the displayed result! You have 90 seconds to earn as many stars as you can.\n\nHow to play:\n• Tap number buttons to select them – purple means selected.\n• Choose the required number of buttons to check your answer – a correct combination turns gray permanently, while an incorrect one flashes red and resets after a moment.\n• Some levels include extra cards that are not needed to reach the target sum.\n\nBonuses:\n• Earn a star for every correctly found sum.\n• Gain an extra 20 seconds for completing a level.</string>
+    <string name="path_change_instruction">Instructions will go here.</string>
+
     <string name="word_search_instruction">Instructions will go here.</string>
+    <string name="fruit_sort_instruction">Instructions will go here.</string>
+
+    <string name="symbol_race_instruction">Instructions will go here.</string>
+    <string name="road_dash_instruction">Instructions will go here.</string>
 
 </resources>

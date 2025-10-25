@@ -6,7 +6,7 @@
     <string name="category_reasoning_enter">Rozwiązywanie\nproblemów</string>
     <string name="category_reasoning">Rozwiązywanie problemów</string>
     <string name="category_attention">Skupienie</string>
-    <string name="category_memory">Pamiec</string>
+    <string name="category_memory">Pamięć</string>
     <string name="unknown">Nieznane</string>
     <string name="title_home">Strona główna</string>
     <string name="title_dashboard">Panel główny</string>
@@ -100,17 +100,15 @@
     <string name="cm_section_selective_attention">Selektywna uwaga</string>
     <string name="cm_desc_selective_attention">Popraw koncentrację na właściwym zadaniu i ignoruj zbędne bodźce</string>
 
+    <!-- Color Sequence -->
+    <string name="cs_section_working_memory">Pamięć robocza</string>
+    <string name="cs_desc_working_memory">Doskonal zdolność utrzymywania i aktualizowania informacji w głowie</string>
 
-    <!-- Word Search -->
-    <string name="ws_section_active_vocab">Aktywne słownictwo</string>
-    <string name="ws_desc_active_vocab">Ucz się nowych słów i poszerzaj słownictwo</string>
+    <string name="cs_section_selective_attention">Selektywna uwaga</string>
+    <string name="cs_desc_selective_attention">Popraw koncentrację na właściwym zadaniu i ignoruj zbędne bodźce</string>
 
-    <string name="ws_section_attention">Skupienie</string>
-    <string name="ws_desc_attention">Utrzymuj uwagę na celu, mimo obecności rozpraszaczy</string>
-
-    <string name="ws_section_mind_speed">Tempo myślenia</string>
-    <string name="ws_desc_mind_speed">Skróć czas potrzebny na wykonanie zadań umysłowych</string>
-
+    <string name="cs_section_visual_auditory_sync">Koordynacja wzrokowo–słuchowa</string>
+    <string name="cs_desc_visual_auditory_sync">Ulepsz współpracę między zmysłami, łącząc kolory i dźwięki w jedną całość</string>
 
     <!-- Number Addition -->
     <string name="na_section_number_memory">Pamięć liczbowa</string>
@@ -122,10 +120,32 @@
     <string name="na_section_calculation">Sprawność rachunkowa</string>
     <string name="na_desc_calculation">Trenuj szybkie liczenie i logiczne wnioskowanie</string>
 
+    <!-- Path Change -->
+
+    <!-- Word Search -->
+    <string name="ws_section_active_vocab">Aktywne słownictwo</string>
+    <string name="ws_desc_active_vocab">Ucz się nowych słów i poszerzaj słownictwo</string>
+
+    <string name="ws_section_attention">Skupienie</string>
+    <string name="ws_desc_attention">Utrzymuj uwagę na celu, mimo obecności rozpraszaczy</string>
+
+    <string name="ws_section_mind_speed">Tempo myślenia</string>
+    <string name="ws_desc_mind_speed">Skróć czas potrzebny na wykonanie zadań umysłowych</string>
+
+    <!-- Symbol Race -->
+
+
     <!-- OKNO POMOCY -->
-    <string name="card_match_instruction">Znajduj identyczne owoce i łącz je w pary, unikając bomb! Masz 90 sekund, aby uzbierać jak najwięcej gwiazdek.\n\nJak grać:\n• Na początku każdego poziomu karty pokazane są przez 2 sekundy, zapamiętaj jak najwięcej, zanim się odwrócą.\n• Klikaj karty, aby je odkrywać - musisz wybrać dwie, aby sprawdzić dopasowanie.\n• Pasujące pary zostają odkryte na stałe, niepasujące odwracają się po chwili.\n• Uważaj na bomby: kliknięcie bomby kosztuje 10 sekund!\n\nBonusy:\n• Zdobądź gwiazdkę za każdą dopasowaną parę.\n• Ukończenie poziomu dodaje 30 sekund do paska czasu i przenosi na trudniejszą planszę.</string>
-    <string name="color_sequence_instruction">Tu będzie instrukcja.</string>
-    <string name="number_addition_instruction">Wybieraj liczby tak, aby ich suma dała docelowy wynik! Masz 90 sekund, aby uzbierać jak najwięcej gwiazdek.\n\nJak grać:\n• Każdy poziom ma konkretną liczbę kafelków do spasowania – na początku są to dwie liczby, potem robi się trudniej.\n• Klikaj przyciski z liczbami (1–9), aby je zaznaczyć - fioletowy kolor oznacza wybór.\n• Po wybraniu wymaganej liczby sprawdź sumę: pasująca kombinacja staje się szara na stałe, błędna świeci czerwono i resetuje się po chwili.\n• Niektóre poziomy mają nadprogramowe karty - nie są one potrzebne do znalezienia sumy.\n\nBonusy:\n• Zdobądź gwiazdkę za każdą poprawnie znalezioną sumę.\n• Ukończenie poziomu dodaje 20 sekund do paska czasu i przenosi na trudniejszy poziom (większa siatka lub więcej liczb do wyboru).</string>
+    <string name="card_match_instruction">Znajduj pary identycznych owoców, unikając bomb. Masz 90 sekund, aby uzbierać jak najwięcej gwiazdek!\n\nJak grać:\n• Na początku każdego poziomu karty pokazane są przez 2 sekundy – zapamiętaj jak najwięcej, zanim się odwrócą.\n• Klikaj karty, aby je odkrywać – musisz wybrać dwie, aby sprawdzić dopasowanie.\n• Pasujące pary zostają odkryte na stałe, niepasujące odwracają się po chwili.\n• Uważaj na bomby: trafienie na bombę zabiera 10 sekund!\n\nBonusy:\n• Zdobądź gwiazdkę za każdą prawidłowo dopasowaną parę.\n• Otrzymaj dodatkowe 30 sekund za ukończenie poziomu.</string>
+    <string name="color_sequence_instruction">Odtwarzaj pokazane sekwencje kolorowych przycisków. Masz 90 sekund, aby uzbierać jak najwięcej gwiazdek!\n\nJak grać:\n• Na początku każdej rundy zostaje pokazana sekwencja przycisków – każdy przycisk ma przypisany unikalny kolor i dźwięk.\n• Po pokazie odtwarzaj sekwencję, klikając przyciski w tej samej kolejności.\n• Popełnienie błędu natychmiast uruchamia ponowny pokaz sekwencji.\n• Czas zatrzymuje się w trakcie pokazu i płynie tylko podczas twojego ruchu.\n\nBonusy:\n• Zdobądź gwiazdkę za każde poprawne powtórzenie sekwencji.\n• Otrzymaj dodatkowe 15 sekund za ukończenie poziomu.</string>
+
+    <string name="number_addition_instruction">Dobieraj liczby tak, aby ich suma dała wyświetlony wynik. Masz 90 sekund, aby uzbierać jak najwięcej gwiazdek!\n\nJak grać:\n• Klikaj przyciski z liczbami, aby je zaznaczyć – fioletowy kolor oznacza wybór.\n• Wybierz wymaganą liczbę przycisków, aby sprawdzić dopasowanie – pasująca kombinacja staje się szara na stałe, błędna podświetla się na czerwono i resetuje po chwili.\n• Niektóre poziomy mają dodatkowe karty, które nie są potrzebne do utworzenia sumy.\n\nBonusy:\n• Zdobądź gwiazdkę za każdą prawidłowo znalezioną sumę.\n• Otrzymaj dodatkowe 20 sekund za ukończenie poziomu.</string>
+    <string name="path_change_instruction">Tu będzie instrukcja.</string>
+
     <string name="word_search_instruction">Tu będzie instrukcja.</string>
+    <string name="fruit_sort_instruction">Tu będzie instrukcja.</string>
+
+    <string name="symbol_race_instruction">Tu będzie instrukcja.</string>
+    <string name="road_dash_instruction">Tu będzie instrukcja.</string>
 
 </resources>

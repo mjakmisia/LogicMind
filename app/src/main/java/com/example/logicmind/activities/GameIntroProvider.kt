@@ -35,6 +35,9 @@ object GameIntroProvider {
                 titleRes = R.string.color_sequence,
                 imageRes = R.drawable.image_color_sequence,
                 sections = listOf(
+                    IntroSection(R.string.cs_section_working_memory, R.string.cs_desc_working_memory),
+                    IntroSection(R.string.cs_section_selective_attention, R.string.cs_desc_selective_attention),
+                    IntroSection(R.string.cs_section_visual_auditory_sync, R.string.cs_desc_visual_auditory_sync)
                 ),
                 gameActivity = ColorSequenceActivity::class.java,
                 instructionRes = R.string.color_sequence_instruction
@@ -51,6 +54,16 @@ object GameIntroProvider {
                 gameActivity = NumberAdditionActivity::class.java,
                 instructionRes = R.string.number_addition_instruction
             )
+            "path_change" -> GameIntroConfig(
+                colorRes = R.color.category_pink_dark_mode,
+                titleRes = R.string.path_change,
+                imageRes = R.drawable.ic_close, //ZMIEŃ
+                sections = listOf(
+
+                ),
+                gameActivity = PathChangeActivity::class.java,
+                instructionRes = R.string.path_change_instruction
+            )
             "word_search" -> GameIntroConfig(
                 colorRes = R.color.category_yellow_dark_mode,
                 titleRes = R.string.word_search,
@@ -62,6 +75,16 @@ object GameIntroProvider {
                 ),
                 gameActivity = NumberAdditionActivity::class.java, // ZMIEŃ
                 instructionRes = R.string.word_search_instruction
+            )
+            "symbol_race" -> GameIntroConfig(
+                colorRes = R.color.category_blue_dark_mode,
+                titleRes = R.string.symbol_race,
+                imageRes = R.drawable.ic_close, //ZMIEŃ
+                sections = listOf(
+
+                ),
+                gameActivity = SymbolRaceActivity::class.java,
+                instructionRes = R.string.symbol_race_instruction
             )
             else -> throw IllegalArgumentException("Unknown gameId: $gameId")
         }
