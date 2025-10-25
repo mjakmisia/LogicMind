@@ -39,6 +39,8 @@
     <color name="gray_for_cardview">#353535</color>
     <color name="almost_white">#DCDBDB</color>
     <color name="picker_gray">#444444</color>
+    <color name="red">#CE0000</color>
+    <color name="green">#00A406</color>
 
 
 

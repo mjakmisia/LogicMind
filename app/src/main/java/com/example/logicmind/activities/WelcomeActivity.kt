@@ -30,44 +30,53 @@ class WelcomeActivity : BaseActivity() {
         binding = ActivityWelcomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        auth = FirebaseAuth.getInstance()
-        db = FirebaseDatabase.getInstance("https://logicmind-default-rtdb.europe-west1.firebasedatabase.app")
+        //TextWatcher to interfejs ma 3 metody: beforeTextChanged, onTextChanged, afterTextChanged
+        //trzeba je wszystkie zastosować
 
-        // hasło – walidacja
+        // hasło – walidacja w czasie rzeczywistym
+        //zmienia kolor komunikatów jeśli spełniają wymagania
         binding.etPassword.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            //pobiera aktualne hasło:
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                val password = s.toString()
+                //s - aktualny fragment tekstu
+                val password = s.toString() //aktualny tekst hasła
+
+                //zmienia na zielony jeżeli hasło ma co najmniej 8 znaków
                 binding.tvLength.setTextColor(
                     ContextCompat.getColor(
-                        this@WelcomeActivity,
-                        if (password.length >= 8) android.R.color.holo_green_dark else android.R.color.holo_red_dark
+                        this@WelcomeActivity, //aktualny kontekst
+                        if (password.length >= 8) R.color.green else R.color.red
                     )
                 )
+                //zmienia na zielony jeżeli hasło ma co najmniej 1 dużą literę
                 binding.tvUppercase.setTextColor(
                     ContextCompat.getColor(
                         this@WelcomeActivity,
-                        if (password.any { it.isUpperCase() }) android.R.color.holo_green_dark else android.R.color.holo_red_dark
+                        if (password.any { it.isUpperCase() }) R.color.green else R.color.red
                     )
                 )
+                //zmienia na zielony jeżeli hasło ma co najmniej 1 cyfrę
                 binding.tvDigit.setTextColor(
                     ContextCompat.getColor(
                         this@WelcomeActivity,
-                        if (password.any { it.isDigit() }) android.R.color.holo_green_dark else android.R.color.holo_red_dark
+                        if (password.any { it.isDigit() }) R.color.green else R.color.red
                     )
                 )
             }
-
             override fun afterTextChanged(s: Editable?) {}
         })
 
+        //pokazuje layout z wymaganiami hasła
+        //pojawia sie dopiero po wpisaniu cokolwiek do pola
         binding.etPassword.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) binding.passwordRequirementsLayout.visibility = View.VISIBLE
         }
 
         // logowanie
         binding.btnLogin.setOnClickListener {
-            val email = binding.etEmail.text.toString().trim()
+            val email = binding.etEmail.text.toString().trim() //trim usuwa białe znaki
             val password = binding.etPassword.text.toString().trim()
             if (email.isEmpty() || password.isEmpty()) {
                 showToast("Wypełnij wszystkie pola")
@@ -97,7 +106,7 @@ class WelcomeActivity : BaseActivity() {
             showUsernameDialog(email, password)
         }
 
-        // gość
+        // wejście do aplikacji jako gość
         binding.btnGuest.setOnClickListener {
             auth.signInAnonymously()
                 .addOnCompleteListener { task ->
@@ -108,30 +117,35 @@ class WelcomeActivity : BaseActivity() {
     }
 
     private fun showUsernameDialog(email: String, password: String) {
+        //inflacja widoku = zamiana xml na obiekty View
         val dialogView: View = layoutInflater.inflate(R.layout.dialog_username, null)
         val input = dialogView.findViewById<EditText>(R.id.etUsername)
         val btnCancel = dialogView.findViewById<Button>(R.id.btnCancel)
         val btnProceed = dialogView.findViewById<Button>(R.id.btnProceed)
 
+        //ładuje dialog z moim custom stylem
         val dialog = AlertDialog.Builder(this, R.style.CustomDialogStyle)
             .setView(dialogView)
             .create()
 
         dialog.show()
+        //przezroczyste tło
         dialog.window?.setBackgroundDrawable(ColorDrawable(android.graphics.Color.TRANSPARENT))
         dialog.window?.decorView?.setPadding(0, 0, 0, 0)
 
+        //parametry okna dialogu - ? chroni przed błędem jeżeli dialog.window jest null
         val params = dialog.window?.attributes
         params?.width = WindowManager.LayoutParams.WRAP_CONTENT
         params?.height = WindowManager.LayoutParams.WRAP_CONTENT
         params?.gravity = Gravity.CENTER
+        //przypisuje zmodyfikowane parametry z powrotem do okna dialogu
         dialog.window?.attributes = params
 
         btnCancel.setOnClickListener { dialog.dismiss() }
         btnProceed.setOnClickListener {
             val username = input.text.toString().trim()
             if (username.isEmpty()) {
-                input.error = "Login nie może być pusty"
+                input.error = getString(R.string.login_empty_error)
             } else {
                 dialog.dismiss()
                 registerUser(username, email, password)
@@ -150,7 +164,7 @@ class WelcomeActivity : BaseActivity() {
                         "username" to username,
                         "email" to email,
                         "streak" to 0,
-                        "bestStreak" to 0, // Dodano bestStreak
+                        "bestStreak" to 0,
                         "statistics" to mapOf(
                             "avgReactionTime" to 0.0,
                             "avgAccuracy" to 0.0,
@@ -206,8 +220,9 @@ class WelcomeActivity : BaseActivity() {
 
         for (category in categories) {
             val catRef = userRef.child("categories").child(category)
-            catRef.child("description").setValue("")
 
+            //!! - wymusza aby wartosc nie była null
+            //jeżeli jest null to wyrzuci NullPointerException
             for (game in defaultGames[category]!!) {
                 val gameData = mapOf(
                     "bestScore" to 0,
@@ -229,7 +244,7 @@ class WelcomeActivity : BaseActivity() {
                     binding.tvErrorMessage.visibility = View.GONE
                     goToMain()
                 } else {
-                    binding.tvErrorMessage.text = "Nieprawidłowy e-mail lub hasło"
+                    binding.tvErrorMessage.text = getString(R.string.login_validation)
                     binding.tvErrorMessage.visibility = View.VISIBLE
                 }
             }

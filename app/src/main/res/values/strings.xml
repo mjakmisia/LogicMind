@@ -85,6 +85,8 @@
     <string name="coordination_game2">Symbol Race</string>
     <string name="login_prompt_text">Zaloguj się, żeby zobaczyć profil użytkownika</string>
     <string name="login_button_text">ZALOGUJ SIĘ!</string>
+    <string name="login_empty_error">Login nie może być pusty</string>
+    <string name="login_validation">Nieprawidłowy e-mail lub hasło</string>
     <string name="give_your_username">Podaj swój login</string>
     <string name="username">login</string>
 
