@@ -89,6 +89,8 @@
     <string name="login_validation">Invalid email or password</string>
     <string name="give_your_username">Give your username</string>
     <string name="username">username</string>
+    <string name="delete_account_popup">Are you sure you want to delete your account?</string>
+    <string name="delete_account">Delete account</string>
 
 
     <!-- GAME INTRO DESCRIPTIONS -->

@@ -26,7 +26,10 @@ class StatisticsActivity : BaseActivity() {
         //db = FirebaseDatabase.getInstance("https://logicmind-default-rtdb.europe-west1.firebasedatabase.app")
 
         bottomNav = findViewById(R.id.bottomNavigationView)
-        setupBottomMenu()
+
+        //dolne menu
+        setupBottomNavigation(R.id.nav_statistics)
+
 
         val layoutLoggedIn = findViewById<ScrollView>(R.id.statisticsScrollView)
         val layoutNotLoggedIn = findViewById<LinearLayout>(R.id.layoutNotLoggedIn)
@@ -87,32 +90,6 @@ class StatisticsActivity : BaseActivity() {
 //        findViewById<TextView>(R.id.tvLastPlayedGame)?.text = "Ostatnio zagrana gra: Brak"
     }
 
-
-    /**
-     * Konfiguracja dolnego menu nawigacyjnego
-     */
-    private fun setupBottomMenu() {
-        bottomNav.selectedItemId = R.id.nav_statistics
-
-        bottomNav.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_home -> {
-                    startActivity(Intent(this, MainActivity::class.java))
-                    true
-                }
-                R.id.nav_statistics -> true
-                R.id.nav_profile -> {
-                    startActivity(Intent(this, ProfileActivity::class.java))
-                    true
-                }
-                R.id.nav_settings -> {
-                    startActivity(Intent(this, SettingsActivity::class.java))
-                    true
-                }
-                else -> false
-            }
-        }
-    }
 
     /**
      * Funkcja pozwalająca rozwijać i zwijać statystyki po kliknięciu w tytuł gry.

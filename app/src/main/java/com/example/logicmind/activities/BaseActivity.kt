@@ -1,6 +1,7 @@
 package com.example.logicmind.activities
 
 import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -9,6 +10,8 @@ import com.google.firebase.database.FirebaseDatabase
 import java.util.Locale
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.example.logicmind.R
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 /**
  * BaseActivity
@@ -63,6 +66,39 @@ open class BaseActivity : AppCompatActivity() {
         // Inicjalizacja Firebase w każdej aktywności
         auth = FirebaseAuth.getInstance()
         db = FirebaseDatabase.getInstance("https://logicmind-default-rtdb.europe-west1.firebasedatabase.app")
+    }
+
+    /**
+     * Metoda do ustawiania menu na dole
+     */
+    protected fun setupBottomNavigation(selectedItemId: Int){
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+
+        bottomNav.selectedItemId = selectedItemId
+
+        bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    startActivity(Intent(this, MainActivity::class.java))
+                    true
+                }
+                R.id.nav_statistics -> {
+                    startActivity(Intent(this, StatisticsActivity::class.java))
+                    true
+                }
+                R.id.nav_profile -> {
+                    startActivity(Intent(this, ProfileActivity::class.java))
+                    true
+                }
+                R.id.nav_settings -> {
+                    startActivity(Intent(this, SettingsActivity::class.java))
+                    true
+                }
+                else -> false
+            }
+
+        }
+
     }
 
 

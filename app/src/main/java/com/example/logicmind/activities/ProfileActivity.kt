@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import com.example.logicmind.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -17,6 +18,7 @@ import java.util.Calendar
 class ProfileActivity : BaseActivity() {
 
     private lateinit var database: FirebaseDatabase
+    private lateinit var bottomNav: BottomNavigationView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,28 +29,10 @@ class ProfileActivity : BaseActivity() {
         // Inicjalizacja Firebase
         database = FirebaseDatabase.getInstance("https://logicmind-default-rtdb.europe-west1.firebasedatabase.app")
 
-        // Inicjalizacja dolnego menu
-        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-        bottomNav.selectedItemId = R.id.nav_profile
+        bottomNav = findViewById(R.id.bottomNavigationView)
+        // Ustawienie menu na dole
+        setupBottomNavigation(R.id.nav_profile)
 
-        bottomNav.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_home -> {
-                    startActivity(Intent(this, MainActivity::class.java))
-                    true
-                }
-                R.id.nav_statistics -> {
-                    startActivity(Intent(this, StatisticsActivity::class.java))
-                    true
-                }
-                R.id.nav_profile -> true
-                R.id.nav_settings -> {
-                    startActivity(Intent(this, SettingsActivity::class.java))
-                    true
-                }
-                else -> false
-            }
-        }
 
         // Logika kalendarza
         val calendar = Calendar.getInstance()
@@ -87,6 +71,23 @@ class ProfileActivity : BaseActivity() {
         } else {
             // Użytkownik niezalogowany - pokaż komunikat i przycisk logowania
             showLoginPrompt()
+        }
+
+        val btnDeleteAccount = findViewById<Button>(R.id.buttonDeleteAccount)
+        btnDeleteAccount.setOnClickListener {
+            //popup czy na pewno chcesz usunąć konto
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle(R.string.delete_account)
+            builder.setMessage(R.string.delete_account_popup)
+
+            builder.setPositiveButton("Tak") { _, _ ->
+                deleteAccount()
+            }
+            builder.setNegativeButton("Nie") { dialog, _ ->
+                dialog.dismiss()
+            }
+            val dialog = builder.create()
+            dialog.show()
         }
     }
 

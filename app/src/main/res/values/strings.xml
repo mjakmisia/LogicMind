@@ -89,6 +89,8 @@
     <string name="login_validation">Nieprawidłowy e-mail lub hasło</string>
     <string name="give_your_username">Podaj swój login</string>
     <string name="username">login</string>
+    <string name="delete_account_popup">Czy na pewno chcesz usunąć swoje konto?</string>
+    <string name="delete_account">Usuń konto</string>
 
 
     <!-- OPISY GIER DO INTRO -->
