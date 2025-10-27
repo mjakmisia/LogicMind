@@ -20,7 +20,6 @@ import com.google.android.material.shape.CornerFamily
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import android.content.res.Configuration
-import android.util.Log
 
 class NumberAdditionActivity : BaseActivity() {
 

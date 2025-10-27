@@ -7,14 +7,12 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.gridlayout.widget.GridLayout
-import android.media.AudioAttributes
-import android.media.SoundPool
-import android.util.Log
 import com.example.logicmind.R
 import com.example.logicmind.common.GameCountdownManager
 import com.example.logicmind.common.GameTimerProgressBar
 import com.example.logicmind.common.PauseMenu
 import com.example.logicmind.common.StarManager
+import com.example.logicmind.common.SoundManager
 import com.google.firebase.database.FirebaseDatabase
 
 class CardMatchActivity : BaseActivity() {
@@ -38,11 +36,7 @@ class CardMatchActivity : BaseActivity() {
     private lateinit var pauseMenu: PauseMenu // Menu pauzy gry
     private var previewRemaining: Long = 0L // Pozostały czas do ukrycia kart w fazie preview (ms)
     private var isPreviewPhase: Boolean = false // Flaga aktywnej fazy preview (karty przodem na starcie rundy)
-
-    // Pola dla SoundPool – obsługa nakładających się dźwięków eksplozji
-    private lateinit var soundPool: SoundPool
-    private var explosionSoundId: Int = 0
-
+    private var pendingFlipCardIndex: Int = -1  // Indeks karty do odwrócenia po bombie
     companion object {
         const val BOMB_VALUE = -1 // Specjalna wartość dla bomby
     }
@@ -73,26 +67,10 @@ class CardMatchActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_card_match)
 
-        // Inicjalizacja SoundPool
-        val audioAttributes = AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_GAME)
-            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-            .build()
-
-        soundPool = SoundPool.Builder()
-            .setMaxStreams(5)  // Do 5 dźwięków naraz
-            .setAudioAttributes(audioAttributes)
-            .build()
-
-        // Preload dźwięku – brak opóźnień przy pierwszym play()
-        explosionSoundId = soundPool.load(this, R.raw.explosion, 1)
-        soundPool.setOnLoadCompleteListener { _, sampleId, status ->
-            if (status != 0) {
-                android.util.Log.e("CardMatchActivity", "Błąd ładowania dźwięku: $status")
-            }
-        }
-
         supportActionBar?.hide()
+
+        // Inicjalizacja dźwięku
+        SoundManager.init(this)
 
         // Inicjalizacja widoków
         gridLayout = findViewById(R.id.gridLayout)
@@ -192,6 +170,7 @@ class CardMatchActivity : BaseActivity() {
         outState.putLong("previewRemaining", previewRemaining)
         outState.putBoolean("isPreviewPhase", isPreviewPhase)
         outState.putInt("currentLevel", currentLevel)
+        outState.putInt("pendingFlipCardIndex", pendingFlipCardIndex)
         starManager.saveState(outState)
     }
 
@@ -199,7 +178,6 @@ class CardMatchActivity : BaseActivity() {
         super.onDestroy()
         timerProgressBar.cancel() // Zatrzymaj CountDownTimer
         countdownManager.cancel() // Usuń handlery odliczania
-        soundPool.release()
     }
 
     // Inicjalizuje nową grę
@@ -297,6 +275,8 @@ class CardMatchActivity : BaseActivity() {
                 // Ustaw stan wizualny (dla restore) lub domyślny
                 if (card.isFlipped || card.isMatched) {
                     flipCard(card, true)
+                } else {
+                    flipCard(card, false)
                 }
 
                 imageView.setOnClickListener { onCardClick(card) }
@@ -318,6 +298,7 @@ class CardMatchActivity : BaseActivity() {
         pauseButton.visibility = savedInstanceState.getInt("pauseButtonVisibility")
         isPreviewPhase = savedInstanceState.getBoolean("isPreviewPhase", false)
         currentLevel = savedInstanceState.getInt("currentLevel", 1)
+        pendingFlipCardIndex = savedInstanceState.getInt("pendingFlipCardIndex", -1)
         starManager.restoreState(savedInstanceState)
 
         val countdownIndex = savedInstanceState.getInt("countdownIndex", 0)
@@ -357,6 +338,9 @@ class CardMatchActivity : BaseActivity() {
                     checkMatch()
                 }, 500)
             }
+            else if (firstCard != null && !isFlipping) {
+                flipCard(firstCard!!, true)
+            }
 
             // Kontynuowanie odliczania, jeśli było aktywne
             if (countdownInProgress) {
@@ -384,6 +368,15 @@ class CardMatchActivity : BaseActivity() {
                 isPreviewPhase = false
                 timerProgressBar.start()
             }, true) // Włącz aktualizację previewRemaining
+        }
+
+        if (pendingFlipCardIndex != -1 && pendingFlipCardIndex in cards.indices) {
+            val card = cards[pendingFlipCardIndex]
+            flipCard(card, false)
+            card.isFlipped = false  // Upewnij się, że stan logiczny jest aktualny
+            pendingFlipCardIndex = -1
+            isFlipping = false
+            gridLayout.isEnabled = true
         }
     }
 
@@ -420,23 +413,22 @@ class CardMatchActivity : BaseActivity() {
             timerProgressBar.subtractTime(10) // Odejmij 10 sekund
             card.isMatched = true // Odkryta na stałe
             Toast.makeText(this, "Bomba! -10s", Toast.LENGTH_SHORT).show()
+            SoundManager.play(this, R.raw.explosion)
 
-            // Odtwarzanie dźwięku eksplozji
-            if (explosionSoundId != 0) {
-                soundPool.play(explosionSoundId, 1.0f, 1.0f, 1, 0, 1.0f)  // Głośność L/R=1, priorytet=1, bez loopa, prędkość=1
-            }
-
-            // Zapisz referencję do pierwszej karty przed resetem
             val firstToFlip = firstCard
             if (firstToFlip != null && firstToFlip != card) {
-                // Bomba jest drugą kartą – odwróć pierwszą kartę z powrotem po opóźnieniu
+                // Bomba jako druga karta – zapisz indeks do odwrócenia po obrocie
+                pendingFlipCardIndex = cards.indexOf(firstToFlip)
+
                 runDelayed(1200, {
                     flipCard(firstToFlip, false)
+                    firstToFlip.isFlipped = false
+                    pendingFlipCardIndex = -1
                     isFlipping = false
-                    gridLayout.isEnabled = true  // Włącz siatkę po hide
+                    gridLayout.isEnabled = true
                 }, updatePreview = false)
             } else {
-                // Jeśli bomba jako pierwsza – odblokuj od razu po animacji
+                // Bomba jako pierwsza karta
                 runDelayed(150, {
                     isFlipping = false
                     gridLayout.isEnabled = true
@@ -551,5 +543,4 @@ class CardMatchActivity : BaseActivity() {
             pauseMenu.pause()
         }
     }
-
 }

@@ -2,8 +2,6 @@ package com.example.logicmind.activities
 import android.animation.ObjectAnimator
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
-import android.media.AudioAttributes
-import android.media.SoundPool
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -21,12 +19,15 @@ import com.example.logicmind.common.GameCountdownManager
 import com.example.logicmind.common.GameTimerProgressBar
 import com.example.logicmind.common.PauseMenu
 import com.example.logicmind.common.StarManager
+import com.example.logicmind.common.SoundManager
 import kotlin.random.Random
 
 class ColorSequenceActivity : BaseActivity() {
     private var keyButtons: List<KeyButton> = emptyList()   // Lista klawiszy z ich widokami i indeksami
     private var currentSequence = mutableListOf<Int>()      // Sekwencja pokazana przez grę
     private var userSequence = mutableListOf<Int>()         // Sekwencja wpisana przez gracza
+    private var sequenceDelayRemaining: Long = 0L      // Pozostały czas opóźnienia
+    private var pendingShowSequenceDelay: Long = 0L  // Pozostały czas do następnego showSequence po checkUserSequence
 
     //Flagi
     private var isShowingSequence = false     // Flaga: gra pokazuje sekwencję
@@ -49,16 +50,20 @@ class ColorSequenceActivity : BaseActivity() {
     private lateinit var pauseMenu: PauseMenu                    // Menu pauzy gry
     private lateinit var countdownManager: GameCountdownManager  // Manager odliczania początkowego
 
-    // Pola dla SoundPool – obsługa dźwięków
-    private lateinit var soundPool: SoundPool          // Player dla dźwięków nut muzycznych
-    private lateinit var sequenceHandler: Handler      // Handler do opóźnień i animacji sekwencji
-    private val soundIds = mutableMapOf<Int, Int>()    // Mapa indeks dźwięku -> ID w SoundPool
-    private var sequenceDelayRemaining: Long = 0L      // Pozostały czas opóźnienia
-
     // Mapowanie klawiszy na dźwięki
     private val soundOrder4 = listOf(2, 5, 7, 1)              // C E G B
     private val soundOrder6 = listOf(2, 5, 6, 7, 1, 3)        // C E F G B C (wyższe C)
     private val soundOrder8 = listOf(2, 4, 5, 6, 7, 0, 1, 3)  // C D E F G A B C (wyższe C)
+    private val soundResources = listOf(
+        R.raw.key_sound_a,        // 0
+        R.raw.key_sound_b,        // 1
+        R.raw.key_sound_c,        // 2
+        R.raw.key_sound_c_higher, // 3
+        R.raw.key_sound_d,        // 4
+        R.raw.key_sound_e,        // 5
+        R.raw.key_sound_f,        // 6
+        R.raw.key_sound_g         // 7
+    )
 
     // Klasy danych pomocnicze
     private data class KeyButton(val view: Button, val index: Int) // Klawisz z widokiem i indeksem
@@ -68,7 +73,6 @@ class ColorSequenceActivity : BaseActivity() {
         val step: Int,
         val maxLength: Int
     )
-
     companion object {
         const val BASE_TIME_SECONDS = 90 // Czas gry w sekundach
     }
@@ -78,34 +82,8 @@ class ColorSequenceActivity : BaseActivity() {
         setContentView(R.layout.activity_color_sequence)
         supportActionBar?.hide()
 
-        // Inicjalizacja SoundPool
-        val audioAttributes = AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_GAME)
-            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-            .build()
-
-        soundPool = SoundPool.Builder()
-            .setMaxStreams(8)  // Maksymalnie 8 nakładających się dźwięków
-            .setAudioAttributes(audioAttributes)
-            .build()
-
-        // Preload dźwięków nut muzycznych
-        val soundResources = listOf(
-            R.raw.key_sound_a,        // 0: A
-            R.raw.key_sound_b,        // 1: B
-            R.raw.key_sound_c,        // 2: C
-            R.raw.key_sound_c_higher, // 3: C higher
-            R.raw.key_sound_d,        // 4: D
-            R.raw.key_sound_e,        // 5: E
-            R.raw.key_sound_f,        // 6: F
-            R.raw.key_sound_g         // 7: G
-        )
-
-        for (i in soundResources.indices) {
-            soundIds[i] = soundPool.load(this, soundResources[i], 1)
-        }
-
-        sequenceHandler = Handler(Looper.getMainLooper())
+        // Inicjalizacja dźwięku
+        SoundManager.init(this)
 
         // Inicjalizacja widoków
         gridLayout = findViewById(R.id.gridLayout)
@@ -207,6 +185,7 @@ class ColorSequenceActivity : BaseActivity() {
         outState.putInt("countdownIndex", countdownManager.getIndex())
         outState.putBoolean("countdownInProgress", countdownManager.isInProgress())
         outState.putLong("sequenceDelayRemaining", sequenceDelayRemaining)
+        outState.putLong("pendingShowSequenceDelay", pendingShowSequenceDelay)
         starManager.saveState(outState)
     }
 
@@ -225,6 +204,7 @@ class ColorSequenceActivity : BaseActivity() {
         gridLayout.visibility = savedInstanceState.getInt("gridLayoutVisibility")
         pauseButton.visibility = savedInstanceState.getInt("pauseButtonVisibility")
         sequenceDelayRemaining = savedInstanceState.getLong("sequenceDelayRemaining", 0L)
+        pendingShowSequenceDelay = savedInstanceState.getLong("pendingShowSequenceDelay", 0L)
         starManager.restoreState(savedInstanceState)
 
         // Przywracanie stanu timera
@@ -256,21 +236,38 @@ class ColorSequenceActivity : BaseActivity() {
         }
 
         // Wznowienie pokazu sekwencji lub tury gracza
-        if (isShowingSequence && sequenceDelayRemaining > 0) {
+        if (isShowingSequence) {
             gridLayout.isEnabled = false
             keyButtons.forEach { it.view.isEnabled = false }
-            runDelayed(sequenceDelayRemaining) {
-                highlightKey(currentSequence[sequenceShowIndex], false)
-                sequenceShowIndex++
-                playSequenceStep()
+
+            if (sequenceDelayRemaining > 0) {
+                runDelayed(sequenceDelayRemaining) {
+                    if (sequenceShowIndex < currentSequence.size) {
+                        highlightKey(currentSequence[sequenceShowIndex], false)
+                        sequenceShowIndex++
+                        playSequenceStep()
+                    } else {
+                        endSequenceShow()
+                    }
+                }
+            } else if (sequenceShowIndex >= currentSequence.size) {
+                endSequenceShow()
+            } else {
+                showSequence()
             }
-        } else if (isShowingSequence) {
-            gridLayout.isEnabled = false
-            keyButtons.forEach { it.view.isEnabled = false }
-            showSequence()
         } else if (isUserTurn) {
             gridLayout.isEnabled = true
             keyButtons.forEach { it.view.isEnabled = true }
+        }
+
+        // Wznawiamy showSequence() jeśli obrót był po checkUserSequence()
+        if (pendingShowSequenceDelay > 0L) {
+            runDelayed(pendingShowSequenceDelay) {
+                if (!isFinishing && !isDestroyed) {
+                    showSequence()
+                    pendingShowSequenceDelay = 0L
+                }
+            }
         }
     }
 
@@ -473,7 +470,7 @@ class ColorSequenceActivity : BaseActivity() {
         val soundIndex = soundOrder[keyIndex]
         playKeySound(soundIndex)
         highlightKey(keyIndex, true)
-        sequenceHandler.postDelayed({ highlightKey(keyIndex, false) }, 200)
+        runDelayed(200L) { highlightKey(keyIndex, false) }
 
         userSequence.add(keyIndex)
 
@@ -518,18 +515,30 @@ class ColorSequenceActivity : BaseActivity() {
 
             generateNewSequence() // Dodaj krok
 
-            runDelayed(1500L) { showSequence() }
+            pendingShowSequenceDelay = 1500L
+            runDelayed(1500L) {
+                if (!isFinishing && !isDestroyed) {
+                    showSequence()
+                    pendingShowSequenceDelay = 0L
+                }
+            }
         } else {
             // Błędna sekwencja - powtórz
             Toast.makeText(this, "Błąd! Powtórka sekwencji.", Toast.LENGTH_SHORT).show()
             userSequence.clear()
-            runDelayed(1500L) { showSequence() }
+            pendingShowSequenceDelay = 1500L
+            runDelayed(1500L) {
+                if (!isFinishing && !isDestroyed) {
+                    showSequence()
+                    pendingShowSequenceDelay = 0L
+                }
+            }
         }
     }
 
     // Odtwarza dźwięk dla danego indeksu nuty
     private fun playKeySound(soundIndex: Int) {
-        soundIds[soundIndex]?.let { soundPool.play(it, 1.0f, 1.0f, 1, 0, 1.0f) }
+        SoundManager.play(this, soundResources[soundIndex])
     }
 
     // Podświetla klawisz (animacja skalowania + efekt wblaknięcia)
@@ -562,27 +571,31 @@ class ColorSequenceActivity : BaseActivity() {
 
     // Uruchamia akcję z opóźnieniem, uwzględniając pauzę
     private fun runDelayed(delay: Long, action: () -> Unit) {
+        val activityRef = java.lang.ref.WeakReference(this)
         var remaining = delay
-        val interval = 16L // ~60fps, aby odliczanie było płynne
+        val interval = 16L
+
         val runnable = object : Runnable {
             override fun run() {
+                val activity = activityRef.get() ?: return
                 if (pauseMenu.isPaused) {
-                    // Gra w pauzie – czekamy do wznowienia
-                    sequenceHandler.postDelayed(this, interval)
+                    Handler(Looper.getMainLooper()).postDelayed(this, interval)
                     return
                 }
-
                 remaining -= interval
-                sequenceDelayRemaining = remaining.coerceAtLeast(0L)
+                if (pendingShowSequenceDelay == 0L) {
+                    sequenceDelayRemaining = remaining.coerceAtLeast(0L)
+                }
                 if (remaining <= 0) {
-                    action() // Wykonanie akcji po upłynięciu czasu
+                    if (activity.isFinishing || activity.isDestroyed) return
+                    activity.runOnUiThread { action() }
                     sequenceDelayRemaining = 0L
                 } else {
-                    sequenceHandler.postDelayed(this, interval) // Kolejna iteracja
+                    Handler(Looper.getMainLooper()).postDelayed(this, interval)
                 }
             }
         }
-        sequenceHandler.postDelayed(runnable, interval)
+        Handler(Looper.getMainLooper()).postDelayed(runnable, interval)
     }
 
     override fun onPause() {
@@ -594,9 +607,7 @@ class ColorSequenceActivity : BaseActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        soundPool.release()
         timerProgressBar.cancel() // Zatrzymaj CountDownTimer
         countdownManager.cancel() // Usuń handlery odliczania
-        sequenceHandler.removeCallbacksAndMessages(null)
     }
 }
