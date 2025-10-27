@@ -71,34 +71,45 @@ open class BaseActivity : AppCompatActivity() {
     /**
      * Metoda do ustawiania menu na dole
      */
-    protected fun setupBottomNavigation(selectedItemId: Int){
-        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-
+    protected fun setupBottomNavigation(bottomNav: BottomNavigationView, selectedItemId: Int) {
+        if (bottomNav == null) {
+            Log.e("NAV_DEBUG", "BottomNavigationView is null")
+            return
+        }
         bottomNav.selectedItemId = selectedItemId
-
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
-                    startActivity(Intent(this, MainActivity::class.java))
+                    if (this !is MainActivity) {
+                        startActivity(Intent(this, MainActivity::class.java))
+                        finish()
+                    }
                     true
                 }
                 R.id.nav_statistics -> {
-                    startActivity(Intent(this, StatisticsActivity::class.java))
+                    if (this !is StatisticsActivity) {
+                        startActivity(Intent(this, StatisticsActivity::class.java))
+                        finish()
+                    }
                     true
                 }
                 R.id.nav_profile -> {
-                    startActivity(Intent(this, ProfileActivity::class.java))
+                    if (this !is ProfileActivity) {
+                        startActivity(Intent(this, ProfileActivity::class.java))
+                        finish()
+                    }
                     true
                 }
                 R.id.nav_settings -> {
-                    startActivity(Intent(this, SettingsActivity::class.java))
+                    if (this !is SettingsActivity) {
+                        startActivity(Intent(this, SettingsActivity::class.java))
+                        finish()
+                    }
                     true
                 }
                 else -> false
             }
-
         }
-
     }
 
 

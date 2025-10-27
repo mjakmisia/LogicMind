@@ -9,7 +9,10 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.example.logicmind.R
+import com.example.logicmind.databinding.ActivityProfileBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
@@ -17,21 +20,27 @@ import java.util.Calendar
 
 class ProfileActivity : BaseActivity() {
 
-    private lateinit var database: FirebaseDatabase
     private lateinit var bottomNav: BottomNavigationView
+    private lateinit var binding: ActivityProfileBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_profile)
+        binding = ActivityProfileBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         supportActionBar?.hide()
 
-        // Inicjalizacja Firebase
-        database = FirebaseDatabase.getInstance("https://logicmind-default-rtdb.europe-west1.firebasedatabase.app")
+        //obsługa wcięć systemowych dla bottonNavigationView
+        //dynamicznie ustawia paddingBottom na wysokość paska nav
+        ViewCompat.setOnApplyWindowInsetsListener(binding.includeBottomNav.bottomNavigationView) {view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(0, 0, 0, systemBars.bottom)
+            insets
+        }
 
-        bottomNav = findViewById(R.id.bottomNavigationView)
+        //bottomNav = findViewById(R.id.bottomNavigationView)
         // Ustawienie menu na dole
-        setupBottomNavigation(R.id.nav_profile)
+        setupBottomNavigation(binding.includeBottomNav.bottomNavigationView, R.id.nav_profile)
 
 
         // Logika kalendarza
@@ -117,7 +126,7 @@ class ProfileActivity : BaseActivity() {
      * Pobiera dane użytkownika (username, streak, bestStreak) z Realtime Database
      */
     private fun loadUserData(uid: String) {
-        database.getReference("users").child(uid)
+        db.getReference("users").child(uid)
             .get()
             .addOnSuccessListener { snapshot ->
                 if (snapshot.exists()) {

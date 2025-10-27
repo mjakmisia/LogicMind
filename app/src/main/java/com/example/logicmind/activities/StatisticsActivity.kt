@@ -7,48 +7,56 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.example.logicmind.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.core.view.isGone
+import com.example.logicmind.databinding.ActivityStatisticsBinding
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class StatisticsActivity : BaseActivity() {
 
     private lateinit var bottomNav: BottomNavigationView
+    private lateinit var binding: ActivityStatisticsBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_statistics)
+        binding = ActivityStatisticsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         supportActionBar?.hide()
 
-        //auth = FirebaseAuth.getInstance()
-        //trzeba podac url do bazy w regionie bo inaczej uzywa domyślnej bazy w us
-        //db = FirebaseDatabase.getInstance("https://logicmind-default-rtdb.europe-west1.firebasedatabase.app")
-
-        bottomNav = findViewById(R.id.bottomNavigationView)
-
+        //obsługa wcięć systemowych dla bottonNavigationView
+        //dynamicznie ustawia paddingBottom na wysokość paska nav
+        ViewCompat.setOnApplyWindowInsetsListener(binding.includeBottomNav.bottomNavigationView) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(0, 0, 0, systemBars.bottom)
+            insets
+        }
         //dolne menu
-        setupBottomNavigation(R.id.nav_statistics)
+        setupBottomNavigation(binding.includeBottomNav.bottomNavigationView, R.id.nav_statistics)
 
+//        val layoutLoggedIn = findViewById<ScrollView>(R.id.statisticsScrollView)
+//        val layoutNotLoggedIn = findViewById<LinearLayout>(R.id.layoutNotLoggedIn)
+//        val buttonLogin = findViewById<Button>(R.id.buttonLogin)
+//
+//        // Na start ukryj wszystkie widoki
+//        layoutLoggedIn.visibility = View.GONE
+//        layoutNotLoggedIn.visibility = View.GONE
+//        buttonLogin.visibility = View.GONE
 
-        val layoutLoggedIn = findViewById<ScrollView>(R.id.statisticsScrollView)
-        val layoutNotLoggedIn = findViewById<LinearLayout>(R.id.layoutNotLoggedIn)
-        val buttonLogin = findViewById<Button>(R.id.buttonLogin)
         val user = auth.currentUser //pobranie bieżącego użytkownika
-
-        // Na start ukryj wszystkie widoki
-        layoutLoggedIn.visibility = View.GONE
-        layoutNotLoggedIn.visibility = View.GONE
-        buttonLogin.visibility = View.GONE
-
         // Debugowanie: Logowanie stanu użytkownika
         Log.d("StatisticsActivity", "User: ${user?.uid ?: "null"}")
 
         if (user != null) {
             // Zalogowany użytkownik
             Log.d("StatisticsActivity", "Widok dla zalogowanego użytkownika")
-            layoutLoggedIn.visibility = View.VISIBLE
-            layoutNotLoggedIn.visibility = View.GONE
+            binding.statisticsScrollView.visibility = View.VISIBLE
+            binding.layoutNotLoggedIn.visibility = View.GONE
 
             setupExpandableStats() //rozwijanie statystyk
             loadUserStats(user.uid) //ładowanie statystyk z bazy
@@ -56,12 +64,13 @@ class StatisticsActivity : BaseActivity() {
         } else {
             // Niezalogowany użytkownik
             Log.d("StatisticsActivity", "Widok dla niezalogowanego użytkownika")
-            showLoginPrompt() //prompt do logowania
-        }
-
-        //przejscie z przycisku do strony logowania/rejestracji
-        buttonLogin.setOnClickListener {
-            startActivity(Intent(this, WelcomeActivity::class.java))
+            binding.statisticsScrollView.visibility = View.GONE
+            binding.layoutNotLoggedIn.visibility = View.VISIBLE
+            binding.buttonLogin.visibility = View.VISIBLE
+            binding.buttonLogin.setOnClickListener {
+                startActivity(Intent(this, WelcomeActivity::class.java))
+                finish()
+            }
         }
     }
 
@@ -96,33 +105,25 @@ class StatisticsActivity : BaseActivity() {
      * Każdy wpis to para: (layout gry, układ statystyk dla tej gry)
      */
     private fun setupExpandableStats() {
-        val pairs = listOf( //lista par (List<Pair<String, String>>)
-            //  KOORDYNACJA
+        val pairs = listOf( //lista par (List<Pair<Int, Int>>)
             Pair(R.id.layoutCoordinationGame1, R.id.layoutCoordinationGame1Stats),
-            R.id.layoutCoordinationGame2 to R.id.layoutCoordinationGame2Stats,
-
-            //  SKUPIENIE
-            R.id.layoutAttentionGame1 to R.id.layoutAttentionGame1Stats,
-            R.id.layoutAttentionGame2 to R.id.layoutAttentionGame2Stats,
-
-            //  PAMIĘĆ
-            R.id.layoutMemoryGame1 to R.id.layoutMemoryGame1Stats,
-            R.id.layoutMemoryGame2 to R.id.layoutMemoryGame2Stats,
-
-            // ROZWIĄZYWANIE PROBLEMÓW
-            R.id.layoutReasoningGame1 to R.id.layoutReasoningGame1Stats,
-            R.id.layoutReasoningGame2 to R.id.layoutReasoningGame2Stats
+            Pair(R.id.layoutCoordinationGame2, R.id.layoutCoordinationGame2Stats),
+            Pair(R.id.layoutAttentionGame1, R.id.layoutAttentionGame1Stats),
+            Pair(R.id.layoutAttentionGame2, R.id.layoutAttentionGame2Stats),
+            Pair(R.id.layoutMemoryGame1, R.id.layoutMemoryGame1Stats),
+            Pair(R.id.layoutMemoryGame2, R.id.layoutMemoryGame2Stats),
+            Pair(R.id.layoutReasoningGame1, R.id.layoutReasoningGame1Stats),
+            Pair(R.id.layoutReasoningGame2, R.id.layoutReasoningGame2Stats)
         )
 
         // Dla każdej pary ustawienie kliknięcia w layout gry
         pairs.forEach { (layoutId, statsId) ->
-            val layout = findViewById<LinearLayout>(layoutId)
-            val stats = findViewById<LinearLayout>(statsId)
+            val layout = binding.root.findViewById<LinearLayout>(layoutId)
+            val stats = binding.root.findViewById<LinearLayout>(statsId)
 
             layout.setOnClickListener {
                 // Jeśli statystyki są ukryte to pokaż, jeśli widoczne to ukryj
-                stats.visibility =
-                    if (stats.isGone) LinearLayout.VISIBLE else LinearLayout.GONE
+                stats.visibility = if (stats.isGone) View.VISIBLE else View.GONE
             }
         }
     }
@@ -251,18 +252,6 @@ class StatisticsActivity : BaseActivity() {
             Pair("Rozwiazywanie_problemow", "path_change")
         )
 
-        //Słownik tłumaczący nazwy gier do wyświetlenia dla użytkownika
-//        val gameDisplayNames = mapOf(
-//            "road_dash" to "Unikanie przeszkód",
-//            "symbol_race" to "Wyścig symboli",
-//            "word_search" to "Wyszukiwanie słów",
-//            "fruit_sort" to "Sortowanie owoców",
-//            "color_sequence" to "Kolorowa sekwencja",
-//            "card_match" to "Dopasowywanie kart",
-//            "number_addition" to "Dodawanie liczb",
-//            "path_change" to "Zmiana ścieżki"
-//        )
-
         var latestGameKey: String? = null
         var latestTimestamp: Long? = null
         var completedRequests = 0 // ile zapytań z bazy już się zakończyło
@@ -291,16 +280,14 @@ class StatisticsActivity : BaseActivity() {
                     //wszystkie pytania zakończone - aktualizuje textview
                     if (completedRequests == gameMapping.size) {
                         Log.d("LAST_PLAYED_DEBUG (StatisticsActivity)", "Wybrana gra (LastPlayedGame): $latestGameKey | Timestamp: $latestTimestamp")
-                        updateLastPlayedText(latestGameKey)
+                        updateLastPlayedText(latestGameKey, latestTimestamp)
                     }
                 }
                 .addOnFailureListener {
                     completedRequests++
                     // Aktualizuj TextView po przetworzeniu wszystkich gier
                     if (completedRequests == gameMapping.size) {
-                        findViewById<TextView>(R.id.tvLastPlayedGame)?.text =
-                            if (latestGameKey != null) "Ostatnio zagrana gra: $latestGameKey"
-                            else "Ostatnio zagrana gra: Brak"
+                        updateLastPlayedText(latestGameKey, latestTimestamp)
                     }
                 }
         }
@@ -309,22 +296,23 @@ class StatisticsActivity : BaseActivity() {
     /**
      * Ustawia tekst ostatnio zagranej gry
      */
-    private fun updateLastPlayedText(gameKey: String?){ //gameKey - klucz zapisany w Firebase
-        val textView = findViewById<TextView>(R.id.tvLastPlayedGame)
-        if(gameKey == null){
-            textView.text = "Ostatnio zagrana gra: Brak"
-            return
-        }
+     //gameKey - klucz zapisany w Firebase
+    private fun updateLastPlayedText(gameKey: String?, timestamp: Long?) {
+            if (gameKey == null || timestamp == null) {
+                binding.tvLastPlayedGame.text = "Ostatnio zagrana gra: Brak"
+                return
+            }
 
-        //szukanie stringa po nazwie klucza
-        val resID = resources.getIdentifier(gameKey,"string", packageName)
-        val displayName = if(resID != 0){
-            getString(resID)
-        } else {
-            gameKey
+            val resID = resources.getIdentifier(gameKey, "string", packageName)
+            val displayName = if (resID != 0) {
+                getString(resID)
+            } else {
+                gameKey
+            }
+            val dateFormat = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault())
+            val lastPlayedDate = dateFormat.format(Date(timestamp))
+            binding.tvLastPlayedGame.text = "Ostatnio zagrana gra: $displayName ($lastPlayedDate)"
         }
-        textView.text = "Ostatnio zagrana gra: $displayName"
-    }
 
     /**
      * Ustawia wartości statystyk dla pojedynczej gry.
@@ -334,17 +322,13 @@ class StatisticsActivity : BaseActivity() {
         reactionId: Int, accuracyId: Int, totalId: Int, bestId: Int,
         reactionValue: Any?, accuracyValue: Any?, totalValue: Any?, bestValue: Any?
     ) {
-        findViewById<TextView>(reactionId).text =
+        binding.root.findViewById<TextView>(reactionId).text =
             getString(R.string.avg_reaction_time_value, reactionValue ?: "N/A")
-
-        findViewById<TextView>(accuracyId).text =
+        binding.root.findViewById<TextView>(accuracyId).text =
             getString(R.string.accuracy_value, accuracyValue ?: "N/A")
-
-        findViewById<TextView>(totalId).text =
+        binding.root.findViewById<TextView>(totalId).text =
             getString(R.string.total_points_value, totalValue ?: "0")
-
-        findViewById<TextView>(bestId).text =
+        binding.root.findViewById<TextView>(bestId).text =
             getString(R.string.highest_score_value, bestValue ?: "0")
     }
-
 }
