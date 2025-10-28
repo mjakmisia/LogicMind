@@ -11,74 +11,67 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SwitchCompat
 import com.example.logicmind.R
+import com.example.logicmind.databinding.ActivitySettingsBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.util.*
 
 class SettingsActivity : BaseActivity() {
 
     private var selectedLanguage: String? = "pl"  // "pl" lub "en"
+    private lateinit var binding :ActivitySettingsBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val sharedPrefs = getSharedPreferences("Settings", MODE_PRIVATE)
-        val currentLang = sharedPrefs.getString("My_Lang", "pl") ?: "pl"
-        val darkModeEnabled = sharedPrefs.getBoolean("DarkMode_Enabled", false)
-
-        // ustaw język i tryb nocny przed setContentView
-        setLocale(currentLang)
-        AppCompatDelegate.setDefaultNightMode(
-            if (darkModeEnabled) AppCompatDelegate.MODE_NIGHT_YES
-            else AppCompatDelegate.MODE_NIGHT_NO
-        )
-
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_settings)
+        binding = ActivitySettingsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
         supportActionBar?.hide()
 
-        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-        bottomNav.selectedItemId = R.id.nav_settings
-
-        val langPl = findViewById<LinearLayout>(R.id.langPl)
-        val langEn = findViewById<LinearLayout>(R.id.langEn)
-
-        val saveBtn = findViewById<Button>(R.id.saveButton)
-        val resetBtn = findViewById<Button>(R.id.resetButton)
-
-        val switchSound = findViewById<SwitchCompat>(R.id.switchSound)
-        val switchDarkMode = findViewById<SwitchCompat>(R.id.switchDarkMode)
-        val switchNotification = findViewById<SwitchCompat>(R.id.switchNotification)
-
-        // ustaw stan przełączników
-        switchSound.isChecked = sharedPrefs.getBoolean("Sound_Enabled", true)
-        switchDarkMode.isChecked = darkModeEnabled
-        switchNotification.isChecked = sharedPrefs.getBoolean("Notifications_Enabled", true)
-
-        // język
+        //aktualne ustawienia
+        val sharedPrefs = getSharedPreferences("Settings", MODE_PRIVATE)
+        val currentLang = sharedPrefs.getString("My_Lang", "pl") ?: "pl"
         selectedLanguage = currentLang
+
+        // ustaw język i tryb nocny przed setContentView
+        //setLocale(currentLang)
+//        AppCompatDelegate.setDefaultNightMode(
+//            if (darkModeEnabled) AppCompatDelegate.MODE_NIGHT_YES
+//            else AppCompatDelegate.MODE_NIGHT_NO
+//        )
+
+        //stan przełączników na start
+        binding.switchSound.isChecked = sharedPrefs.getBoolean("Sound_Enabled", true)
+        binding.switchDarkMode.isChecked = sharedPrefs.getBoolean("DarkMode_Enabled", false)
+        binding.switchNotification.isChecked = sharedPrefs.getBoolean("Notification_Enabled", true)
+
+        //val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+        //bottomNav.selectedItemId = R.id.nav_settings
+
+        //wybór języka
         updateLanguageSelectionUI(currentLang)
 
-        langPl.setOnClickListener {
+        binding.langPl.setOnClickListener {
             selectedLanguage = "pl"
             updateLanguageSelectionUI("pl")
         }
 
-        langEn.setOnClickListener {
+        binding.langEn.setOnClickListener {
             selectedLanguage = "en"
             updateLanguageSelectionUI("en")
         }
 
-        // tryb nocny
-        switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
-            val editor = sharedPrefs.edit()
-            editor.putBoolean("DarkMode_Enabled", isChecked)
-            editor.apply()
-
-            val mode = if (isChecked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
-            AppCompatDelegate.setDefaultNightMode(mode)
+        // Tryb nocny
+        binding.switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
+            sharedPrefs.edit().putBoolean("DarkMode_Enabled", isChecked).apply()
+            AppCompatDelegate.setDefaultNightMode(
+                if (isChecked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+            )
             recreate()
         }
 
-        // zapis ustawień
-        saveBtn.setOnClickListener {
+
+        // przycisk zapisz
+        binding.saveButton.setOnClickListener {
             val currentLangBeforeChange = sharedPrefs.getString("My_Lang", "pl") ?: "pl"
 
             if (selectedLanguage != null) {
@@ -92,16 +85,16 @@ class SettingsActivity : BaseActivity() {
                     .setTitle(getString(R.string.changes))
                     .setMessage(confirmMessage)
                     .setPositiveButton(android.R.string.ok) { _, _ ->
-                        val editor = sharedPrefs.edit()
-                        editor.putString("My_Lang", selectedLanguage)
-                        editor.putBoolean("Sound_Enabled", switchSound.isChecked)
-                        editor.putBoolean("DarkMode_Enabled", switchDarkMode.isChecked)
-                        editor.putBoolean("Notifications_Enabled", switchNotification.isChecked)
-                        editor.apply()
+                        sharedPrefs.edit().apply {
+                            putString("My_Lang", selectedLanguage)
+                            putBoolean("Sound_Enabled", binding.switchSound.isChecked)
+                            putBoolean("DarkMode_Enabled", binding.switchDarkMode.isChecked)
+                            putBoolean("Notifications_Enabled", binding.switchNotification.isChecked)
+                            apply()
+                        }
 
                         // tylko jeśli język się zmienił
                         if (selectedLanguage != currentLangBeforeChange) {
-                            setLocale(selectedLanguage!!)
                             recreate()   // przeładowanie całej aktywności
                         }
 
@@ -112,24 +105,24 @@ class SettingsActivity : BaseActivity() {
         }
 
         // reset ustawień
-        resetBtn.setOnClickListener {
+        binding.resetButton.setOnClickListener {
             AlertDialog.Builder(this)
                 .setTitle(getString(R.string.reset_settings_title))
                 .setMessage(getString(R.string.reset_settings_message))
                 .setPositiveButton("Tak") { _, _ ->
-                    val editor = sharedPrefs.edit()
-                    editor.putString("My_Lang", "pl")
-                    editor.putBoolean("Sound_Enabled", true)
-                    editor.putBoolean("DarkMode_Enabled", false)
-                    editor.putBoolean("Notifications_Enabled", true)
-                    editor.apply()
+                    sharedPrefs.edit().apply {
+                        putString("My_Lang", "pl")
+                        putBoolean("Sound_Enabled", true)
+                        putBoolean("DarkMode_Enabled", false)
+                        putBoolean("Notifications_Enabled", true)
+                        apply()
+                    }
 
-                    switchSound.isChecked = true
-                    switchDarkMode.isChecked = false
-                    switchNotification.isChecked = true
+                    binding.switchSound.isChecked = true
+                    binding.switchDarkMode.isChecked = false
+                    binding.switchNotification.isChecked = true
 
                     selectedLanguage = "pl"
-                    setLocale("pl")
                     updateLanguageSelectionUI("pl")
                     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
@@ -140,41 +133,20 @@ class SettingsActivity : BaseActivity() {
         }
 
         // bottom navigation
-        bottomNav.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_home -> { startActivity(Intent(this, MainActivity::class.java)); true }
-                R.id.nav_statistics -> { startActivity(Intent(this, StatisticsActivity::class.java)); true}
-                R.id.nav_profile -> { startActivity(Intent(this, ProfileActivity::class.java)); true }
-                R.id.nav_settings -> true
-                else -> false
-            }
-        }
+        setupBottomNavigation(binding.includeBottomNav.bottomNavigationView, R.id.nav_settings)
     }
 
-    private fun setLocale(lang: String) {
-        val locale = Locale(lang)
-        Locale.setDefault(locale)
-        val config = Configuration()
-        config.setLocale(locale)
-        resources.updateConfiguration(config, resources.displayMetrics)
-    }
 
     private fun updateLanguageSelectionUI(currentLang: String) {
-        val langPl = findViewById<LinearLayout>(R.id.langPl)
-        val langEn = findViewById<LinearLayout>(R.id.langEn)
-        val textLangPl = langPl.findViewById<TextView>(R.id.textLangPl)
-        val textLangEn = langEn.findViewById<TextView>(R.id.textLangEn)
+        val selectedBg = R.drawable.lang_button_selected
+        val unselectedBg = R.drawable.lang_button_unselected
 
         if (currentLang == "pl") {
-            langPl.setBackgroundResource(R.drawable.lang_button_selected)
-            textLangPl.isSelected = true
-            langEn.setBackgroundResource(R.drawable.lang_button_unselected)
-            textLangPl.isSelected = false
+            binding.langPl.setBackgroundResource(selectedBg)
+            binding.langEn.setBackgroundResource(unselectedBg)
         } else {
-            langEn.setBackgroundResource(R.drawable.lang_button_selected)
-            textLangPl.isSelected = true
-            langPl.setBackgroundResource(R.drawable.lang_button_unselected)
-            textLangPl.isSelected = false
+            binding.langEn.setBackgroundResource(selectedBg)
+            binding.langPl.setBackgroundResource(unselectedBg)
         }
     }
 }

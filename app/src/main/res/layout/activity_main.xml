@@ -141,22 +141,15 @@
         app:layout_constraintTop_toBottomOf="@id/btnRozwiazywanieProblemow"
         app:layout_constraintHeight_percent="0.20" />
 
-    <!-- DOLNY PASEK NAWIGACJI -->
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNavigationView"
+    <!-- Dolny pasek nawigacji -->
+    <include
+        layout="@layout/bottom_navigation"
+        android:id="@+id/includeBottomNav"
         android:layout_width="0dp"
-        android:layout_height="80dp"
-        android:background="?attr/colorOnBackgroundMenu"
-        app:itemIconTint="@color/selector_nav_item_color"
-        app:itemTextColor="@color/selector_nav_item_color"
-        app:itemTextAppearanceActive="@style/BottomNavigationViewText"
-        app:itemTextAppearanceInactive="@style/BottomNavigationViewText"
+        android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:menu="@menu/bottom_nav_menu"
-        app:itemIconSize="40dp"
-        app:labelVisibilityMode="labeled" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
