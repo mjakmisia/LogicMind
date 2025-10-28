@@ -53,7 +53,7 @@ object GameConfigProvider {
                 nameRes = R.string.category_coordination,
                 games = listOf(
                     GameOption("road_dash", R.string.road_dash, R.drawable.ic_close, null),
-                    GameOption("symbol_race", R.string.symbol_race, R.drawable.ic_close,
+                    GameOption("symbol_race", R.string.symbol_race, R.drawable.image_symbol_race,
                         GameIntroActivity::class.java)
                 )
             )

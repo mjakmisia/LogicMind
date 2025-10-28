@@ -79,7 +79,7 @@ object GameIntroProvider {
             "symbol_race" -> GameIntroConfig(
                 colorRes = R.color.category_blue_dark_mode,
                 titleRes = R.string.symbol_race,
-                imageRes = R.drawable.ic_close, //ZMIEŃ
+                imageRes = R.drawable.image_symbol_race,
                 sections = listOf(
 
                 ),

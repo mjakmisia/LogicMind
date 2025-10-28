@@ -446,7 +446,7 @@
                     android:id="@+id/iconArrowPolicy"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_arrow_right"
+                    android:src="@drawable/ic_arrow_play"
                     app:tint="@color/textGrey" />
             </LinearLayout>
 
