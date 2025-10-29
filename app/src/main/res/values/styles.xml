@@ -3,6 +3,8 @@
     <!-- styl do zwiększenia czcionki w dolnym menu -->
     <style name="BottomNavigationViewText" parent="TextAppearance.AppCompat.Caption">
         <item name="android:textSize">14sp</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:paddingTop">@dimen/nav_text_padding_top</item>
     </style>
 
     <style name="PauseButton" parent="Widget.MaterialComponents.Button">

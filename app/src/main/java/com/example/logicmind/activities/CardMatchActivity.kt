@@ -13,7 +13,6 @@ import com.example.logicmind.common.GameTimerProgressBar
 import com.example.logicmind.common.PauseMenu
 import com.example.logicmind.common.StarManager
 import com.example.logicmind.common.SoundManager
-import com.google.firebase.database.FirebaseDatabase
 
 class CardMatchActivity : BaseActivity() {
 
