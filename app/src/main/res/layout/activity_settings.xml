@@ -160,94 +160,105 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <TableLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="16dp">
 
-            <TableRow
-                android:layout_width="match_parent"
+            <!-- Tekst "Language/Język" -->
+            <TextView
+                android:id="@+id/languageLabel"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp">
+                android:text="@string/language"
+                android:textSize="22sp"
+                android:textColor="?attr/colorOnSurface"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.4"
-                    android:text="@string/language"
-                    android:textSize="22sp"
-                    android:textColor="?attr/colorOnSurface"
-                    android:layout_marginEnd="6dp" />
+            <!-- bariera po prawej stronie tekstu (dodaje odstęp) po tekście-->
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/languageBarrier"
+                app:barrierDirection="end"
+                app:constraint_referenced_ids="languageLabel"
+                app:barrierMargin="16dp"
+                android:layout_height="12dp"
+                android:layout_width="4dp"/>
 
+            <LinearLayout
+                android:id="@+id/languageSelector"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                app:layout_constraintStart_toEndOf="@id/languageBarrier"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintHorizontal_bias="1.0">
+
+                <!-- POLSKI -->
                 <LinearLayout
-                    android:id="@+id/languageSelector"
+                    android:id="@+id/langPl"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.6"
+                    android:layout_height="48dp"
+                    android:layout_weight="0.45"
                     android:orientation="horizontal"
-                    android:gravity="end">
+                    android:gravity="center"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/lang_button_selected"
+                    android:clickable="true"
+                    android:focusable="true">
 
-                    <!-- POLSKI -->
-                    <LinearLayout
-                        android:id="@+id/langPl"
-                        android:layout_width="95dp"
-                        android:layout_height="48dp"
-                        android:orientation="horizontal"
-                        android:gravity="center"
-                        android:background="@drawable/lang_button_selected"
-                        android:clickable="true"
-                        android:focusable="true">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginEnd="6dp"
+                        android:src="@drawable/polska_flaga" />
 
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_marginEnd="6dp"
-                            android:src="@drawable/polska_flaga" />
-
-                        <TextView
-                            android:id="@+id/textLangPl"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/polish"
-                            android:textSize="16sp"
-                            android:textColor="@color/lang_text_selector" />
-                    </LinearLayout>
-
-                    <!-- ENGLISH -->
-                    <LinearLayout
-                        android:id="@+id/langEn"
-                        android:layout_width="95dp"
-                        android:layout_height="48dp"
-                        android:layout_marginStart="8dp"
-                        android:orientation="horizontal"
-                        android:gravity="center"
-                        android:background="@drawable/lang_button_unselected"
-                        android:clickable="true"
-                        android:focusable="true">
-
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_marginEnd="6dp"
-                            android:src="@drawable/uk_flaga" />
-
-                        <TextView
-                            android:id="@+id/textLangEn"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/english"
-                            android:textSize="16sp"
-                            android:textColor="@color/lang_text_selector" />
-                    </LinearLayout>
-
+                    <TextView
+                        android:id="@+id/textLangPl"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/polish"
+                        android:textSize="16sp"
+                        android:textColor="@color/lang_text_selector" />
                 </LinearLayout>
-            </TableRow>
-        </TableLayout>
+
+                <!-- ENGLISH -->
+                <LinearLayout
+                    android:id="@+id/langEn"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="0.55"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:background="@drawable/lang_button_unselected"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginEnd="6dp"
+                        android:src="@drawable/uk_flaga" />
+
+                    <TextView
+                        android:id="@+id/textLangEn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/english"
+                        android:textSize="16sp"
+                        android:textColor="@color/lang_text_selector" />
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
+
     <!-- Kontener na przyciski – spięty łańcuchem -->
+
     <LinearLayout
         android:id="@+id/buttonsContainer"
         android:layout_width="0dp"
@@ -256,45 +267,47 @@
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         app:layout_constraintBottom_toTopOf="@id/includeBottomNav"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-    <Button
-        android:id="@+id/resetButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/reset_settings"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/bg_rounded_light_gray"
-        android:backgroundTint="?attr/colorPrimary"
-        android:textColor="?attr/colorOnPrimary"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        app:layout_constraintBottom_toTopOf="@id/saveButton"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent">
 
-    <Button
-        android:id="@+id/saveButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/changes"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:background="@drawable/bg_rounded_light_gray"
-        android:backgroundTint="?attr/colorPrimary"
-        android:textColor="?attr/colorOnPrimary"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="20dp"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        app:layout_constraintBottom_toTopOf="@id/includeBottomNav"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        <Button
+            android:id="@+id/resetButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="3dp"
+            android:layout_marginEnd="3dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_rounded_light_gray"
+            android:backgroundTint="?attr/colorPrimary"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:text="@string/reset_settings"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@id/saveButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Button
+            android:id="@+id/saveButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="3dp"
+            android:layout_marginEnd="3dp"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/bg_rounded_light_gray"
+            android:backgroundTint="?attr/colorPrimary"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:text="@string/changes"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@id/includeBottomNav"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
     </LinearLayout>
 
     <include

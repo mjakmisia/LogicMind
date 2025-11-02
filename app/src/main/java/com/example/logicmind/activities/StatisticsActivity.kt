@@ -1,5 +1,6 @@
 package com.example.logicmind.activities
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -29,13 +30,7 @@ class StatisticsActivity : BaseActivity() {
 
         supportActionBar?.hide()
 
-        //obsługa wcięć systemowych dla bottonNavigationView
-        //dynamicznie ustawia paddingBottom na wysokość paska nav
-        ViewCompat.setOnApplyWindowInsetsListener(binding.includeBottomNav.bottomNavigationView) { view, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.setPadding(0, 0, 0, systemBars.bottom)
-            insets
-        }
+
         //dolne menu
         setupBottomNavigation(binding.includeBottomNav.bottomNavigationView, R.id.nav_statistics)
 

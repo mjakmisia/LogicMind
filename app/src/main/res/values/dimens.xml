@@ -4,6 +4,6 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="kafel_text_size">18sp</dimen>
     <dimen name="nav_icon_size">32dp</dimen>
-    <dimen name="nav_text_padding_top">10dp</dimen>
+    <dimen name="nav_text_padding_top">16dp</dimen>
 
 </resources>

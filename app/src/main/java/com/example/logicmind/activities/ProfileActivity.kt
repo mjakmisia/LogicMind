@@ -30,14 +30,6 @@ class ProfileActivity : BaseActivity() {
 
         supportActionBar?.hide()
 
-        //obsługa wcięć systemowych dla bottonNavigationView
-        //dynamicznie ustawia paddingBottom na wysokość paska nav
-        ViewCompat.setOnApplyWindowInsetsListener(binding.includeBottomNav.bottomNavigationView) {view, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.setPadding(0, 0, 0, systemBars.bottom)
-            insets
-        }
-
         //bottomNav = findViewById(R.id.bottomNavigationView)
         // Ustawienie menu na dole
         setupBottomNavigation(binding.includeBottomNav.bottomNavigationView, R.id.nav_profile)
