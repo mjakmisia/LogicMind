@@ -46,14 +46,14 @@ class StatisticsActivity : BaseActivity() {
             // Ukryj progressbar
             binding.progressBar.visibility = View.GONE
             if(isGuest){
-            // Niezalogowany użytkownik
-            Log.d("StatisticsActivity", "Widok dla niezalogowanego użytkownika")
-            binding.statisticsScrollView.visibility = View.GONE
-            binding.layoutNotLoggedIn.visibility = View.VISIBLE
-            binding.buttonLogin.visibility = View.VISIBLE
-            binding.buttonLogin.setOnClickListener {
-                startActivity(Intent(this, WelcomeActivity::class.java))
-                finish()
+                // Niezalogowany użytkownik
+                Log.d("StatisticsActivity", "Widok dla niezalogowanego użytkownika")
+                binding.statisticsScrollView.visibility = View.GONE
+                binding.layoutNotLoggedIn.visibility = View.VISIBLE
+                binding.buttonLogin.visibility = View.VISIBLE
+                binding.buttonLogin.setOnClickListener {
+                    startActivity(Intent(this, WelcomeActivity::class.java))
+                    finish()
             }
 
         } else {
@@ -67,30 +67,30 @@ class StatisticsActivity : BaseActivity() {
         }
     }
 
-    /**
-     * Pokazuje komunikat i przycisk, gdy użytkownik nie jest zalogowany
-     */
-    private fun showLoginPrompt() {
-        val layoutLoggedIn = findViewById<ScrollView>(R.id.statisticsScrollView)
-        val layoutNotLoggedIn = findViewById<LinearLayout>(R.id.layoutNotLoggedIn)
-        val buttonLogin = findViewById<Button>(R.id.buttonLogin)
-
-        // Ukrywa zawartość statystyk
-        layoutLoggedIn.visibility = View.GONE
-
-        // Pokaż komunikat i przycisk
-        layoutNotLoggedIn.visibility = View.VISIBLE
-        buttonLogin.visibility = View.VISIBLE
-
-        //przejscie z przycisku do strony logowania/rejestracji
-        buttonLogin.setOnClickListener {
-            startActivity(Intent(this, WelcomeActivity::class.java))
-            finish()
-        }
-
-//        // Ustaw domyślny tekst dla tvLastPlayedGame
-//        findViewById<TextView>(R.id.tvLastPlayedGame)?.text = "Ostatnio zagrana gra: Brak"
-    }
+//    /**
+//     * Pokazuje komunikat i przycisk, gdy użytkownik nie jest zalogowany
+//     */
+//    private fun showLoginPrompt() {
+//        val layoutLoggedIn = findViewById<ScrollView>(R.id.statisticsScrollView)
+//        val layoutNotLoggedIn = findViewById<TextView>(R.id.layoutNotLoggedIn)
+//        val buttonLogin = findViewById<Button>(R.id.buttonLogin)
+//
+//        // Ukrywa zawartość statystyk
+//        layoutLoggedIn.visibility = View.GONE
+//
+//        // Pokaż komunikat i przycisk
+//        layoutNotLoggedIn.visibility = View.VISIBLE
+//        buttonLogin.visibility = View.VISIBLE
+//
+//        //przejscie z przycisku do strony logowania/rejestracji
+//        buttonLogin.setOnClickListener {
+//            startActivity(Intent(this, WelcomeActivity::class.java))
+//            finish()
+//        }
+//
+////        // Ustaw domyślny tekst dla tvLastPlayedGame
+////        findViewById<TextView>(R.id.tvLastPlayedGame)?.text = "Ostatnio zagrana gra: Brak"
+//    }
 
 
     /**

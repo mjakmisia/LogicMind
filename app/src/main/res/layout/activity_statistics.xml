@@ -81,7 +81,7 @@
                             android:id="@+id/tvCoordinationGame1Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/coordination_game1"
+                            android:text="@string/road_dash"
                             android:textColor="?attr/text_dark"
                             android:textSize="18sp" />
 
@@ -140,7 +140,7 @@
                             android:id="@+id/tvCoordinationGame2Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/coordination_game2"
+                            android:text="@string/symbol_race"
                             android:textColor="?attr/text_dark"
                             android:textSize="18sp" />
 
@@ -224,7 +224,7 @@
                             android:id="@+id/tvMemoryGame1Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/memory_game1"
+                            android:text="@string/color_sequence"
                             android:textColor="?attr/text_dark"
                             android:textSize="18sp" />
 
@@ -283,7 +283,7 @@
                             android:id="@+id/tvMemoryGame2Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/memory_game2"
+                            android:text="@string/card_match"
                             android:textColor="?attr/text_dark"
                             android:textSize="18sp" />
 
@@ -367,7 +367,7 @@
                             android:id="@+id/tvAttentionGame1Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/attention_game1"
+                            android:text="@string/word_search"
                             android:textColor="?attr/text_dark"
                             android:textSize="18sp" />
 
@@ -426,7 +426,7 @@
                             android:id="@+id/tvAttentionGame2Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/attention_game2"
+                            android:text="@string/fruit_sort"
                             android:textColor="?attr/text_dark"
                             android:textSize="18sp" />
 
@@ -510,7 +510,7 @@
                             android:id="@+id/tvReasoningGame1Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/reasoning_game1"
+                            android:text="@string/number_addition"
                             android:textColor="?attr/text_dark"
                             android:textSize="18sp" />
 
@@ -569,7 +569,7 @@
                             android:id="@+id/tvReasoningGame2Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/reasoning_game2"
+                            android:text="@string/path_change"
                             android:textColor="?attr/text_dark"
                             android:textSize="18sp" />
 

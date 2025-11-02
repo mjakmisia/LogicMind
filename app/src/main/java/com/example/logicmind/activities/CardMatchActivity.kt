@@ -89,6 +89,10 @@ class CardMatchActivity : BaseActivity() {
                 gridLayout.isEnabled = false
                 cards.forEach { it.view.isEnabled = false }
                 pauseOverlay.visibility = View.GONE
+                updateUserStatistics(
+                    gameId = GameKeys.GAME_CARD_MATCH,
+                    starsEarned = starManager.starCount
+                )
                 onGameFinished(GameKeys.CATEGORY_MEMORY, GameKeys.GAME_CARD_MATCH, getString(R.string.card_match))
                 finish()
             }
@@ -132,6 +136,10 @@ class CardMatchActivity : BaseActivity() {
                 }
             }, // Zatrzymuje timer podczas pauzy pod warunkiem że nie jesteśmy w preview
             onExit = {
+                updateUserStatistics(
+                    gameId = GameKeys.GAME_CARD_MATCH,
+                    starsEarned = starManager.starCount
+                )
                 onGameFinished(GameKeys.CATEGORY_MEMORY, GameKeys.GAME_CARD_MATCH, getString(R.string.card_match))
                 finish() }, // Kończy aktywność
             instructionTitle = getString(R.string.instructions),

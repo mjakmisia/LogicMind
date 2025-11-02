@@ -13,6 +13,11 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.example.logicmind.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.GenericTypeIndicator
+import com.google.firebase.database.MutableData
+import com.google.firebase.database.Transaction
 
 /**
  * BaseActivity
@@ -260,6 +265,60 @@ open class BaseActivity : AppCompatActivity() {
         const val GAME_PATH_CHANGE = "path_change"
         const val GAME_ROAD_DASH = "road_dash"
 
+    }
+
+    /**
+     * Aktualizuje statystyki gracza w Firestore po zakończeniu gry
+     * @param gameId - id gry
+     * @param starsEarned - liczba zdobytych gwiazdek
+     * @param score - punktacja w grze
+     * @param accuracy - celność
+     * @param reactionTime - średni czas reakcji
+     */
+
+    protected fun updateUserStatistics(gameId: String, starsEarned: Int = 0, score: Int = 0, accuracy: Double = 0.0, reactionTime: Double = 0.0){
+        val userId = auth.currentUser?.uid ?: return
+
+        val userRef = db.getReference("users").child(userId).child("statistics")
+
+        //runTransaction wykonuje aktualizacje "atomowo" czyli jedną grę na raz
+        //używany do odczytu danych ktore sa zalezne od poprzednich danych
+        //wykonuje się w pętli retry - jeśli ktoś inny zmienił dane między odczytem i zapisem to odczyt jest wykonywany ponownie
+        userRef.runTransaction(object: Transaction.Handler {
+            override fun doTransaction(currentData: MutableData): Transaction.Result {
+                //mutableData - tymczasowy lokalny obiekt rezprezentuje dane węzła na którym robimy transakcje
+
+                val stats = currentData.getValue(object :GenericTypeIndicator<Map<String, Any>>() {}) ?: emptyMap()
+
+                val currentStars = (stats["totalStars"] as? Long ?: 0L).toInt()
+                val currentAvgScore = (stats["avgScore"] as? Long ?: 0L).toInt()
+                val currentAvgAccuracy = (stats["AvgAccuracy"] as? Double ?: 0.0)
+                val currentAvgReactionTime = (stats["AvgReactionTime"] as? Double ?: 0.0)
+
+                //obliczanie nowych średnich
+                val newAvgScore = if(score > 0) (currentAvgScore + score)/2 else currentAvgScore
+                val newAvgAccuracy = if(accuracy > 0) (currentAvgAccuracy + accuracy)/2 else currentAvgAccuracy
+                val newAvgReaction= if(reactionTime > 0) (currentAvgReactionTime + reactionTime)/2 else currentAvgReactionTime
+
+                val updatedStats = mapOf(
+                    "avgScore" to newAvgScore,
+                    "avgAccuracy" to newAvgAccuracy,
+                    "avgReactionTime" to newAvgReaction,
+                    "totalStars" to currentStars + starsEarned
+                )
+
+                currentData.value = updatedStats
+                return Transaction.success(currentData)
+            }
+
+            override fun onComplete(error: DatabaseError?, comitted: Boolean, currentData: DataSnapshot?) {
+                if (error != null){
+                    Log.e("STATS_DEBUG", "Błąd aktualizacji statystyk: ${error.message}")
+                } else {
+                    Log.d("STATS_DEBUG", "Zaktualizowane statystyki dla gry $gameId")
+                }
+            }
+        })
     }
 
 }

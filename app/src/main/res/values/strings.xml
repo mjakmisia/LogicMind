@@ -76,14 +76,6 @@
     <string name="total_points_value">Łączna liczba punktów: %1$s</string>
     <string name="highest_score_value">Najlepszy wynik: %1$s</string>
     <string name="no_data">Brak danych</string>
-    <string name="memory_game1">Color Sequence</string>
-    <string name="memory_game2">Memory Game</string>
-    <string name="attention_game1">Word Search</string>
-    <string name="attention_game2">Left or Right</string>
-    <string name="reasoning_game1">Number Addition</string>
-    <string name="reasoning_game2">Path Change</string>
-    <string name="coordination_game1">Cards on the Roads</string>
-    <string name="coordination_game2">Symbol Race</string>
     <string name="login_text_profile">Zaloguj się, żeby zobaczyć profil użytkownika</string>
     <string name="login_text_statistics">Zaloguj się, żeby zobaczyć statystyki użytkownika</string>
     <string name="login_button_text">ZALOGUJ SIĘ!</string>

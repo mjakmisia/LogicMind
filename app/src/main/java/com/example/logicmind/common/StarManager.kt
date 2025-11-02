@@ -5,6 +5,7 @@ import android.widget.TextView
 
 class StarManager {
     var starCount: Int = 0 // Licznik zdobytych gwiazdek
+        private set
 
     private lateinit var starCountText: TextView // Pole tekstowe wyświetlające liczbę gwiazdek
 
@@ -40,5 +41,9 @@ class StarManager {
     fun restoreState(savedInstanceState: Bundle, key: String = "starCount") {
         starCount = savedInstanceState.getInt(key, 0)
         updateUI()
+    }
+
+    fun getCurrentStarCount(): Int{
+        return starCount
     }
 }
