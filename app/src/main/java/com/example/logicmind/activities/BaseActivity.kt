@@ -221,6 +221,26 @@ open class BaseActivity : AppCompatActivity() {
         }
     }
 
+    protected fun isGuestUser(onResult: (Boolean) -> Unit) {
+        val user = auth.currentUser
+
+        if(user == null || !user.isAnonymous){
+            onResult(false)
+            return
+        }
+
+        //sprawdza czy w bazie istnieje wpisa dla tego uid
+        db.getReference("users").child(user.uid).get()
+            .addOnSuccessListener { snapshot ->
+                //jeżeli snapshot nie istnieje = gość
+                onResult(!snapshot.exists())
+            }
+            .addOnFailureListener {
+                onResult(true)
+            }
+
+    }
+
     /*
     Stałe używane do dostępu do kategorii i gier w bazie danych Firebase.
     Nazwy muszą zgadzać się z tym co jest w bazie

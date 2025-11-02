@@ -9,6 +9,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.logicmind.R
@@ -62,19 +63,34 @@ class ProfileActivity : BaseActivity() {
         scrollView.visibility = View.GONE
         textLoginPrompt.visibility = View.GONE
         buttonLogin.visibility = View.GONE
+        binding.progressBar.visibility = View.VISIBLE
 
         // Pobranie danych użytkownika
         val user = FirebaseAuth.getInstance().currentUser
-        if (user != null) {
-            // Użytkownik zalogowany - pokaż profil i pobierz dane
-            scrollView.visibility = View.VISIBLE
-            loadUserData(user.uid)
-        } else {
-            // Użytkownik niezalogowany - pokaż komunikat i przycisk logowania
-            showLoginPrompt()
+        //poczekaj na wynik czy jest gościem
+        isGuestUser { isGuest ->
+            binding.progressBar.visibility = View.GONE
+            if (isGuest) {
+                // Użytkownik jest gościem
+                showLoginPrompt()
+            } else {
+                binding.scrollView.visibility = View.VISIBLE
+                auth.currentUser?.let {
+                    loadUserData((it.uid))
+                }
+            }
         }
+        //val btnDeleteAccount = findViewById<Button>(R.id.buttonDeleteAccount)
 
-        val btnDeleteAccount = findViewById<Button>(R.id.buttonDeleteAccount)
+        // Ustawienie koloru przycisku programowo
+        val btnDeleteAccount = binding.buttonDeleteAccount
+        // usuń wpływ motywu
+        btnDeleteAccount.backgroundTintList = null
+        // pobierz drawable i zmień jego kolor
+        val drawable = ContextCompat.getDrawable(this, R.drawable.bg_rounded_light_gray)?.mutate()
+        drawable?.setTint(ContextCompat.getColor(this, R.color.red_lighter))
+        btnDeleteAccount.background = drawable
+
         btnDeleteAccount.setOnClickListener {
             //popup czy na pewno chcesz usunąć konto
             val builder = AlertDialog.Builder(this)
@@ -89,6 +105,19 @@ class ProfileActivity : BaseActivity() {
             }
             val dialog = builder.create()
             dialog.show()
+        }
+
+        binding.buttonLogout.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("Wylogowanie")
+                .setMessage("Czy na pewno chcesz się wylogować?")
+                .setPositiveButton("Tak") { _, _ ->
+                    auth.signOut()
+                    startActivity(Intent(this, WelcomeActivity::class.java))
+                    finish()
+                }
+                .setNegativeButton("Nie", null)
+                .show()
         }
     }
 

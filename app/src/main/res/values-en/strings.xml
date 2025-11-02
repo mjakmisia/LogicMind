@@ -63,6 +63,7 @@
     <string name="password_capital_letter">At least 1 uppercase letter</string>
     <string name="password_number">At least 1 number</string>
     <string name="log_in">Log in</string>
+    <string name="logout">Log out</string>
     <string name="register">Register</string>
     <string name="guest">Continue as guest</string>
     <string name="game_statistics">Games statistics</string>
@@ -83,7 +84,8 @@
     <string name="reasoning_game2">Path Change</string>
     <string name="coordination_game1">Cards on the Roads</string>
     <string name="coordination_game2">Symbol Race</string>
-    <string name="login_prompt_text">Log in to view your user profile</string>
+    <string name="login_text_profile">Log in to view your user profile</string>
+    <string name="login_text_statistics">Log in to view your user statistics</string>
     <string name="login_button_text">LOG IN!</string>
     <string name="login_empty_error">Username cannot be empty</string>
     <string name="login_validation">Invalid email or password</string>

@@ -30,33 +30,22 @@ class StatisticsActivity : BaseActivity() {
 
         supportActionBar?.hide()
 
-
         //dolne menu
         setupBottomNavigation(binding.includeBottomNav.bottomNavigationView, R.id.nav_statistics)
 
-//        val layoutLoggedIn = findViewById<ScrollView>(R.id.statisticsScrollView)
-//        val layoutNotLoggedIn = findViewById<LinearLayout>(R.id.layoutNotLoggedIn)
-//        val buttonLogin = findViewById<Button>(R.id.buttonLogin)
-//
-//        // Na start ukryj wszystkie widoki
-//        layoutLoggedIn.visibility = View.GONE
-//        layoutNotLoggedIn.visibility = View.GONE
-//        buttonLogin.visibility = View.GONE
+        // Na start ukryj wszystkie widoki
+        binding.statisticsScrollView.visibility = View.GONE
+        binding.layoutNotLoggedIn.visibility = View.GONE
+        binding.progressBar.visibility = View.VISIBLE
 
         val user = auth.currentUser //pobranie bieżącego użytkownika
         // Debugowanie: Logowanie stanu użytkownika
         Log.d("StatisticsActivity", "User: ${user?.uid ?: "null"}")
 
-        if (user != null) {
-            // Zalogowany użytkownik
-            Log.d("StatisticsActivity", "Widok dla zalogowanego użytkownika")
-            binding.statisticsScrollView.visibility = View.VISIBLE
-            binding.layoutNotLoggedIn.visibility = View.GONE
-
-            setupExpandableStats() //rozwijanie statystyk
-            loadUserStats(user.uid) //ładowanie statystyk z bazy
-            loadLastPlayedGame(user.uid) //ostatnio zagrana gra
-        } else {
+        isGuestUser { isGuest ->
+            // Ukryj progressbar
+            binding.progressBar.visibility = View.GONE
+            if(isGuest){
             // Niezalogowany użytkownik
             Log.d("StatisticsActivity", "Widok dla niezalogowanego użytkownika")
             binding.statisticsScrollView.visibility = View.GONE
@@ -65,6 +54,15 @@ class StatisticsActivity : BaseActivity() {
             binding.buttonLogin.setOnClickListener {
                 startActivity(Intent(this, WelcomeActivity::class.java))
                 finish()
+            }
+
+        } else {
+                // Zalogowany użytkownik
+                Log.d("StatisticsActivity", "Widok dla zalogowanego użytkownika")
+                binding.statisticsScrollView.visibility = View.VISIBLE
+                binding.layoutNotLoggedIn.visibility = View.GONE
+                setupExpandableStats() //rozwijanie statystyk
+                auth.currentUser?.let { loadUserStats(it.uid) }
             }
         }
     }
