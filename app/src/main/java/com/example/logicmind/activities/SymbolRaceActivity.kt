@@ -6,7 +6,9 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
+import android.view.MotionEvent
 import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -24,82 +26,85 @@ import androidx.core.graphics.toColorInt
 class SymbolRaceActivity : BaseActivity() {
 
     // UI elementy gry
-    private lateinit var trackContainer: FrameLayout        // Kontener na kółka (ścieżka)
-    private lateinit var trackLine: View                     // Linia toru (wizualna)
-    private lateinit var countdownText: TextView            // Tekst odliczania początkowego
-    private lateinit var pauseButton: ImageButton           // Przycisk pauzy
-    private lateinit var pauseOverlay: ConstraintLayout     // Nakładka menu pauzy
-    private lateinit var timerProgressBar: GameTimerProgressBar // Pasek postępu czasu gry
-    private lateinit var starManager: StarManager           // Manager gwiazdek (punkty)
-    private lateinit var pauseMenu: PauseMenu               // Menu pauzy
-    private lateinit var countdownManager: GameCountdownManager // Manager odliczania startowego
-    private lateinit var blueContainer: FrameLayout         // Lewy pojemnik (klik = niebieski)
-    private lateinit var redContainer: FrameLayout          // Prawy pojemnik (klik = czerwony)
+    private lateinit var trackContainer: FrameLayout // Kontener na koła w grze
+    private lateinit var trackLine: View // Linia pod kołami
+    private lateinit var countdownText: TextView // Tekst odliczania przed startem
+    private lateinit var pauseButton: ImageButton // Przycisk pauzy
+    private lateinit var pauseOverlay: ConstraintLayout // Nakładka menu pauzy
+    private lateinit var timerProgressBar: GameTimerProgressBar // Pasek czasu gry
+    private lateinit var starManager: StarManager // Zarządzanie gwiazdkami
+    private lateinit var pauseMenu: PauseMenu // Logika menu pauzy
+    private lateinit var countdownManager: GameCountdownManager // Odliczanie startowe
+    private lateinit var blueContainer: FrameLayout // Lewy kontener (niebieski)
+    private lateinit var redContainer: FrameLayout // Prawy kontener (czerwony)
 
     // Stan gry
-    private val circleQueue = mutableListOf<Circle>()       // Kolejka kółek: indeks 0 = góra (najnowsze), ostatni = dół (do kliknięcia)
-    private var isProcessing = false                        // Flaga: trwa usuwanie kółka (blokada autoShift)
-    private val handler = Handler(Looper.getMainLooper())   // Handler do opóźnień (autoShift, BLOCK, itp.)
-    private var autoShiftRunnable: Runnable? = null         // Zadanie cykliczne: automatyczne przesuwanie
-    private var awaitingDoubleClick = false                 // Flaga: oczekujemy drugiego kliknięcia (DOUBLE_LEFT/RIGHT)
+    private val circleQueue = mutableListOf<Circle>() // Kolejka kół, ostatnie = dolne
+    private var isProcessing = false // Blokada podczas animacji
+    private val handler = Handler(Looper.getMainLooper()) // Handler UI dla runDelayed
+
+    // Podwójne kliknięcia
+    private var awaitingDoubleClick = false // Czy oczekujemy drugiego tapnięcia
+    private var awaitingDoubleSide: Int? = null // 1 = lewo, -1 = prawo
+    private var awaitingDoubleForId: Int? = null // ID koła dla double-tap
+
+    private var nextCircleId = 1 // Unikalne ID dla nowych kół
+
+    // Gest BOTH – tap-tap w 300ms
+    private var lastTapTime: Long = 0 // Czas ostatniego tapnięcia
+    private var lastTapSide: Boolean? = null // Strona ostatniego tapnięcia
+    private val bothTapWindowMs = 300L // Okno czasowe dla gestu BOTH
+    private val animationDurationMs = 300L // Czas trwania animacji
 
     companion object {
-        private const val BASE_TIME_SECONDS = 90             // Czas gry w sekundach
-        private const val REACTION_TIME_MS = 5000L           // Co ile ms przesuwa się kółko (jeśli nie kliknięto)
-        private const val CIRCLE_SIZE_DP = 130               // Rozmiar kółka w dp
-        private const val VISIBLE_CIRCLES = 4                // Ile kółek widać na ekranie
+        private const val BASE_TIME_SECONDS = 90 // Całkowity czas gry
+        private const val REACTION_TIME_MS = 10000L // Maksymalny czas na reakcję
+        private const val BLOCK_DELAY_MS = 2000L // Czas auto-usunięcia BLOCK
+        private const val CIRCLE_SIZE_DP = 130 // Rozmiar koła w dp
+        private const val VISIBLE_CIRCLES = 4 // Liczba widocznych kół
     }
 
-    // Kolory kółek i ich obramowania
-    private val RED_COLOR = "#EF5350".toColorInt()      // Kolor czerwonego kółka
-    private val BLUE_COLOR = "#4FC3F7".toColorInt()     // Kolor niebieskiego kółka
-    private val RED_STROKE = "#D32F2F".toColorInt()     // Obramowanie czerwonego
-    private val BLUE_STROKE = "#0288D1".toColorInt()    // Obramowanie niebieskiego
-    private val STROKE_WIDTH_DP = 6                          // Grubość obramowania w dp
+    private val redColor = "#EF5350".toColorInt() // Kolor czerwony
+    private val blueColor = "#4FC3F7".toColorInt() // Kolor niebieski
+    private val redStroke = "#D32F2F".toColorInt() // Obramowanie czerwone
+    private val blueStroke = "#0288D1".toColorInt() // Obramowanie niebieskie
+    private val strokeWidthDp = 6 // Grubość obramowania koła
 
-    // Typy symboli na kółkach
+    // Typy symboli
     private enum class Symbol {
-        EMPTY,       // Puste – dopasuj kolor
-        LEFT,        // Strzałka w lewo – kliknij lewy pojemnik
-        RIGHT,       // Strzałka w prawo – kliknij prawy pojemnik
-        BOTH,        // Zakaz – nie klikaj nigdzie
-        DOUBLE_LEFT, // Podwójna lewa – dwa szybkie kliki w lewo
-        DOUBLE_RIGHT,// Podwójna prawa – dwa szybkie kliki w prawo
-        SWAP,        // Zamiana – kliknij przeciwny kolor
-        TARGET,      // Cel – kliknij kółko, gdy jest na dole
-        BLOCK        // Blokada – poczekaj 2s, aż zniknie
+        EMPTY, LEFT, RIGHT, BOTH, DOUBLE_LEFT, DOUBLE_RIGHT, SWAP, TARGET, BLOCK
     }
 
-    // Klasa danych kółka
     private data class Circle(
-        val view: ImageView,                                // Widok ImageView kółka
-        val color: Int,                                     // Kolor tła (czerwony/niebieski)
-        val symbol: Symbol                                  // Symbol na kółku
+        val id: Int,            // Unikalne ID koła
+        val view: ImageView,    // Widok koła
+        val color: Int,         // Kolor tła koła
+        val symbol: Symbol      // Symbol na kole
     )
 
+    // Inicjalizacja aktywności
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_symbol_race)
         supportActionBar?.hide()
 
-        initViews()                  // Inicjalizacja widoków
-        setupTimer()                 // Konfiguracja paska czasu
-        setupCountdown()             // Konfiguracja odliczania startowego
-        setupPauseMenu()             // Konfiguracja menu pauzy
-        setupClickListeners()        // Nasłuchiwanie kliknięć na pojemniki
+        initViews()
+        setupTimer()
+        setupCountdown()
+        setupPauseMenu()
+        setupTouchListeners()
 
         if (savedInstanceState == null) {
-            // Pierwsze uruchomienie – ukryj elementy przed odliczaniem
             trackLine.visibility = View.GONE
             blueContainer.visibility = View.INVISIBLE
             redContainer.visibility = View.INVISIBLE
             countdownManager.startCountdown()
         } else {
-            restoreGameState(savedInstanceState) // Przywróć stan po rotacji
+            restoreGameState(savedInstanceState)
         }
     }
 
-    // Inicjalizacja widoków
+    // Inicjalizacja widoków UI
     private fun initViews() {
         trackContainer = findViewById(R.id.trackContainer)
         trackLine = findViewById(R.id.trackLine)
@@ -114,13 +119,117 @@ class SymbolRaceActivity : BaseActivity() {
         trackContainer.clipChildren = false
     }
 
-    // Nasłuchiwanie kliknięć na lewy/prawy pojemnik
-    private fun setupClickListeners() {
-        blueContainer.setOnClickListener { onContainerClick(isBlue = true) }
-        redContainer.setOnClickListener { onContainerClick(isBlue = false) }
+    // Ustawia nasłuchiwanie dotyku na kontenerach z performClick
+    private fun setupTouchListeners() {
+        blueContainer.setOnTouchListener { view, event ->
+            if (event.action == MotionEvent.ACTION_DOWN) {
+                view.performClick() // Accessibility
+            }
+            handleContainerTouch(isBlue = true, event)
+            true
+        }
+        redContainer.setOnTouchListener { view, event ->
+            if (event.action == MotionEvent.ACTION_DOWN) {
+                view.performClick() // Accessibility
+            }
+            handleContainerTouch(isBlue = false, event)
+            true
+        }
     }
 
-    // Konfiguracja paska czasu
+    // Obsługuje dotyk na niebieskim/czerwonym kontenerze
+    private fun handleContainerTouch(isBlue: Boolean, event: MotionEvent) {
+        if (circleQueue.isEmpty() || isProcessing || pauseMenu.isPaused) return
+
+        val bottomCircle = circleQueue.last()
+        val symbol = bottomCircle.symbol
+
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                val currentTime = System.currentTimeMillis()
+
+                if (symbol == Symbol.BOTH) {
+                    if (lastTapTime > 0 && (currentTime - lastTapTime) <= bothTapWindowMs && lastTapSide != isBlue) {
+                        lastTapTime = 0
+                        lastTapSide = null
+                        animateCorrectBoth(bottomCircle)
+                        return
+                    } else {
+                        lastTapTime = currentTime
+                        lastTapSide = isBlue
+                        runDelayed(bothTapWindowMs + 50) {
+                            if (lastTapTime == currentTime && circleQueue.isNotEmpty() && circleQueue.last() == bottomCircle && !isProcessing) {
+                                animateError(bottomCircle)
+                            }
+                        }
+                        return
+                    }
+                } else {
+                    onContainerPressed(isBlue)
+                }
+            }
+        }
+    }
+
+    // Sprawdza poprawność ruchu po dotknięciu
+    private fun onContainerPressed(isBlue: Boolean) {
+        if (circleQueue.isEmpty() || isProcessing || pauseMenu.isPaused) return
+
+        val bottomCircle = circleQueue.last()
+        val color = bottomCircle.color
+        val symbol = bottomCircle.symbol
+        val isRedCircle = color == redColor
+
+        var correct: Boolean
+
+        if (awaitingDoubleClick && awaitingDoubleForId != bottomCircle.id) {
+            clearAwaitingDouble()
+        }
+
+        when (symbol) {
+            Symbol.EMPTY -> correct = (isBlue && color == blueColor) || (!isBlue && color == redColor)
+            Symbol.LEFT -> correct = isBlue
+            Symbol.RIGHT -> correct = !isBlue
+            Symbol.DOUBLE_LEFT -> {
+                if (!awaitingDoubleClick && isBlue) {
+                    startAwaitingDouble(forId = bottomCircle.id, side = 1)
+                    return
+                }
+                if (awaitingDoubleClick && awaitingDoubleForId == bottomCircle.id && isBlue && awaitingDoubleSide == 1) {
+                    correct = true
+                    clearAwaitingDouble()
+                } else {
+                    clearAwaitingDouble()
+                    correct = false
+                }
+            }
+            Symbol.DOUBLE_RIGHT -> {
+                if (!awaitingDoubleClick && !isBlue) {
+                    startAwaitingDouble(forId = bottomCircle.id, side = -1)
+                    return
+                }
+                if (awaitingDoubleClick && awaitingDoubleForId == bottomCircle.id && !isBlue && awaitingDoubleSide == -1) {
+                    correct = true
+                    clearAwaitingDouble()
+                } else {
+                    clearAwaitingDouble()
+                    correct = false
+                }
+            }
+            Symbol.SWAP -> correct = (isBlue && isRedCircle) || (!isBlue && !isRedCircle)
+            Symbol.TARGET -> { animateError(bottomCircle); return }
+            Symbol.BLOCK -> { animateError(bottomCircle); return }
+            Symbol.BOTH -> { animateError(bottomCircle); return }
+        }
+
+        if (correct) {
+            animateCorrectMove(bottomCircle, isBlue)
+        } else {
+            animateError(bottomCircle)
+        }
+    }
+
+    // Konfiguruje pasek czasu gry
     private fun setupTimer() {
         timerProgressBar.setTotalTime(BASE_TIME_SECONDS)
         timerProgressBar.setOnFinishCallback {
@@ -131,21 +240,15 @@ class SymbolRaceActivity : BaseActivity() {
         }
     }
 
-    // Konfiguracja odliczania początkowego
+    // Ustawia odliczanie przed startem gry
     private fun setupCountdown() {
         countdownManager = GameCountdownManager(
             countdownText = countdownText,
             gameView = trackContainer,
-            viewsToHide = listOf(
-                pauseButton,
-                findViewById(R.id.starCountText),
-                findViewById(R.id.starIcon),
-                timerProgressBar
-            ),
+            viewsToHide = listOf(pauseButton, findViewById(R.id.starCountText), findViewById(R.id.starIcon), timerProgressBar),
             onCountdownFinished = {
                 starManager.reset()
                 timerProgressBar.start()
-                // Przywracamy widoczność po odliczaniu
                 trackLine.visibility = View.VISIBLE
                 blueContainer.visibility = View.VISIBLE
                 redContainer.visibility = View.VISIBLE
@@ -154,7 +257,7 @@ class SymbolRaceActivity : BaseActivity() {
         )
     }
 
-    // Konfiguracja menu pauzy
+    // Konfiguruje menu pauzy
     private fun setupPauseMenu() {
         pauseMenu = PauseMenu(
             context = this,
@@ -163,14 +266,19 @@ class SymbolRaceActivity : BaseActivity() {
             onRestart = {
                 if (pauseMenu.isPaused) pauseMenu.resume()
                 timerProgressBar.reset()
-                // Ukrywamy przed odliczaniem
                 trackLine.visibility = View.GONE
                 blueContainer.visibility = View.INVISIBLE
                 redContainer.visibility = View.INVISIBLE
                 countdownManager.startCountdown()
             },
-            onResume = { timerProgressBar.start() },
-            onPause = { timerProgressBar.pause() },
+            onResume = {
+                timerProgressBar.start()
+                startAutoShift() // Wznów auto-shift po pauzie
+            },
+            onPause = {
+                timerProgressBar.pause()
+                // runDelayed automatycznie się zatrzyma
+            },
             onExit = { finish() },
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.path_change_instruction)
@@ -181,17 +289,18 @@ class SymbolRaceActivity : BaseActivity() {
     private fun startNewGame() {
         circleQueue.clear()
         trackContainer.removeAllViews()
-        trackLine.visibility = View.VISIBLE
-
+        lastTapTime = 0
+        lastTapSide = null
         repeat(VISIBLE_CIRCLES) { createCircle() }
         updatePositionsInstantly()
         startAutoShift()
+        startActiveCircleTimer()
     }
 
-    // Tworzy nowe kółko i dodaje je na górę kolejki
+    // Tworzy nowe koło
     private fun createCircle() {
         val isRed = Random.nextBoolean()
-        val color = if (isRed) RED_COLOR else BLUE_COLOR
+        val color = if (isRed) redColor else blueColor
         val symbol = Symbol.entries.random()
 
         val view = ImageView(this).apply {
@@ -205,85 +314,179 @@ class SymbolRaceActivity : BaseActivity() {
             setPadding(dpToPx(16), dpToPx(16), dpToPx(16), dpToPx(16))
         }
 
-        trackContainer.addView(view)
-        val circle = Circle(view, color, symbol)
-
-        // Dodajemy nowe kółko na górę kolejki
+        val circle = Circle(nextCircleId++, view, color, symbol)
         circleQueue.add(0, circle)
+        trackContainer.addView(view)
 
-        // Obsługa specjalnych symboli
-        when (symbol) {
-            Symbol.BLOCK -> handler.postDelayed({
-                // Gwiazdka za przeczekanie 2s
-                if (circleQueue.isNotEmpty() && circleQueue.last() == circle) {
-                    removeBottomCircle(showStar = true)
-                }
-            }, 2000L)
-            Symbol.TARGET -> view.setOnClickListener {
-                if (circleQueue.isNotEmpty() && circleQueue.last() == circle) {
-                    removeBottomCircle(showStar = true)
+        if (circleQueue.last() == circle) {
+            lastTapTime = 0
+            lastTapSide = null
+            startActiveCircleTimer()
+        }
+
+        view.setOnClickListener {
+            if (circleQueue.isNotEmpty() && circleQueue.last() == circle) {
+                when (symbol) {
+                    Symbol.TARGET -> animateCorrectInstant(circle)
+                    else -> animateError(circle)
                 }
             }
-            else -> {}
         }
     }
 
-    // Obsługuje kliknięcie na lewy (isBlue=true) lub prawy (isBlue=false) pojemnik
-    private fun onContainerClick(isBlue: Boolean) {
-        if (circleQueue.isEmpty()) return
-        val bottomCircle = circleQueue.last()
-        val color = bottomCircle.color
-        val symbol = bottomCircle.symbol
-        val isRedCircle = color == RED_COLOR
+    // Animuje poprawny ruch koła
+    private fun animateCorrectMove(circle: Circle, toBlue: Boolean) {
+        if (isProcessing) return
+        isProcessing = true
 
-        var correct = false
+        val view = circle.view
+        val targetX = if (toBlue) blueContainer.x + blueContainer.width / 2 - view.width / 2
+        else redContainer.x + redContainer.width / 2 - view.width / 2
 
-        when (symbol) {
-            Symbol.EMPTY -> correct = (isBlue && color == BLUE_COLOR) || (!isBlue && color == RED_COLOR)
-            Symbol.LEFT -> correct = isBlue
-            Symbol.RIGHT -> correct = !isBlue
-            Symbol.DOUBLE_LEFT -> {
-                if (!awaitingDoubleClick && isBlue) {
-                    awaitingDoubleClick = true
-                    handler.postDelayed({ awaitingDoubleClick = false }, 600L)
-                    return
-                } else if (awaitingDoubleClick && isBlue) {
-                    correct = true
-                    awaitingDoubleClick = false
-                }
+        view.animate()
+            .x(targetX)
+            .setDuration(animationDurationMs)
+            .setInterpolator(AccelerateDecelerateInterpolator())
+            .withEndAction {
+                removeBottomCircleAfterAnimation(circle, showStar = true)
             }
-            Symbol.DOUBLE_RIGHT -> {
-                if (!awaitingDoubleClick && !isBlue) {
-                    awaitingDoubleClick = true
-                    handler.postDelayed({ awaitingDoubleClick = false }, 600L)
-                    return
-                } else if (awaitingDoubleClick && !isBlue) {
-                    correct = true
-                    awaitingDoubleClick = false
-                }
-            }
-            Symbol.BOTH -> correct = false
-            Symbol.SWAP -> correct = (isBlue && isRedCircle) || (!isBlue && !isRedCircle)
-            Symbol.TARGET, Symbol.BLOCK -> return
-        }
-
-        if (correct) starManager.increment()
-        removeBottomCircle(showStar = false)
+            .start()
     }
 
-    // Usuwa kółko z dołu kolejki i tworzy nowe na górze
-    private fun removeBottomCircle(showStar: Boolean) {
-        if (circleQueue.isEmpty()) return
-        val removed = circleQueue.removeAt(circleQueue.lastIndex)
-        trackContainer.removeView(removed.view)
+    // Animuje poprawny gest BOTH
+    private fun animateCorrectBoth(circle: Circle) {
+        if (isProcessing) return
+        isProcessing = true
+
+        val view = circle.view
+        val centerX = view.x
+        val leftX = blueContainer.x + blueContainer.width / 2 - view.width / 2
+        val rightX = redContainer.x + redContainer.width / 2 - view.width / 2
+
+        val leftCopy = ImageView(this).apply {
+            layoutParams = view.layoutParams
+            setImageDrawable(view.drawable)
+            background = view.background
+            scaleType = ImageView.ScaleType.FIT_CENTER
+            x = centerX
+            y = view.y
+            elevation = 10f
+        }
+        val rightCopy = ImageView(this).apply {
+            layoutParams = view.layoutParams
+            setImageDrawable(view.drawable)
+            background = view.background
+            scaleType = ImageView.ScaleType.FIT_CENTER
+            x = centerX
+            y = view.y
+            elevation = 10f
+        }
+        trackContainer.addView(leftCopy)
+        trackContainer.addView(rightCopy)
+
+        view.visibility = View.INVISIBLE
+
+        leftCopy.animate().x(leftX).setDuration(animationDurationMs)
+            .setInterpolator(AccelerateDecelerateInterpolator())
+            .withEndAction { leftCopy.visibility = View.GONE }.start()
+
+        rightCopy.animate().x(rightX).setDuration(animationDurationMs)
+            .setInterpolator(AccelerateDecelerateInterpolator())
+            .withEndAction {
+                rightCopy.visibility = View.GONE
+                removeBottomCircleAfterAnimation(circle, showStar = true)
+            }.start()
+    }
+
+    // Animuje natychmiastowy sukces (TARGET)
+    private fun animateCorrectInstant(circle: Circle) {
+        if (isProcessing) return
+        isProcessing = true
+
+        circle.view.animate()
+            .alpha(0f)
+            .scaleX(0.8f)
+            .scaleY(0.8f)
+            .setDuration(animationDurationMs)
+            .withEndAction {
+                removeBottomCircleAfterAnimation(circle, showStar = true)
+            }
+            .start()
+    }
+
+    // Animuje błąd
+    private fun animateError(circle: Circle) {
+        if (isProcessing) return
+        isProcessing = true
+
+        circle.view.animate()
+            .alpha(0f)
+            .scaleX(0.5f)
+            .scaleY(0.5f)
+            .setDuration(animationDurationMs)
+            .withEndAction {
+                removeBottomCircleAfterAnimation(circle, showStar = false)
+            }
+            .start()
+    }
+
+    // Usuwa koło po animacji
+    private fun removeBottomCircleAfterAnimation(removedCircle: Circle, showStar: Boolean) {
+        trackContainer.removeView(removedCircle.view)
+        circleQueue.remove(removedCircle)
+
         if (showStar) starManager.increment()
 
-        // Tworzymy nowe kółko na górze
+        if (awaitingDoubleForId == removedCircle.id) clearAwaitingDouble()
+
         createCircle()
         updatePositionsInstantly()
+        startActiveCircleTimer()
+        isProcessing = false
     }
 
-    // Mapuje symbol na odpowiedni drawable
+    // Uruchamia timer reakcji dla dolnego koła
+    private fun startActiveCircleTimer() {
+        if (circleQueue.isEmpty()) return
+        val bottomCircle = circleQueue.last()
+
+        runDelayed(REACTION_TIME_MS) {
+            if (circleQueue.isNotEmpty() && circleQueue.last() == bottomCircle && !isProcessing) {
+                animateError(bottomCircle)
+            }
+        }
+
+        if (bottomCircle.symbol == Symbol.BLOCK) {
+            runDelayed(BLOCK_DELAY_MS) {
+                if (circleQueue.isNotEmpty() && circleQueue.last() == bottomCircle && !isProcessing) {
+                    animateCorrectInstant(bottomCircle)
+                }
+            }
+        }
+    }
+
+    // Rozpoczyna oczekiwanie na double-tap
+    private fun startAwaitingDouble(forId: Int, side: Int) {
+        awaitingDoubleClick = true
+        awaitingDoubleSide = side
+        awaitingDoubleForId = forId
+
+        runDelayed(600L) {
+            if (circleQueue.isNotEmpty() && circleQueue.last().id == forId && !isProcessing) {
+                animateError(circleQueue.last())
+            }
+            clearAwaitingDouble()
+        }
+    }
+
+    // Czyści stan double-tap
+    private fun clearAwaitingDouble() {
+        awaitingDoubleClick = false
+        awaitingDoubleSide = null
+        awaitingDoubleForId = null
+    }
+
+    // Zwraca drawable dla symbolu
     private fun getSymbolDrawable(symbol: Symbol): Int = when (symbol) {
         Symbol.EMPTY -> 0
         Symbol.LEFT -> R.drawable.ic_arrow_left
@@ -296,17 +499,17 @@ class SymbolRaceActivity : BaseActivity() {
         Symbol.BLOCK -> R.drawable.ic_close
     }
 
-    // Tworzy tło kółka z kolorem i obramowaniem
+    // Tworzy tło koła z obramowaniem
     private fun createCircleBackground(color: Int): Drawable {
-        val strokeColor = if (color == RED_COLOR) RED_STROKE else BLUE_STROKE
+        val strokeColor = if (color == redColor) redStroke else blueStroke
         return GradientDrawable().apply {
             shape = GradientDrawable.OVAL
             setColor(color)
-            setStroke(dpToPx(STROKE_WIDTH_DP), strokeColor)
+            setStroke(dpToPx(strokeWidthDp), strokeColor)
         }
     }
 
-    // Aktualizuje pozycje Y wszystkich widocznych kółek (natychmiastowo)
+    // Aktualizuje pozycje kół na ekranie
     private fun updatePositionsInstantly() {
         val trackHeight = trackContainer.height
         if (trackHeight == 0) {
@@ -339,38 +542,25 @@ class SymbolRaceActivity : BaseActivity() {
         }
     }
 
-    // Uruchamia automatyczne przesuwanie kółek co REACTION_TIME_MS
+    // Uruchamia timer auto-przesuwania kół
     private fun startAutoShift() {
-        cancelAutoShift()
-        autoShiftRunnable = object : Runnable {
-            override fun run() {
-                if (isProcessing || circleQueue.size < VISIBLE_CIRCLES) {
-                    handler.postDelayed(this, REACTION_TIME_MS)
-                    return
-                }
-                isProcessing = true
-                removeBottomCircle(showStar = false)
-                isProcessing = false
-                handler.postDelayed(this, REACTION_TIME_MS)
+        fun shiftAction() {
+            if (isProcessing || circleQueue.size < VISIBLE_CIRCLES) {
+                runDelayed(REACTION_TIME_MS) { shiftAction() }
+                return
             }
+            runDelayed(REACTION_TIME_MS) { shiftAction() }
         }
-        handler.postDelayed(autoShiftRunnable!!, REACTION_TIME_MS)
+        runDelayed(REACTION_TIME_MS) { shiftAction() }
     }
 
-    // Anuluje automatyczne przesuwanie
-    private fun cancelAutoShift() {
-        autoShiftRunnable?.let { handler.removeCallbacks(it) }
-        autoShiftRunnable = null
-    }
-
-    // Kończy grę – wyłącza wszystko i zamyka aktywność
+    // Kończy grę
     private fun endGame() {
-        cancelAutoShift()
         trackContainer.isEnabled = false
         finish()
     }
 
-    // Zapisuje stan gry (do rotacji ekranu)
+    // Zapisuje stan gry
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putInt("pauseOverlayVisibility", pauseOverlay.visibility)
@@ -382,7 +572,7 @@ class SymbolRaceActivity : BaseActivity() {
         starManager.saveState(outState)
     }
 
-    // Przywraca stan gry po rotacji
+    // Przywraca stan gry
     private fun restoreGameState(savedInstanceState: Bundle) {
         pauseOverlay.visibility = savedInstanceState.getInt("pauseOverlayVisibility", View.GONE)
         countdownText.visibility = savedInstanceState.getInt("countdownTextVisibility", View.GONE)
@@ -396,24 +586,49 @@ class SymbolRaceActivity : BaseActivity() {
         pauseMenu.syncWithOverlay()
         starManager.restoreState(savedInstanceState)
         trackContainer.post {
-            if (circleQueue.isNotEmpty()) updatePositionsInstantly()
+            if (circleQueue.isNotEmpty()) {
+                updatePositionsInstantly()
+                startActiveCircleTimer()
+            }
         }
     }
 
-    // Automatyczna pauza przy wyjściu z aktywności
+    // Automatyczna pauza przy wyjściu z aplikacji
     override fun onPause() {
         super.onPause()
-        if (!pauseMenu.isPaused && !isChangingConfigurations) pauseMenu.pause()
+        if (!pauseMenu.isPaused && !isChangingConfigurations) {
+            pauseMenu.pause()
+        }
     }
 
-    // Czyszczenie zasobów
     override fun onDestroy() {
         super.onDestroy()
         timerProgressBar.cancel()
         countdownManager.cancel()
-        cancelAutoShift()
     }
 
-    // Konwersja dp na px
+    // Konwertuje dp na px
     private fun dpToPx(dp: Int): Int = (dp * resources.displayMetrics.density).toInt()
+
+    // Uniwersalna funkcja opóźnienia
+    private fun runDelayed(delay: Long, action: () -> Unit) {
+        var remaining = delay
+        val interval = 16L // ~60fps
+
+        val runnable = object : Runnable {
+            override fun run() {
+                if (pauseMenu.isPaused) {
+                    handler.postDelayed(this, interval)
+                    return
+                }
+                remaining -= interval
+                if (remaining <= 0) {
+                    action()
+                } else {
+                    handler.postDelayed(this, interval)
+                }
+            }
+        }
+        handler.postDelayed(runnable, interval)
+    }
 }
