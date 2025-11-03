@@ -63,7 +63,7 @@ class NumberAdditionActivity : BaseActivity() {
                 Toast.makeText(this, "Czas minął! Koniec gry!", Toast.LENGTH_LONG).show()
                 numberGrid.isEnabled = false
                 pauseOverlay.visibility = View.GONE
-                onGameFinished(GameKeys.CATEGORY_REASONING, GameKeys.GAME_NUMBER_ADDITION, getString(R.string.number_addition))
+                lastPlayedGame(GameKeys.CATEGORY_REASONING, GameKeys.GAME_NUMBER_ADDITION, getString(R.string.number_addition))
                 finish()
             }
         }
@@ -120,8 +120,8 @@ class NumberAdditionActivity : BaseActivity() {
                 timerProgressBar.pause()
             },
             onExit = {
-                onGameFinished(GameKeys.CATEGORY_REASONING, GameKeys.GAME_NUMBER_ADDITION, getString(R.string.number_addition),
-                    onSuccess = { Toast.makeText(this, "Gra zapisana do lastPlayed", Toast.LENGTH_LONG).show() } )
+                lastPlayedGame(GameKeys.CATEGORY_REASONING, GameKeys.GAME_NUMBER_ADDITION, getString(R.string.number_addition),
+                    onSuccess = {  } )
                 finish() },
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.number_addition_instruction),
@@ -439,7 +439,7 @@ class NumberAdditionActivity : BaseActivity() {
         Toast.makeText(this, "Koniec gry!", Toast.LENGTH_LONG).show()
         numberGrid.isEnabled = false
         pauseOverlay.visibility = View.GONE
-        onGameFinished(GameKeys.CATEGORY_REASONING, GameKeys.GAME_NUMBER_ADDITION, getString(R.string.number_addition))
+        lastPlayedGame(GameKeys.CATEGORY_REASONING, GameKeys.GAME_NUMBER_ADDITION, getString(R.string.number_addition))
         finish()
     }
 

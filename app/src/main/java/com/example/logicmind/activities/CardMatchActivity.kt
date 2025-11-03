@@ -8,11 +8,12 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.gridlayout.widget.GridLayout
 import com.example.logicmind.R
+import com.example.logicmind.activities.BaseActivity.GameKeys
 import com.example.logicmind.common.GameCountdownManager
 import com.example.logicmind.common.GameTimerProgressBar
 import com.example.logicmind.common.PauseMenu
-import com.example.logicmind.common.StarManager
 import com.example.logicmind.common.SoundManager
+import com.example.logicmind.common.StarManager
 
 class CardMatchActivity : BaseActivity() {
 
@@ -80,6 +81,12 @@ class CardMatchActivity : BaseActivity() {
         starManager = StarManager()
         starManager.init(findViewById(R.id.starCountText))
 
+
+        //TODO: Usuń po implementacji funkcji które to rzeczywiście liczą
+        val avgReactionTime = 1.0
+        val avgAccuracy = 0.5
+        val avgScore = 7
+
         // Inicjalizacja paska czasu
         timerProgressBar.setTotalTime(90) // Ustaw czas na 1,5 minuty
         timerProgressBar.setOnFinishCallback {
@@ -90,10 +97,15 @@ class CardMatchActivity : BaseActivity() {
                 cards.forEach { it.view.isEnabled = false }
                 pauseOverlay.visibility = View.GONE
                 updateUserStatistics(
-                    gameId = GameKeys.GAME_CARD_MATCH,
-                    starsEarned = starManager.starCount
+                    categoryKey = GameKeys.CATEGORY_MEMORY,
+                    gameKey = GameKeys.GAME_CARD_MATCH,
+                    starsEarned = starManager.starCount,
+                    avgScore,
+                    avgAccuracy,
+                    avgReactionTime,
                 )
-                onGameFinished(GameKeys.CATEGORY_MEMORY, GameKeys.GAME_CARD_MATCH, getString(R.string.card_match))
+
+                lastPlayedGame(GameKeys.CATEGORY_MEMORY, GameKeys.GAME_CARD_MATCH, getString(R.string.card_match))
                 finish()
             }
         }
@@ -137,10 +149,12 @@ class CardMatchActivity : BaseActivity() {
             }, // Zatrzymuje timer podczas pauzy pod warunkiem że nie jesteśmy w preview
             onExit = {
                 updateUserStatistics(
-                    gameId = GameKeys.GAME_CARD_MATCH,
-                    starsEarned = starManager.starCount
+                    categoryKey = GameKeys.CATEGORY_MEMORY,
+                    gameKey = GameKeys.GAME_CARD_MATCH,
+                    starsEarned = starManager.starCount,
                 )
-                onGameFinished(GameKeys.CATEGORY_MEMORY, GameKeys.GAME_CARD_MATCH, getString(R.string.card_match))
+
+                lastPlayedGame(GameKeys.CATEGORY_MEMORY, GameKeys.GAME_CARD_MATCH, getString(R.string.card_match))
                 finish() }, // Kończy aktywność
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.card_match_instruction),

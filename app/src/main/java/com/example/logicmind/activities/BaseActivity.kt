@@ -5,7 +5,6 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import java.util.Locale
@@ -63,15 +62,18 @@ open class BaseActivity : AppCompatActivity() {
 
         // Ukrywamy paski systemowe
         val insetsController = WindowInsetsControllerCompat(window, window.decorView)
-        insetsController.hide(androidx.core.view.WindowInsetsCompat.Type.statusBars() or
-                androidx.core.view.WindowInsetsCompat.Type.navigationBars())
+        insetsController.hide(
+            androidx.core.view.WindowInsetsCompat.Type.statusBars() or
+                    androidx.core.view.WindowInsetsCompat.Type.navigationBars()
+        )
         insetsController.systemBarsBehavior =
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
 
         // Inicjalizacja Firebase w każdej aktywności
         auth = FirebaseAuth.getInstance()
-        db = FirebaseDatabase.getInstance("https://logicmind-default-rtdb.europe-west1.firebasedatabase.app")
+        db =
+            FirebaseDatabase.getInstance("https://logicmind-default-rtdb.europe-west1.firebasedatabase.app")
     }
 
     /**
@@ -92,6 +94,7 @@ open class BaseActivity : AppCompatActivity() {
                     }
                     true
                 }
+
                 R.id.nav_statistics -> {
                     if (this !is StatisticsActivity) {
                         startActivity(Intent(this, StatisticsActivity::class.java))
@@ -99,6 +102,7 @@ open class BaseActivity : AppCompatActivity() {
                     }
                     true
                 }
+
                 R.id.nav_profile -> {
                     if (this !is ProfileActivity) {
                         startActivity(Intent(this, ProfileActivity::class.java))
@@ -106,6 +110,7 @@ open class BaseActivity : AppCompatActivity() {
                     }
                     true
                 }
+
                 R.id.nav_settings -> {
                     if (this !is SettingsActivity) {
                         startActivity(Intent(this, SettingsActivity::class.java))
@@ -113,6 +118,7 @@ open class BaseActivity : AppCompatActivity() {
                     }
                     true
                 }
+
                 else -> false
             }
         }
@@ -124,10 +130,15 @@ open class BaseActivity : AppCompatActivity() {
      *
      * Unit - odpowiednik void w Kotlinie, ? - opcjonalna funkcja
      */
-    protected fun onGameFinished(categoryKey: String, gameKey: String, displayName: String, onSuccess: (() -> Unit)? = null){
+    protected fun lastPlayedGame(
+        categoryKey: String,
+        gameKey: String,
+        displayName: String,
+        onSuccess: (() -> Unit)? = null
+    ) {
         val user = auth.currentUser
 
-        if (user != null){
+        if (user != null) {
             val uid = user.uid
             //zapis do bazy danych - operacja asynchroniczna, czyli nie blokuje wątku głównego
             val dbRef = db.getReference("users").child(uid).child("categories").child(categoryKey)
@@ -142,7 +153,7 @@ open class BaseActivity : AppCompatActivity() {
                     //używa się aby wykonać akcję dopiero po zapisie do bazy
                     updateStreak() //wywołanie tutaj aby nie powtarzać kodu
                 }
-                .addOnFailureListener{ e ->
+                .addOnFailureListener { e ->
                     Log.e("GAME_DEBUG", "Błąd aktualizacji lastPlayed dla $gameKey", e)
                 }
         } else {
@@ -203,16 +214,16 @@ open class BaseActivity : AppCompatActivity() {
                     .addOnSuccessListener {
                         Log.d("STREAK_DEBUG", "Zaktualizowano streak dla $uid")
                     }
-                    .addOnFailureListener{
+                    .addOnFailureListener {
                         Log.e("STREAK_DEBUG", "Błąd aktualizacji streak dla $uid", it)
                     }
 
-                if(newStreak > bestStreak){
+                if (newStreak > bestStreak) {
                     userRef.child("bestStreak").setValue(newStreak)
                         .addOnSuccessListener {
                             Log.d("STREAK_DEBUG", "Zaktualizowano bestStreak dla $uid")
                         }
-                        .addOnFailureListener{
+                        .addOnFailureListener {
                             Log.e("STREAK_DEBUG", "Błąd aktualizacji bestStreak dla $uid", it)
                         }
                 }
@@ -220,7 +231,7 @@ open class BaseActivity : AppCompatActivity() {
                 userRef.child("lastPlayDate").setValue(today.timeInMillis)
                 Log.d("STREAK_DEBUG", "Nowy streak:  $newStreak, BestStreak: $bestStreak")
 
-            }.addOnFailureListener{ e ->
+            }.addOnFailureListener { e ->
                 Log.e("STREAK_DEBUG", "Błąd pobierania danych użytkownika", e)
             }
         }
@@ -229,7 +240,7 @@ open class BaseActivity : AppCompatActivity() {
     protected fun isGuestUser(onResult: (Boolean) -> Unit) {
         val user = auth.currentUser
 
-        if(user == null || !user.isAnonymous){
+        if (user == null || !user.isAnonymous) {
             onResult(false)
             return
         }
@@ -274,31 +285,49 @@ open class BaseActivity : AppCompatActivity() {
      * @param score - punktacja w grze
      * @param accuracy - celność
      * @param reactionTime - średni czas reakcji
+     *
+     * TODO: score zamienic na star bo to jest to samo
      */
 
-    protected fun updateUserStatistics(gameId: String, starsEarned: Int = 0, score: Int = 0, accuracy: Double = 0.0, reactionTime: Double = 0.0){
+    protected fun updateUserStatistics(
+        categoryKey: String,
+        gameKey: String,
+        starsEarned: Int = 0,
+        score: Int = 0,
+        accuracy: Double = 0.0,
+        reactionTime: Double = 0.0
+    ) {
         val userId = auth.currentUser?.uid ?: return
-
-        val userRef = db.getReference("users").child(userId).child("statistics")
+        val userRef = db.getReference("users").child(userId)
+        //aktualizacja globalnych statystyk usera
+        val statsRef = userRef.child("statistics")
 
         //runTransaction wykonuje aktualizacje "atomowo" czyli jedną grę na raz
-        //używany do odczytu danych ktore sa zalezne od poprzednich danych
+        //używany do odczytu danych które są zależne od poprzednich danych
         //wykonuje się w pętli retry - jeśli ktoś inny zmienił dane między odczytem i zapisem to odczyt jest wykonywany ponownie
-        userRef.runTransaction(object: Transaction.Handler {
+        statsRef.runTransaction(object : Transaction.Handler {
             override fun doTransaction(currentData: MutableData): Transaction.Result {
-                //mutableData - tymczasowy lokalny obiekt rezprezentuje dane węzła na którym robimy transakcje
+                //mutableData - tymczasowy lokalny obiekt reprezentuje dane węzła na którym robimy transakcje
 
-                val stats = currentData.getValue(object :GenericTypeIndicator<Map<String, Any>>() {}) ?: emptyMap()
+                val currentStats = currentData.value as? Map<String, Any> ?: emptyMap()
 
-                val currentStars = (stats["totalStars"] as? Long ?: 0L).toInt()
-                val currentAvgScore = (stats["avgScore"] as? Long ?: 0L).toInt()
-                val currentAvgAccuracy = (stats["AvgAccuracy"] as? Double ?: 0.0)
-                val currentAvgReactionTime = (stats["AvgReactionTime"] as? Double ?: 0.0)
+                val currentStars = (currentStats["totalStars"] as? Long ?: 0L).toInt()
+                val currentAvgScore = (currentStats["avgScore"] as? Long ?: 0L).toInt()
+                val currentAvgAccuracy = (currentStats["avgAccuracy"] as? Double ?: 0.0)
+                val currentAvgReactionTime = (currentStats["avgReactionTime"] as? Double ?: 0.0)
+                val gamesPlayed = (currentStats["gamesPlayed"] as? Long ?: 0L).toInt()
 
-                //obliczanie nowych średnich
-                val newAvgScore = if(score > 0) (currentAvgScore + score)/2 else currentAvgScore
-                val newAvgAccuracy = if(accuracy > 0) (currentAvgAccuracy + accuracy)/2 else currentAvgAccuracy
-                val newAvgReaction= if(reactionTime > 0) (currentAvgReactionTime + reactionTime)/2 else currentAvgReactionTime
+                //obliczanie nowych średnich ważonych
+                val newGamesPlayed = gamesPlayed + 1
+                val newAvgScore =
+                    if (score > 0) (currentAvgScore * gamesPlayed + score) / newGamesPlayed
+                    else currentAvgScore
+                val newAvgAccuracy =
+                    if (accuracy > 0) (currentAvgAccuracy * gamesPlayed + accuracy) / newGamesPlayed
+                    else currentAvgAccuracy
+                val newAvgReaction =
+                    if (reactionTime > 0) (currentAvgReactionTime * gamesPlayed + reactionTime) / newGamesPlayed
+                    else currentAvgReactionTime
 
                 val updatedStats = mapOf(
                     "avgScore" to newAvgScore,
@@ -311,14 +340,57 @@ open class BaseActivity : AppCompatActivity() {
                 return Transaction.success(currentData)
             }
 
-            override fun onComplete(error: DatabaseError?, comitted: Boolean, currentData: DataSnapshot?) {
-                if (error != null){
+            override fun onComplete(
+                error: DatabaseError?,
+                committed: Boolean,
+                currentData: DataSnapshot?
+            ) {
+                if (error != null) {
                     Log.e("STATS_DEBUG", "Błąd aktualizacji statystyk: ${error.message}")
                 } else {
-                    Log.d("STATS_DEBUG", "Zaktualizowane statystyki dla gry $gameId")
+                    Log.d("STATS_DEBUG", "Zaktualizowane globalne statystyki użytkownika")
                 }
             }
         })
+
+        //aktualizacja statystyk konkretnej gry
+        val gameRef = userRef.child("categories").child(categoryKey).child("games").child(gameKey)
+
+        gameRef.get().addOnSuccessListener { snapshot ->
+            val currentStars = snapshot.child("starsEarned").getValue(Int::class.java) ?: 0
+            val currentGamesPlayed = snapshot.child("gamesPlayed").getValue(Int::class.java) ?: 0
+            val currentBestScore = snapshot.child("bestScore").getValue(Int::class.java) ?: 0
+            val currentAvgAccuracy = snapshot.child("accuracy").getValue(Double::class.java) ?: 0.0
+            val currentAvgReaction = snapshot.child("avgReactionTime").getValue(Double::class.java) ?: 0.0
+
+            val newGamesPlayed = currentGamesPlayed + 1
+
+            //obliczanie rzeczywistych średnich dla gry
+            val newAvgAccuracy =
+                if (accuracy > 0) ((currentAvgAccuracy * currentGamesPlayed + accuracy) / newGamesPlayed)
+                else currentAvgAccuracy
+            val newAvgReaction =
+                if (reactionTime > 0) ((currentAvgReaction * currentGamesPlayed + reactionTime) / newGamesPlayed)
+                else currentAvgReaction
+
+            val updatedGameData = mapOf(
+                "starsEarned" to (currentStars + starsEarned),
+                "bestScore" to maxOf(currentBestScore, score),
+                "accuracy" to newAvgAccuracy,
+                "avgReactionTime" to newAvgReaction,
+                "gamesPlayed" to newGamesPlayed,
+                "lastPlayed" to System.currentTimeMillis()
+            )
+
+            gameRef.updateChildren(updatedGameData).addOnSuccessListener {
+                Log.d("STATS_DEBUG", "Zaktualizowane statystyki dla gry $gameKey: $updatedGameData")
+            }.addOnFailureListener {
+                Log.e("STATS_DEBUG", "Błąd zapisu danych statystyk dla gry $gameKey: ${it.message}")
+            }
+        }.addOnFailureListener {
+            Log.e("STATS_DEBUG", "Błąd pobierania danych gry $gameKey: ${it.message}")
+        }
     }
 
 }
+

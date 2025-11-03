@@ -119,7 +119,7 @@ class SymbolRaceActivity : BaseActivity() {
                 isGameEnding = true
                 Toast.makeText(this, "Czas minął!", Toast.LENGTH_LONG).show()
                 trackContainer.isEnabled = false
-                onGameFinished(GameKeys.CATEGORY_COORDINATION, GameKeys.GAME_SYMBOL_RACE, getString(R.string.path_change))
+                lastPlayedGame(GameKeys.CATEGORY_COORDINATION, GameKeys.GAME_SYMBOL_RACE, getString(R.string.path_change))
                 finish()
             }
         }
@@ -167,7 +167,7 @@ class SymbolRaceActivity : BaseActivity() {
                 timerProgressBar.pause()
             },
             onExit = {
-                onGameFinished(GameKeys.CATEGORY_COORDINATION, GameKeys.GAME_SYMBOL_RACE, getString(R.string.path_change))
+                lastPlayedGame(GameKeys.CATEGORY_COORDINATION, GameKeys.GAME_SYMBOL_RACE, getString(R.string.path_change))
                 finish()
             },
             instructionTitle = getString(R.string.instructions),

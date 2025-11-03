@@ -62,7 +62,10 @@ class StatisticsActivity : BaseActivity() {
                 binding.statisticsScrollView.visibility = View.VISIBLE
                 binding.layoutNotLoggedIn.visibility = View.GONE
                 setupExpandableStats() //rozwijanie statystyk
-                auth.currentUser?.let { loadUserStats(it.uid) }
+                auth.currentUser?.let {
+                    loadUserStats(it.uid)
+                    loadLastPlayedGame(it.uid)
+                }
             }
         }
     }
