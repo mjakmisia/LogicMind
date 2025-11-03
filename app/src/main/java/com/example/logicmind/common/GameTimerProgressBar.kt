@@ -48,8 +48,9 @@ class GameTimerProgressBar @JvmOverloads constructor(
 
     /** Startuje odliczanie od aktualnego czasu */
     fun start() {
-        timer?.cancel()
-        if (currentTimeMs <= 0){
+        stop() // ZAWSZE zatrzymaj stary timer przed uruchomieniem nowego
+
+        if (currentTimeMs <= 0) {
             currentTimeMs = totalTimeMs
         }
 
@@ -65,7 +66,7 @@ class GameTimerProgressBar @JvmOverloads constructor(
             }
 
             override fun onFinish() {
-                if (!isRunning) return // jeśli timer został anulowany nie wywołujemy callbacku!
+                if (!isRunning) return // Zabezpieczenie przed podwójnym wywołaniem
                 currentTimeMs = 0
                 updateProgress()
                 isRunning = false
@@ -74,10 +75,18 @@ class GameTimerProgressBar @JvmOverloads constructor(
         }.start()
     }
 
-    /** Pauzuje odliczanie */
+    /** Zatrzymuje odliczanie (całkowicie) */
+    fun stop() {
+        timer?.cancel()
+        timer = null
+        isRunning = false
+    }
+
+    /** Pauzuje odliczanie (można wznowić przez start()) */
     fun pause() {
         if (!isRunning) return
         timer?.cancel()
+        timer = null
         isRunning = false
     }
 
@@ -85,7 +94,6 @@ class GameTimerProgressBar @JvmOverloads constructor(
     fun addTime(seconds: Int) {
         currentTimeMs = (currentTimeMs + seconds * 1000L).coerceAtMost(maxTimeMs)
         if (isRunning) {
-            timer?.cancel()
             start()
         } else {
             updateProgress()
@@ -96,13 +104,11 @@ class GameTimerProgressBar @JvmOverloads constructor(
     fun subtractTime(seconds: Int) {
         currentTimeMs = (currentTimeMs - seconds * 1000L).coerceAtLeast(0)
         if (currentTimeMs == 0L) {
-            timer?.cancel()
-            isRunning = false
+            stop()
             updateProgress()
             onFinishCallback?.invoke()
         } else {
             if (isRunning) {
-                timer?.cancel()
                 start()
             } else {
                 updateProgress()
@@ -112,11 +118,8 @@ class GameTimerProgressBar @JvmOverloads constructor(
 
     /** Resetuje timer do wartości początkowej */
     fun reset() {
-        timer?.cancel()
-        isRunning = false
+        stop()
         currentTimeMs = totalTimeMs
-        startTimeMs = System.currentTimeMillis()
-        endTimeMs = startTimeMs + currentTimeMs
         updateProgress()
     }
 
@@ -152,8 +155,14 @@ class GameTimerProgressBar @JvmOverloads constructor(
         updateProgress()
     }
 
+    /** Anuluje timer (do użycia w onDestroy) */
     fun cancel() {
-        timer?.cancel()
-        isRunning = false
+        stop()
+    }
+
+    /** Zabezpieczenie przy odłączaniu z okna */
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        stop()
     }
 }

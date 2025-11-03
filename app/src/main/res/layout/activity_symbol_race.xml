@@ -35,7 +35,7 @@
         android:id="@+id/tempoInfoText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="5.0s"
+        android:text="3.5s"
         android:textSize="18sp"
         android:textColor="#666666"
         android:gravity="center_vertical"
@@ -72,6 +72,7 @@
     <!-- Niebieski kontener (lewy dół) -->
     <FrameLayout
         android:id="@+id/blueContainer"
+        android:contentDescription="@string/blue_container"
         android:layout_width="120dp"
         android:layout_height="320dp"
         android:layout_marginStart="-30dp"
@@ -87,6 +88,7 @@
     <!-- Czerwony kontener (prawy dół) -->
     <FrameLayout
         android:id="@+id/redContainer"
+        android:contentDescription="@string/red_container"
         android:layout_width="120dp"
         android:layout_height="320dp"
         android:layout_marginEnd="-30dp"

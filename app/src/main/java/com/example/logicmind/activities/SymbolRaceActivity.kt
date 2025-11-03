@@ -25,67 +25,70 @@ import androidx.core.graphics.toColorInt
 
 class SymbolRaceActivity : BaseActivity() {
 
-    // UI elementy gry
-    private lateinit var trackContainer: FrameLayout            // Kontener na koła (tor)
-    private lateinit var trackLine: View                        // Szara linia pod kołami
-    private lateinit var countdownText: TextView                // Pole tekstowe odliczania
+    // Handler do zarządzania opóźnionymi akcjami
+    private val handler = Handler(Looper.getMainLooper())
+
+    // Elementy interfejsu gry
+    private lateinit var trackContainer: FrameLayout            // Kontener na koła (tor gry)
+    private lateinit var trackLine: View                        // Linia toru pod kołami
+    private lateinit var countdownText: TextView                // Tekst odliczania startowego
     private lateinit var pauseButton: ImageButton               // Przycisk pauzy
     private lateinit var pauseOverlay: ConstraintLayout         // Nakładka z menu pauzy
-    private lateinit var timerProgressBar: GameTimerProgressBar // Pasek postępu czasu gry
-    private lateinit var starManager: StarManager               // Manager gwiazdek
-    private lateinit var pauseMenu: PauseMenu                   // Menu pauzy gry
-    private lateinit var countdownManager: GameCountdownManager // Manager odliczania początkowego
-    private lateinit var blueContainer: FrameLayout             // Lewa strefa dotyku – niebieski
-    private lateinit var redContainer: FrameLayout              // Prawa strefa dotyku – czerwony
-    private lateinit var tempoInfoText: TextView                // Tekst combo i czasu reakcji
+    private lateinit var timerProgressBar: GameTimerProgressBar // Pasek czasu gry
+    private lateinit var starManager: StarManager               // Licznik gwiazdek
+    private lateinit var pauseMenu: PauseMenu                   // Logika menu pauzy
+    private lateinit var countdownManager: GameCountdownManager // Logika odliczania przed grą
+    private lateinit var blueContainer: FrameLayout             // Lewa strefa dotyku (niebieska)
+    private lateinit var redContainer: FrameLayout              // Prawa strefa dotyku (czerwona)
+    private lateinit var tempoInfoText: TextView                // Tekst tempa i combo
 
     // Stan gry
-    private val circleQueue = mutableListOf<Circle>()           // Kolejka kół (ostatnie = dolne)
-    private var isProcessing = false                            // Flaga: trwa animacja/usuwanie
-    private var isGameRunning = false                           // Flaga: gra aktywna
-    private var isGameEnding = false                            // Flaga: gra kończy się (czas minął)
+    private val circleQueue = mutableListOf<Circle>()           // Kolejka aktywnych kół
+    private var isProcessing = false                            // Flaga: trwa przetwarzanie ruchu
+    private var isGameRunning = false                           // Flaga: gra jest aktywna
+    private var isGameEnding = false                            // Flaga: gra kończy się (czas upłynął)
 
-    // Double-tap
-    private var awaitingDoubleClick = false                     // Flaga: oczekujemy drugiego tapu
-    private var awaitingDoubleSide: Int? = null                 // 1 = lewo, -1 = prawo
-    private var awaitingDoubleForId: Int? = null                // ID koła oczekiwanego na double-tap
-    private var nextCircleId = 1                                // ID kolejnego koła
+    // Obsługa double-tap
+    private var awaitingDoubleClick = false                     // Flaga: oczekiwanie na drugi tap
+    private var awaitingDoubleSide: Int? = null                 // 1 = lewa, -1 = prawa
+    private var awaitingDoubleForId: Int? = null                // ID koła oczekującego na double-tap
+    private var nextCircleId = 1                                // ID dla kolejnych kół
 
-    // BOTH tap
-    private var lastTapTime: Long = 0                           // Czas ostatniego tapu (BOTH)
-    private var lastTapSide: Boolean? = null                    // Strona ostatniego tapu (BOTH)
+    // Obsługa BOTH tap (oba naraz)
+    private var lastTapTime: Long = 0                           // Czas ostatniego tapu
+    private var lastTapSide: Boolean? = null                    // Strona ostatniego tapu
     private val bothTapWindowMs = 300L                          // Okno czasowe dla BOTH (ms)
 
-    // Tempo i combo
-    private var currentReactionTimeMs = 5000L                   // Aktualny czas życia koła (ms)
-    private var successfulStreak = 0                            // Combo (poprawne ruchy pod rząd)
+    // Parametry tempa i combo
+    private var currentReactionTimeMs = 3500L                   // Czas życia koła (ms)
+    private var successfulStreak = 0                            // Licznik poprawnych ruchów (combo)
     private var totalMoves = 0                                  // Licznik wszystkich ruchów
-    private val MIN_REACTION_TIME_MS = 1500L                    // Minimalny czas życia koła
-    private val SPEEDUP_STEP_MS = 400L                          // Skrócenie czasu co krok
-    private val MOVES_PER_SPEEDUP = 12                          // Ruchów na jeden przyspiesznik
 
     // Stałe gry
     companion object {
         const val BASE_TIME_SECONDS = 90                        // Całkowity czas gry
-        private const val BLOCK_DELAY_MS = 1500L                // Opóźnienie auto-usunięcia – BLOCK
+        private const val BLOCK_DELAY_MS = 1300L                // Opóźnienie auto-usunięcia – BLOCK
         private const val CIRCLE_SIZE_DP = 130                  // Rozmiar koła w dp
         private const val VISIBLE_CIRCLES = 4                   // Liczba widocznych kół
-        private const val ANIMATION_DURATION_MS = 300L          // Czas trwania animacji (ms)
+        private const val ANIMATION_DURATION_MS = 300L          // Czas animacji ruchu (ms)
+        private const val MIN_REACTION_TIME_MS = 800L          // Minimalny czas życia koła
+        private const val SPEEDUP_STEP_MS = 300L                // Skrócenie czasu co przyspieszenie
+        private const val MOVES_PER_SPEEDUP = 12                // Ruchów na przyspieszenie
     }
 
-    // Kolory kół i obramowań
-    private val redColor = "#EF5350".toColorInt()               // Czerwony
-    private val blueColor = "#4FC3F7".toColorInt()              // Niebieski
-    private val redStroke = "#D32F2F".toColorInt()              // Obramowanie czerwone
-    private val blueStroke = "#0288D1".toColorInt()             // Obramowanie niebieskie
-    private val strokeWidthDp = 6                               // Szerokość obramowania (dp)
+    // Kolory
+    private val redColor = "#EF5350".toColorInt()
+    private val blueColor = "#4FC3F7".toColorInt()
+    private val redStroke = "#D32F2F".toColorInt()
+    private val blueStroke = "#0288D1".toColorInt()
+    private val strokeWidthDp = 6                   // Szerokość obramowania w dp
 
-    // Symbole na kołach
+    // Rodzaje symboli na kołach
     private enum class Symbol {
         EMPTY, LEFT, RIGHT, BOTH, DOUBLE_LEFT, DOUBLE_RIGHT, SWAP, TARGET, BLOCK
     }
 
-    // Reprezentacja koła
+    // Struktura danych dla koła
     private data class Circle(
         val id: Int,
         val view: ImageView,
@@ -98,7 +101,7 @@ class SymbolRaceActivity : BaseActivity() {
         setContentView(R.layout.activity_symbol_race)
         supportActionBar?.hide()
 
-        // Inicjalizacja widoków
+        // Inicjalizacja elementów interfejsu
         trackContainer = findViewById(R.id.trackContainer)
         trackLine = findViewById(R.id.trackLine)
         countdownText = findViewById(R.id.countdownText)
@@ -112,19 +115,20 @@ class SymbolRaceActivity : BaseActivity() {
         tempoInfoText = findViewById(R.id.tempoInfoText)
         trackContainer.clipChildren = false
 
-        // Inicjalizacja paska czasu
+        // Inicjalizacja paska czasu gry
         timerProgressBar.setTotalTime(BASE_TIME_SECONDS)
         timerProgressBar.setOnFinishCallback {
+            // Gdy czas minie - koniec gry
             runOnUiThread {
                 isGameEnding = true
                 Toast.makeText(this, "Czas minął!", Toast.LENGTH_LONG).show()
                 trackContainer.isEnabled = false
-                lastPlayedGame(GameKeys.CATEGORY_COORDINATION, GameKeys.GAME_SYMBOL_RACE, getString(R.string.path_change))
+                lastPlayedGame(GameKeys.CATEGORY_COORDINATION, GameKeys.GAME_SYMBOL_RACE, getString(R.string.symbol_race))
                 finish()
             }
         }
 
-        // Inicjalizacja managera odliczania
+        // Konfiguracja odliczania startowego
         countdownManager = GameCountdownManager(
             countdownText = countdownText,
             gameView = trackContainer,
@@ -136,57 +140,74 @@ class SymbolRaceActivity : BaseActivity() {
                 tempoInfoText
             ),
             onCountdownFinished = {
+                // Po odliczaniu startujemy grę
                 starManager.reset()
                 startNewGame()
+                timerProgressBar.start()
             }
         )
 
-        // Inicjalizacja menu pauzy
+        // Konfiguracja menu pauzy
         pauseMenu = PauseMenu(
             context = this,
             pauseOverlay = pauseOverlay,
             pauseButton = pauseButton,
             onRestart = {
+                // Restart gry po pauzie
                 if (pauseMenu.isPaused) pauseMenu.resume()
+
+                // Zatrzymaj i zresetuj timer
+                timerProgressBar.stop()
                 timerProgressBar.reset()
+
+                // Ukryj elementy UI
                 trackLine.visibility = View.GONE
                 blueContainer.visibility = View.INVISIBLE
                 redContainer.visibility = View.INVISIBLE
                 tempoInfoText.visibility = View.GONE
                 pauseOverlay.visibility = View.GONE
+
+                // Uruchom odliczanie
                 countdownManager.startCountdown()
+                updateTempoDisplay()
             },
             onResume = {
+                // Wznowienie gry
                 if (isGameRunning && !isProcessing) {
                     timerProgressBar.start()
                     startAutoShift()
+                    updateTempoDisplay()
                     if (circleQueue.isNotEmpty()) startActiveTimer()
                 }
             },
             onPause = {
+                // Pauza zatrzymuje zegar
                 timerProgressBar.pause()
             },
             onExit = {
-                lastPlayedGame(GameKeys.CATEGORY_COORDINATION, GameKeys.GAME_SYMBOL_RACE, getString(R.string.path_change))
+                // Wyjście z gry
+                lastPlayedGame(GameKeys.CATEGORY_COORDINATION, GameKeys.GAME_SYMBOL_RACE, getString(R.string.symbol_race))
                 finish()
             },
             instructionTitle = getString(R.string.instructions),
-            instructionMessage = getString(R.string.path_change_instruction)
+            instructionMessage = getString(R.string.symbol_race_instruction)
         )
 
-        // Nasłuchiwanie dotyku w strefach
+        // Obsługa dotyku w strefach gry (lewa/prawa)
+        @Suppress("ClickableViewAccessibility")
         blueContainer.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) blueContainer.performClick()
             handleTouch(isBlue = true, event)
             true
         }
+        @Suppress("ClickableViewAccessibility")
         redContainer.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) redContainer.performClick()
             handleTouch(isBlue = false, event)
             true
         }
 
-        // Pierwsze uruchomienie – odliczanie
+        // Pierwsze uruchomienie – pokazujemy odliczanie
         if (savedInstanceState == null) {
             trackLine.visibility = View.GONE
             blueContainer.visibility = View.INVISIBLE
@@ -194,11 +215,12 @@ class SymbolRaceActivity : BaseActivity() {
             tempoInfoText.visibility = View.GONE
             countdownManager.startCountdown()
         } else {
+            // Jeśli gra była już aktywna – przywracamy stan
             restoreGameState(savedInstanceState)
         }
     }
 
-    // Zapisuje stan gry
+    // Zapis aktualnego stanu gry przed zniszczeniem aktywności
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putInt("pauseOverlayVisibility", pauseOverlay.visibility)
@@ -225,7 +247,7 @@ class SymbolRaceActivity : BaseActivity() {
         starManager.saveState(outState)
     }
 
-    // Przywraca stan gry po rotacji
+    // Przywrócenie stanu gry po zmianie konfiguracji
     private fun restoreGameState(savedInstanceState: Bundle) {
         pauseOverlay.visibility = savedInstanceState.getInt("pauseOverlayVisibility")
         countdownText.visibility = savedInstanceState.getInt("countdownTextVisibility")
@@ -234,16 +256,17 @@ class SymbolRaceActivity : BaseActivity() {
         redContainer.visibility = savedInstanceState.getInt("redContainerVisibility")
         tempoInfoText.visibility = savedInstanceState.getInt("tempoInfoTextVisibility")
 
-        // Przywracanie stanu timera
+        // Przywraca stan timera
         val timerRemainingMs = savedInstanceState.getLong("timerRemainingTimeMs", BASE_TIME_SECONDS * 1000L)
         val timerRunning = savedInstanceState.getBoolean("timerIsRunning", false)
         timerProgressBar.setRemainingTimeMs(timerRemainingMs.coerceAtLeast(1L))
 
-        // Przywracanie odliczania początkowego
+        // Przywraca odliczanie początkowe
         val countdownInProgress = savedInstanceState.getBoolean("countdownInProgress", false)
         val countdownIndex = savedInstanceState.getInt("countdownIndex", 0)
 
-        currentReactionTimeMs = savedInstanceState.getLong("currentReactionTimeMs", 5000L).coerceAtLeast(MIN_REACTION_TIME_MS)
+        // Przywraca parametry gry
+        currentReactionTimeMs = savedInstanceState.getLong("currentReactionTimeMs", 3500L).coerceAtLeast(MIN_REACTION_TIME_MS)
         successfulStreak = savedInstanceState.getInt("successfulStreak", 0)
         totalMoves = savedInstanceState.getInt("totalMoves", 0)
         isProcessing = savedInstanceState.getBoolean("isProcessing", false)
@@ -255,19 +278,23 @@ class SymbolRaceActivity : BaseActivity() {
         awaitingDoubleForId = if (savedInstanceState.containsKey("awaitingDoubleForId")) savedInstanceState.getInt("awaitingDoubleForId") else null
         nextCircleId = savedInstanceState.getInt("nextCircleId", 1)
 
+        // Przywraca licznik gwiazdek i synchronizuje menu pauzy
         starManager.restoreState(savedInstanceState)
         pauseMenu.syncWithOverlay()
         updateTempoDisplay()
 
+        // Jeśli trwało odliczanie – kontynuuje je
         if (countdownInProgress) {
             countdownManager.startCountdown(countdownIndex)
             return
         }
 
+        // Jeśli gra była aktywna – wznawia licznik i ruch
         if (timerRunning && pauseOverlay.visibility != View.VISIBLE && !isProcessing) {
             timerProgressBar.start()
         }
 
+        // Przywraca układ kół po załadowaniu widoku
         trackContainer.post {
             if (isGameRunning) {
                 updateCirclePositions()
@@ -279,38 +306,48 @@ class SymbolRaceActivity : BaseActivity() {
 
     // Rozpoczyna nową grę
     private fun startNewGame() {
-        if (pauseMenu.isPaused) pauseMenu.resume()
-        pauseOverlay.visibility = View.GONE
+        cancelAllDelayedActions() // Czyści wszystkie zaplanowane zadania
 
+        if (pauseMenu.isPaused) pauseMenu.resume() // Wznawia, jeśli gra była zapauzowana
+        pauseOverlay.visibility = View.GONE // Ukrywa nakładkę pauzy
+
+        timerProgressBar.stop()
+        timerProgressBar.reset()
+
+        // Resetuje stan gry
         circleQueue.clear()
         trackContainer.removeAllViews()
         lastTapTime = 0
         lastTapSide = null
         clearAwaitingDouble()
-        currentReactionTimeMs = 5000L
+        currentReactionTimeMs = 3500L
         successfulStreak = 0
         totalMoves = 0
         isGameRunning = true
         isProcessing = false
 
+        // Przywraca widoczność elementów UI
         trackLine.visibility = View.VISIBLE
         blueContainer.visibility = View.VISIBLE
         redContainer.visibility = View.VISIBLE
         tempoInfoText.visibility = View.VISIBLE
 
+        // Tworzy początkowe koła
         repeat(VISIBLE_CIRCLES) { createCircle() }
         updateCirclePositions()
-        timerProgressBar.start()
-        startAutoShift()
-        startActiveTimer()
+        startAutoShift() // Uruchamia automatyczne przesuwanie
+        startActiveTimer() // Uruchamia timer dla pierwszego koła
+
+        updateTempoDisplay()
     }
 
-    // Tworzy nowe koło i dodaje do toru
+    // Tworzy nowe koło i dodaje je do toru
     private fun createCircle() {
         val isRed = Random.nextBoolean()
         val color = if (isRed) redColor else blueColor
         val symbol = Symbol.entries.random()
 
+        // Tworzy graficzną reprezentację koła
         val view = ImageView(this).apply {
             layoutParams = FrameLayout.LayoutParams(dpToPx(CIRCLE_SIZE_DP), dpToPx(CIRCLE_SIZE_DP)).apply {
                 gravity = Gravity.CENTER_HORIZONTAL
@@ -326,7 +363,7 @@ class SymbolRaceActivity : BaseActivity() {
         circleQueue.add(0, circle)
         trackContainer.addView(view)
 
-        // Kliknięcie tylko na dolnym kole
+        // Pozwala kliknąć tylko dolne (aktywne) koło
         view.setOnClickListener {
             if (isGameRunning && !isProcessing && circleQueue.isNotEmpty() && circleQueue.last() == circle) {
                 when (symbol) {
@@ -336,6 +373,7 @@ class SymbolRaceActivity : BaseActivity() {
             }
         }
 
+        // Jeśli dodane koło jest dolnym – uruchamia jego timer
         if (circleQueue.last() == circle) {
             lastTapTime = 0
             lastTapSide = null
@@ -352,17 +390,20 @@ class SymbolRaceActivity : BaseActivity() {
         val symbol = bottomCircle.symbol
         val currentTime = System.currentTimeMillis()
 
-        // Specjalny przypadek: BOTH
+        // Obsługa symbolu BOTH (naciśnięcie obu stron)
         if (symbol == Symbol.BOTH) {
             if (lastTapTime > 0 && (currentTime - lastTapTime) <= bothTapWindowMs && lastTapSide != isBlue) {
+                // Drugi tap w oknie czasowym – sukces
                 lastTapTime = 0
                 lastTapSide = null
                 animateBoth(bottomCircle)
                 return
             } else {
+                // Pierwszy tap – czekamy na drugi
                 lastTapTime = currentTime
                 lastTapSide = isBlue
                 runDelayed(bothTapWindowMs + 50) {
+                    // Jeśli nie było drugiego tapu – błąd
                     if (lastTapTime == currentTime && circleQueue.isNotEmpty() && circleQueue.last() == bottomCircle && !isProcessing) {
                         animateFailure(bottomCircle)
                     }
@@ -370,11 +411,12 @@ class SymbolRaceActivity : BaseActivity() {
                 return
             }
         } else {
+            // Zwykłe symbole – przekazanie do obsługi
             handleContainerPress(isBlue)
         }
     }
 
-    // Sprawdza poprawność nacisku względem symbolu
+    // Sprawdza poprawność naciśnięcia względem symbolu
     private fun handleContainerPress(isBlue: Boolean) {
         if (!isGameRunning || circleQueue.isEmpty() || isProcessing) return
         val bottomCircle = circleQueue.last()
@@ -383,11 +425,12 @@ class SymbolRaceActivity : BaseActivity() {
         val isRedCircle = color == redColor
 
         if (awaitingDoubleClick && awaitingDoubleForId != bottomCircle.id) {
-            clearAwaitingDouble()
+            clearAwaitingDouble() // Reset, jeśli czekaliśmy na inne koło
         }
 
         var correct = false
 
+        // Logika sprawdzania poprawności
         when (symbol) {
             Symbol.EMPTY -> correct = (isBlue && color == blueColor) || (!isBlue && color == redColor)
             Symbol.LEFT -> correct = isBlue
@@ -422,7 +465,7 @@ class SymbolRaceActivity : BaseActivity() {
         if (correct) animateMoveToSide(bottomCircle, isBlue) else animateFailure(bottomCircle)
     }
 
-    // Animacja przesunięcia w stronę strefy (poprawny ruch)
+    // Animacja poprawnego przesunięcia w stronę odpowiedniej strefy
     private fun animateMoveToSide(circle: Circle, toBlue: Boolean) {
         if (isProcessing) return
         isProcessing = true
@@ -433,6 +476,7 @@ class SymbolRaceActivity : BaseActivity() {
         else
             redContainer.x + redContainer.width / 2 - view.width / 2
 
+        // Animacja przesunięcia i usunięcia po zakończeniu
         view.animate()
             .x(targetX)
             .setDuration(ANIMATION_DURATION_MS)
@@ -441,7 +485,7 @@ class SymbolRaceActivity : BaseActivity() {
             .start()
     }
 
-    // Animacja gestu BOTH – podział na dwa
+    // Animacja BOTH – rozdzielenie koła na dwie strony
     private fun animateBoth(circle: Circle) {
         if (isProcessing) return
         isProcessing = true
@@ -451,6 +495,7 @@ class SymbolRaceActivity : BaseActivity() {
         val leftX = blueContainer.x + blueContainer.width / 2 - view.width / 2
         val rightX = redContainer.x + redContainer.width / 2 - view.width / 2
 
+        // Tworzy dwie kopie koła
         val leftCopy = ImageView(this).apply {
             layoutParams = view.layoutParams
             setImageDrawable(view.drawable)
@@ -474,6 +519,7 @@ class SymbolRaceActivity : BaseActivity() {
         trackContainer.addView(rightCopy)
         view.visibility = View.INVISIBLE
 
+        // Animuje obie kopie w przeciwne strony
         leftCopy.animate().x(leftX).setDuration(ANIMATION_DURATION_MS)
             .setInterpolator(AccelerateDecelerateInterpolator())
             .withEndAction { leftCopy.visibility = View.GONE }.start()
@@ -486,7 +532,7 @@ class SymbolRaceActivity : BaseActivity() {
             }.start()
     }
 
-    // Natychmiastowy sukces (TARGET)
+    // Animacja natychmiastowego sukcesu (dla TARGET)
     private fun animateInstantSuccess(circle: Circle) {
         if (isProcessing) return
         isProcessing = true
@@ -500,7 +546,7 @@ class SymbolRaceActivity : BaseActivity() {
             .start()
     }
 
-    // Animacja błędu
+    // Animacja błędu – znika i pomniejsza się
     private fun animateFailure(circle: Circle) {
         if (isProcessing) return
         isProcessing = true
@@ -520,39 +566,41 @@ class SymbolRaceActivity : BaseActivity() {
         circleQueue.remove(removedCircle)
 
         if (success) {
-            starManager.increment()
+            starManager.increment() // Dodaje punkt
             handleCorrectMove()
         } else {
             handleError()
         }
 
+        // Czyści stan oczekiwania jeśli dotyczyło tego koła
         if (awaitingDoubleForId == removedCircle.id) clearAwaitingDouble()
 
+        // Dodaje nowe koło i kontynuuje grę
         createCircle()
         updateCirclePositions()
         startActiveTimer()
         isProcessing = false
     }
 
-    // Obsługuje poprawne dopasowanie
+    // Obsługuje poprawny ruch gracza
     private fun handleCorrectMove() {
         successfulStreak++
         totalMoves++
-        checkComboBonus()
-        accelerateIfNeeded()
+        checkComboBonus() // Sprawdza bonusy za serię
+        accelerateIfNeeded() // Przyspiesza tempo
         updateTempoDisplay()
     }
 
-    // Obsługuje błąd
+    // Obsługuje błąd gracza
     private fun handleError() {
-        timerProgressBar.subtractTime(6) //Odjęcie czasu
+        timerProgressBar.subtractTime(6) // Kara: odjęcie czasu
         successfulStreak = 0
         totalMoves++
         accelerateIfNeeded()
         updateTempoDisplay()
     }
 
-    // Sprawdza bonusy za combo
+    // Sprawdza, czy osiągnięto próg combo i przyznaje bonus
     private fun checkComboBonus() {
         when (successfulStreak) {
             5 -> addTime(2)
@@ -565,7 +613,7 @@ class SymbolRaceActivity : BaseActivity() {
         }
     }
 
-    // Dodaje czas i pokazuje toast
+    // Dodaje określoną ilość czasu do paska i pokazuje komunikat
     private fun addTime(seconds: Int) {
         if (seconds > 0) {
             timerProgressBar.addTime(seconds)
@@ -573,15 +621,12 @@ class SymbolRaceActivity : BaseActivity() {
         }
     }
 
-    // Pokazuje toast bonusowy
+    // Wyświetla komiunikat z informacją o bonusie
     private fun showComboToast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).apply {
-            setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 120)
-            show()
-        }
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
-    // Przyspiesza grę co podaną ilość ruchów
+    // Przyspiesza grę po określonej liczbie ruchów
     private fun accelerateIfNeeded() {
         if (totalMoves % MOVES_PER_SPEEDUP == 0) {
             currentReactionTimeMs = (currentReactionTimeMs - SPEEDUP_STEP_MS).coerceAtLeast(MIN_REACTION_TIME_MS)
@@ -589,39 +634,43 @@ class SymbolRaceActivity : BaseActivity() {
         }
     }
 
-    // Aktualizuje wyświetlanie tempa i combo
+    // Aktualizuje tekst wyświetlający tempo reakcji i combo
     private fun updateTempoDisplay() {
         val tempoSec = currentReactionTimeMs / 1000.0
         val comboText = if (successfulStreak > 0) "x$successfulStreak" else ""
-        tempoInfoText.text = "$comboText  ${"%.1f".format(tempoSec)}s"
+        tempoInfoText.text = getString(R.string.tempo_display, comboText, tempoSec)
     }
 
-    // Uruchamia timer życia dla dolnego koła
+    // Uruchamia timer dla dolnego koła (brak reakcji = błąd)
     private fun startActiveTimer() {
         if (circleQueue.isEmpty() || !isGameRunning) return
         val bottomCircle = circleQueue.last()
 
-        runDelayed(currentReactionTimeMs) {
-            if (circleQueue.isNotEmpty() && circleQueue.last() == bottomCircle && !isProcessing) {
-                animateFailure(bottomCircle)
-            }
-        }
-
+        // Symbol BLOCK usuwa się automatycznie po krótkim czasie
         if (bottomCircle.symbol == Symbol.BLOCK) {
             runDelayed(BLOCK_DELAY_MS) {
                 if (circleQueue.isNotEmpty() && circleQueue.last() == bottomCircle && !isProcessing) {
                     animateInstantSuccess(bottomCircle)
                 }
             }
+            return
+        }
+
+        // Dla pozostałych symboli – standardowy timeout reakcji
+        runDelayed(currentReactionTimeMs) {
+            if (circleQueue.isNotEmpty() && circleQueue.last() == bottomCircle && !isProcessing) {
+                animateFailure(bottomCircle)
+            }
         }
     }
 
-    // Rozpoczyna oczekiwanie na drugi tap (double-tap)
+    // Rozpoczyna oczekiwanie na drugi tap (dla symboli DOUBLE)
     private fun beginAwaitingDouble(forId: Int, side: Int) {
         awaitingDoubleClick = true
         awaitingDoubleSide = side
         awaitingDoubleForId = forId
 
+        // Jeśli gracz nie wykona drugiego tapu na czas – błąd
         runDelayed(600L) {
             if (circleQueue.isNotEmpty() && circleQueue.last().id == forId && !isProcessing) {
                 animateFailure(circleQueue.last())
@@ -630,14 +679,14 @@ class SymbolRaceActivity : BaseActivity() {
         }
     }
 
-    // Czyści stan oczekiwania na double-tap
+    // Czyści stan oczekiwania na podwójny tap
     private fun clearAwaitingDouble() {
         awaitingDoubleClick = false
         awaitingDoubleSide = null
         awaitingDoubleForId = null
     }
 
-    // Uruchamia automatyczne przesuwanie (rytm gry)
+    // Uruchamia automatyczne przesuwanie kół
     private fun startAutoShift() {
         if (!isGameRunning) return
 
@@ -646,10 +695,12 @@ class SymbolRaceActivity : BaseActivity() {
                 if (isGameRunning && !isProcessing && circleQueue.size >= VISIBLE_CIRCLES) {
                     scheduleNext()
                 } else {
+                    // Jeśli coś przerwało – spróbuj ponownie po krótkiej chwili
                     runDelayed(100L) { scheduleNext() }
                 }
             }
         }
+        // Inicjuje pierwsze przesunięcie
         runDelayed(currentReactionTimeMs) { scheduleNext() }
     }
 
@@ -657,6 +708,7 @@ class SymbolRaceActivity : BaseActivity() {
     private fun updateCirclePositions() {
         val trackHeight = trackContainer.height
         if (trackHeight == 0) {
+            // Jeśli layout jeszcze się nie zmierzył – odłóż wykonanie
             trackContainer.post { updateCirclePositions() }
             return
         }
@@ -672,6 +724,7 @@ class SymbolRaceActivity : BaseActivity() {
         val spacing = if (totalSpace < totalCirclesHeight + minSpacing * totalGaps) minSpacing
         else (totalSpace - totalCirclesHeight) / totalGaps.toFloat()
 
+        // Rozmieszcza widoczne koła w pionie
         circleQueue.forEachIndexed { index, circle ->
             if (index < VISIBLE_CIRCLES) {
                 val y = topMargin + (circleSize + spacing) * index
@@ -684,7 +737,7 @@ class SymbolRaceActivity : BaseActivity() {
         }
     }
 
-    // Zwraca drawable dla symbolu
+    // Zwraca odpowiednią grafikę dla danego symbolu
     private fun getSymbolDrawable(symbol: Symbol): Int = when (symbol) {
         Symbol.EMPTY -> 0
         Symbol.LEFT -> R.drawable.ic_arrow_left
@@ -697,7 +750,7 @@ class SymbolRaceActivity : BaseActivity() {
         Symbol.BLOCK -> R.drawable.ic_close
     }
 
-    // Tworzy tło koła z obramowaniem
+    // Tworzy tło koła z kolorem i obramowaniem
     private fun createCircleBackground(color: Int): Drawable {
         val strokeColor = if (color == redColor) redStroke else blueStroke
         return GradientDrawable().apply {
@@ -707,43 +760,60 @@ class SymbolRaceActivity : BaseActivity() {
         }
     }
 
-    // Konwersja dp → px
+    // Konwersja dp na piksele
     private fun dpToPx(dp: Int): Int = (dp * resources.displayMetrics.density).toInt()
 
     // Uruchamia akcję z opóźnieniem, uwzględniając pauzę
     private fun runDelayed(delay: Long, action: () -> Unit) {
         val activityRef = java.lang.ref.WeakReference(this)
         var remaining = delay
-        val interval = 16L
+        val interval = 16L // odświeżanie co klatkę (~60 FPS)
 
         val runnable = object : Runnable {
             override fun run() {
                 val activity = activityRef.get() ?: return
-                if (pauseMenu.isPaused || activity.isFinishing || activity.isDestroyed) {
-                    Handler(Looper.getMainLooper()).postDelayed(this, interval)
+
+                // Jeśli aktywność została zniszczona – przerwij
+                if (activity.isFinishing || activity.isDestroyed) return
+
+                // Gdy gra wstrzymana, nie zmniejszaj licznika
+                if (pauseMenu.isPaused) {
+                    handler.postDelayed(this, interval)
                     return
                 }
+
                 remaining -= interval
                 if (remaining <= 0) {
+                    // Wykonaj akcję po czasie
                     activity.runOnUiThread { action() }
                 } else {
-                    Handler(Looper.getMainLooper()).postDelayed(this, interval)
+                    // Kontynuuj odliczanie w małych krokach
+                    handler.postDelayed(this, interval)
                 }
             }
         }
-        Handler(Looper.getMainLooper()).postDelayed(runnable, interval)
+        handler.postDelayed(runnable, interval)
     }
 
+    // Anuluje wszystkie zaplanowane akcje
+    private fun cancelAllDelayedActions() {
+        handler.removeCallbacksAndMessages(null)
+    }
+
+    // Zatrzymuje grę, gdy aplikacja przechodzi w tło
     override fun onPause() {
         super.onPause()
         if (!isGameEnding && !pauseMenu.isPaused && !isChangingConfigurations) {
             pauseMenu.pause()
+            timerProgressBar.pause()
         }
     }
 
+    // Sprząta zasoby po zakończeniu aktywności
     override fun onDestroy() {
         super.onDestroy()
-        timerProgressBar.cancel()
+        timerProgressBar.stop()
         countdownManager.cancel()
+        handler.removeCallbacksAndMessages(null)
     }
 }

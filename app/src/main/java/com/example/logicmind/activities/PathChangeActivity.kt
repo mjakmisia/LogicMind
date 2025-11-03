@@ -68,6 +68,8 @@ class PathChangeActivity : BaseActivity() {
             onCountdownFinished = {
                 currentLevel = 1
                 starManager.reset()
+                timerProgressBar.stop()
+                timerProgressBar.reset()
                 timerProgressBar.start()
                 startNewGame()
             }
@@ -81,7 +83,10 @@ class PathChangeActivity : BaseActivity() {
             onRestart = {
                 if (pauseMenu.isPaused) pauseMenu.resume()
                 currentLevel = 1
+                starManager.reset()
+                timerProgressBar.stop()
                 timerProgressBar.reset()
+
                 countdownManager.startCountdown()
             },
             onResume = { timerProgressBar.start() }, // Wznawia timer po pauzie
@@ -157,8 +162,7 @@ class PathChangeActivity : BaseActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // Anuluje wszystkie aktywne timery i handlery
-        timerProgressBar.cancel()
+        timerProgressBar.stop()
         countdownManager.cancel()
     }
 }

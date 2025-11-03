@@ -80,6 +80,8 @@ class NumberAdditionActivity : BaseActivity() {
             onCountdownFinished = {
                 level = 1
                 starManager.reset()
+                timerProgressBar.stop()
+                timerProgressBar.reset()
                 timerProgressBar.start()
                 targetNumberText.visibility = View.VISIBLE
                 numberGrid.visibility = View.VISIBLE
@@ -97,6 +99,7 @@ class NumberAdditionActivity : BaseActivity() {
                 if (pauseMenu.isPaused) pauseMenu.resume()
                 level = 1
                 starManager.reset()
+                timerProgressBar.stop()
                 timerProgressBar.reset()
 
                 // Czyszczenie siatki i stanów
@@ -206,7 +209,7 @@ class NumberAdditionActivity : BaseActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        timerProgressBar.cancel()
+        timerProgressBar.stop()
         countdownManager.cancel()
     }
 
@@ -559,5 +562,4 @@ class NumberAdditionActivity : BaseActivity() {
 
         pauseMenu.syncWithOverlay()
     }
-
 }

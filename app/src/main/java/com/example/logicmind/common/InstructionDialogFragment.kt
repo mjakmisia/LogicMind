@@ -18,7 +18,11 @@ class InstructionDialogFragment : DialogFragment() {
         val title = arguments?.getString(ARG_TITLE) ?: getString(R.string.instructions)
 
         val view = layoutInflater.inflate(R.layout.dialog_instruction, null)
-        view.findViewById<TextView>(R.id.instructionText).text = message
+        val instructionText = view.findViewById<TextView>(R.id.instructionText)
+
+        val processedMessage = message.replace("\n", "<br/>")
+
+        instructionText.text = SymbolRaceInstructionHelper.getSpanned(requireContext(), processedMessage)
 
         val dialog = AlertDialog.Builder(requireContext())
             .setTitle(title)
@@ -27,7 +31,6 @@ class InstructionDialogFragment : DialogFragment() {
             .create()
 
         dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog_round)
-
         return dialog
     }
 

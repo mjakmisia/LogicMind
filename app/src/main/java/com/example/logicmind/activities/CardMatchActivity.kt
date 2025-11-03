@@ -134,6 +134,7 @@ class CardMatchActivity : BaseActivity() {
             onRestart = {
                 if (pauseMenu.isPaused) pauseMenu.resume()
                 currentLevel = 1
+                timerProgressBar.stop()
                 timerProgressBar.reset() // Resetuje timer
                 countdownManager.startCountdown() // Rozpoczyna odliczanie początkowe
             },
@@ -197,7 +198,7 @@ class CardMatchActivity : BaseActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        timerProgressBar.cancel() // Zatrzymaj CountDownTimer
+        timerProgressBar.stop() // Zatrzymaj CountDownTimer
         countdownManager.cancel() // Usuń handlery odliczania
     }
 
@@ -209,6 +210,9 @@ class CardMatchActivity : BaseActivity() {
         } else {
             pauseOverlay.visibility = View.GONE
         }
+
+        timerProgressBar.stop()
+        timerProgressBar.reset()
 
         gridLayout.isEnabled = true // Włącz interakcje
         firstCard = null

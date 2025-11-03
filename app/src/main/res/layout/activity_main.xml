@@ -30,7 +30,7 @@
             android:layout_height="28dp"
             android:layout_gravity="center_horizontal"
             android:src="@drawable/ic_flame"
-            android:contentDescription="@string/flame_icon"
+            android:contentDescription="@string/zero"
             app:tint="#EF476F" />
 
         <TextView
