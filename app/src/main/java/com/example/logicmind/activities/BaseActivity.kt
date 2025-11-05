@@ -14,7 +14,6 @@ import com.example.logicmind.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.GenericTypeIndicator
 import com.google.firebase.database.MutableData
 import com.google.firebase.database.Transaction
 
@@ -293,7 +292,6 @@ open class BaseActivity : AppCompatActivity() {
         categoryKey: String,
         gameKey: String,
         starsEarned: Int = 0,
-        score: Int = 0,
         accuracy: Double = 0.0,
         reactionTime: Double = 0.0
     ) {
@@ -301,6 +299,8 @@ open class BaseActivity : AppCompatActivity() {
         val userRef = db.getReference("users").child(userId)
         //aktualizacja globalnych statystyk usera
         val statsRef = userRef.child("statistics")
+
+        //AKTUALIZACJA GLOBALNYCH STATYSTYK
 
         //runTransaction wykonuje aktualizacje "atomowo" czyli jedną grę na raz
         //używany do odczytu danych które są zależne od poprzednich danych
@@ -312,16 +312,12 @@ open class BaseActivity : AppCompatActivity() {
                 val currentStats = currentData.value as? Map<String, Any> ?: emptyMap()
 
                 val currentStars = (currentStats["totalStars"] as? Long ?: 0L).toInt()
-                val currentAvgScore = (currentStats["avgScore"] as? Long ?: 0L).toInt()
                 val currentAvgAccuracy = (currentStats["avgAccuracy"] as? Double ?: 0.0)
                 val currentAvgReactionTime = (currentStats["avgReactionTime"] as? Double ?: 0.0)
                 val gamesPlayed = (currentStats["gamesPlayed"] as? Long ?: 0L).toInt()
 
                 //obliczanie nowych średnich ważonych
                 val newGamesPlayed = gamesPlayed + 1
-                val newAvgScore =
-                    if (score > 0) (currentAvgScore * gamesPlayed + score) / newGamesPlayed
-                    else currentAvgScore
                 val newAvgAccuracy =
                     if (accuracy > 0) (currentAvgAccuracy * gamesPlayed + accuracy) / newGamesPlayed
                     else currentAvgAccuracy
@@ -330,10 +326,10 @@ open class BaseActivity : AppCompatActivity() {
                     else currentAvgReactionTime
 
                 val updatedStats = mapOf(
-                    "avgScore" to newAvgScore,
                     "avgAccuracy" to newAvgAccuracy,
                     "avgReactionTime" to newAvgReaction,
-                    "totalStars" to currentStars + starsEarned
+                    "totalStars" to currentStars + starsEarned,
+                    "gamesPlayed" to newGamesPlayed
                 )
 
                 currentData.value = updatedStats
@@ -359,7 +355,7 @@ open class BaseActivity : AppCompatActivity() {
         gameRef.get().addOnSuccessListener { snapshot ->
             val currentStars = snapshot.child("starsEarned").getValue(Int::class.java) ?: 0
             val currentGamesPlayed = snapshot.child("gamesPlayed").getValue(Int::class.java) ?: 0
-            val currentBestScore = snapshot.child("bestScore").getValue(Int::class.java) ?: 0
+            val currentBestStars = snapshot.child("bestStars").getValue(Int::class.java) ?: 0
             val currentAvgAccuracy = snapshot.child("accuracy").getValue(Double::class.java) ?: 0.0
             val currentAvgReaction = snapshot.child("avgReactionTime").getValue(Double::class.java) ?: 0.0
 
@@ -375,7 +371,7 @@ open class BaseActivity : AppCompatActivity() {
 
             val updatedGameData = mapOf(
                 "starsEarned" to (currentStars + starsEarned),
-                "bestScore" to maxOf(currentBestScore, score),
+                "bestStars" to maxOf(currentBestStars, starsEarned),
                 "accuracy" to newAvgAccuracy,
                 "avgReactionTime" to newAvgReaction,
                 "gamesPlayed" to newGamesPlayed,
@@ -390,6 +386,41 @@ open class BaseActivity : AppCompatActivity() {
         }.addOnFailureListener {
             Log.e("STATS_DEBUG", "Błąd pobierania danych gry $gameKey: ${it.message}")
         }
+    }
+
+    /*
+    Liczymy średni czas reakcji jako czas trwania rundy / liczba interakcji
+
+    - Zapamiętanie czas startu gry (startTime).
+    - W momencie zapisu statystyk (updateUserStatistics) liczenie ile trwała gra
+    - Obliczenia średniego czasu reakcji - czas gry / liczba kliknięć
+     */
+
+    private var gameStartTime: Long = 0L
+    private var gameClicks: Long = 0L
+
+    //śledzenie gry
+    //wywoływana na początku gry
+    protected fun startReactionTracking(){
+        gameStartTime = System.currentTimeMillis()
+        gameClicks = 0
+    }
+
+    //wywoływana na końcu gry
+    protected fun registerPlayerAction(){
+        gameClicks++
+    }
+
+    //TODO: trzeba zrobic tak żeby to był rzeczywisty średni czas a nie ostatniej gry
+    //zmiana żeby wyswietlaly sie 2 miejsca po przecinku
+    //obliczanie średniego czasu reakcji
+    protected fun getAverageReactionTime(): Double{
+        val duration = (System.currentTimeMillis() - gameStartTime).coerceAtLeast(1L)
+        //coerceAtLeast - upewnie sie ze liczba nie bedzie mniejsza niz dana wartość
+        //przez to unikamy dzielenia przez 0 jezeli gra bedzie trwała krótko
+        val clicks = gameClicks.coerceAtLeast(1)
+        //clicks nigdy nie bedzie 0
+        return duration.toDouble() / clicks / 1000.0 //sekundy
     }
 
 }

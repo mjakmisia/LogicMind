@@ -69,6 +69,9 @@ class CardMatchActivity : BaseActivity() {
 
         supportActionBar?.hide()
 
+        //zaczynamy liczyć średni czas reakcji
+        startReactionTracking()
+
         // Inicjalizacja dźwięku
         SoundManager.init(this)
 
@@ -85,7 +88,6 @@ class CardMatchActivity : BaseActivity() {
         //TODO: Usuń po implementacji funkcji które to rzeczywiście liczą
         val avgReactionTime = 1.0
         val avgAccuracy = 0.5
-        val avgScore = 7
 
         // Inicjalizacja paska czasu
         timerProgressBar.setTotalTime(90) // Ustaw czas na 1,5 minuty
@@ -100,9 +102,8 @@ class CardMatchActivity : BaseActivity() {
                     categoryKey = GameKeys.CATEGORY_MEMORY,
                     gameKey = GameKeys.GAME_CARD_MATCH,
                     starsEarned = starManager.starCount,
-                    avgScore,
                     avgAccuracy,
-                    avgReactionTime,
+                    getAverageReactionTime(),
                 )
 
                 lastPlayedGame(GameKeys.CATEGORY_MEMORY, GameKeys.GAME_CARD_MATCH, getString(R.string.card_match))
@@ -153,6 +154,8 @@ class CardMatchActivity : BaseActivity() {
                     categoryKey = GameKeys.CATEGORY_MEMORY,
                     gameKey = GameKeys.GAME_CARD_MATCH,
                     starsEarned = starManager.starCount,
+                    avgAccuracy,
+                    getAverageReactionTime(),
                 )
 
                 lastPlayedGame(GameKeys.CATEGORY_MEMORY, GameKeys.GAME_CARD_MATCH, getString(R.string.card_match))
@@ -427,6 +430,9 @@ class CardMatchActivity : BaseActivity() {
 
     // Obsługuje kliknięcie karty
     private fun onCardClick(card: Card) {
+        //rejestrujemy kliki użytkownika
+        registerPlayerAction()
+
         if (pauseMenu.isPaused || isPreviewPhase) return // Ignoruj kliknięcia, gdy gra jest w trybie preview lub pauzy
         if (isFlipping || card.isFlipped || card.isMatched || !gridLayout.isEnabled) return // Ignoruj, jeśli karta jest zablokowana
 

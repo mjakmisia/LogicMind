@@ -99,7 +99,8 @@
                                 android:layout_height="wrap_content"
                                 android:text="@string/avg_reaction_time_value"
                                 android:textColor="?attr/text_dark"
-                                android:textSize="14sp" />
+                                android:textSize="14sp"
+                                />
 
                             <TextView
                                 android:id="@+id/tvCoordinationGame1Accuracy"
