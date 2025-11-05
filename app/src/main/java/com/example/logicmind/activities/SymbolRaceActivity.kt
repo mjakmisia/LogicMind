@@ -22,6 +22,10 @@ import com.example.logicmind.common.PauseMenu
 import com.example.logicmind.common.StarManager
 import kotlin.random.Random
 import androidx.core.graphics.toColorInt
+import android.content.res.Configuration
+import androidx.constraintlayout.widget.ConstraintSet
+import java.io.Serializable
+import android.os.Build
 
 class SymbolRaceActivity : BaseActivity() {
 
@@ -68,13 +72,19 @@ class SymbolRaceActivity : BaseActivity() {
     companion object {
         const val BASE_TIME_SECONDS = 90                        // Całkowity czas gry
         private const val BLOCK_DELAY_MS = 1300L                // Opóźnienie auto-usunięcia – BLOCK
-        private const val CIRCLE_SIZE_DP = 130                  // Rozmiar koła w dp
-        private const val VISIBLE_CIRCLES = 4                   // Liczba widocznych kół
+        private const val CIRCLE_SIZE_DP = 130                  // Rozmiar koła w dp (pion)
+        private const val VISIBLE_CIRCLES = 4                   // Liczba widocznych kół (pion)
+        private const val CIRCLE_SIZE_DP_LANDSCAPE = 100        // Rozmiar koła w dp (poziom)
+        private const val VISIBLE_CIRCLES_LANDSCAPE = 3         // Liczba widocznych kół (poziom)
         private const val ANIMATION_DURATION_MS = 300L          // Czas animacji ruchu (ms)
         private const val MIN_REACTION_TIME_MS = 800L          // Minimalny czas życia koła
         private const val SPEEDUP_STEP_MS = 300L                // Skrócenie czasu co przyspieszenie
         private const val MOVES_PER_SPEEDUP = 12                // Ruchów na przyspieszenie
     }
+
+    // Zmienne stanu widoku (zależne od orientacji)
+    private var currentCircleSizeDp: Int = CIRCLE_SIZE_DP
+    private var currentVisibleCircles: Int = VISIBLE_CIRCLES
 
     // Kolory
     private val redColor = "#EF5350".toColorInt()
@@ -88,13 +98,20 @@ class SymbolRaceActivity : BaseActivity() {
         EMPTY, LEFT, RIGHT, BOTH, DOUBLE_LEFT, DOUBLE_RIGHT, SWAP, TARGET, BLOCK
     }
 
-    // Struktura danych dla koła
+    // Struktura danych dla koła - zawiera widok
     private data class Circle(
         val id: Int,
         val view: ImageView,
         val color: Int,
         val symbol: Symbol
     )
+
+    // Struktura do zapisu czystego stanu koła
+    private data class CircleState(
+        val id: Int,
+        val color: Int,
+        val symbol: Symbol
+    ) : Serializable
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -207,6 +224,8 @@ class SymbolRaceActivity : BaseActivity() {
             true
         }
 
+        updateLayoutForOrientation() // Ustawiamy parametry widoku (zależne od zmiany orientacji)
+
         // Pierwsze uruchomienie – pokazujemy odliczanie
         if (savedInstanceState == null) {
             trackLine.visibility = View.GONE
@@ -236,15 +255,15 @@ class SymbolRaceActivity : BaseActivity() {
         outState.putLong("currentReactionTimeMs", currentReactionTimeMs)
         outState.putInt("successfulStreak", successfulStreak)
         outState.putInt("totalMoves", totalMoves)
-        outState.putBoolean("isProcessing", isProcessing)
         outState.putBoolean("isGameRunning", isGameRunning)
-        outState.putLong("lastTapTime", lastTapTime)
-        lastTapSide?.let { outState.putBoolean("lastTapSide", it) }
-        outState.putBoolean("awaitingDoubleClick", awaitingDoubleClick)
-        awaitingDoubleSide?.let { outState.putInt("awaitingDoubleSide", it) }
-        awaitingDoubleForId?.let { outState.putInt("awaitingDoubleForId", it) }
         outState.putInt("nextCircleId", nextCircleId)
         starManager.saveState(outState)
+
+        // Zapisz stan kolejki kół jako listę obiektów
+        val queueToSave = ArrayList(circleQueue.map {
+            CircleState(it.id, it.color, it.symbol)
+        })
+        outState.putSerializable("circleQueueState", queueToSave)
     }
 
     // Przywrócenie stanu gry po zmianie konfiguracji
@@ -269,14 +288,14 @@ class SymbolRaceActivity : BaseActivity() {
         currentReactionTimeMs = savedInstanceState.getLong("currentReactionTimeMs", 3500L).coerceAtLeast(MIN_REACTION_TIME_MS)
         successfulStreak = savedInstanceState.getInt("successfulStreak", 0)
         totalMoves = savedInstanceState.getInt("totalMoves", 0)
-        isProcessing = savedInstanceState.getBoolean("isProcessing", false)
         isGameRunning = savedInstanceState.getBoolean("isGameRunning", false)
-        lastTapTime = savedInstanceState.getLong("lastTapTime", 0)
-        lastTapSide = if (savedInstanceState.containsKey("lastTapSide")) savedInstanceState.getBoolean("lastTapSide") else null
-        awaitingDoubleClick = savedInstanceState.getBoolean("awaitingDoubleClick", false)
-        awaitingDoubleSide = if (savedInstanceState.containsKey("awaitingDoubleSide")) savedInstanceState.getInt("awaitingDoubleSide") else null
-        awaitingDoubleForId = if (savedInstanceState.containsKey("awaitingDoubleForId")) savedInstanceState.getInt("awaitingDoubleForId") else null
         nextCircleId = savedInstanceState.getInt("nextCircleId", 1)
+
+        // Resetujemy stany przejściowe do wartości domyślnych
+        isProcessing = false
+        lastTapTime = 0
+        lastTapSide = null
+        clearAwaitingDouble()
 
         // Przywraca licznik gwiazdek i synchronizuje menu pauzy
         starManager.restoreState(savedInstanceState)
@@ -289,18 +308,131 @@ class SymbolRaceActivity : BaseActivity() {
             return
         }
 
-        // Jeśli gra była aktywna – wznawia licznik i ruch
+        // Odtwarza kolejkę kół
+        @Suppress("UNCHECKED_CAST")
+        val savedQueue = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Sposób pobierania Serializable dla API 33+
+            savedInstanceState.getSerializable("circleQueueState", ArrayList::class.java)
+        } else {
+            // Stary sposób dla API < 33
+            @Suppress("DEPRECATION")
+            savedInstanceState.getSerializable("circleQueueState")
+        } as? ArrayList<CircleState> // Rzutujemy bezpiecznie na końcu
+
+        if (savedQueue != null) {
+            circleQueue.clear()
+            trackContainer.removeAllViews() // Wyczyść kontener
+
+            // Przejdź przez zapisany stan i stwórz koła od nowa
+            for (state in savedQueue) {
+                // Odtwórz widok
+                val view = ImageView(this).apply {
+                    layoutParams = FrameLayout.LayoutParams(dpToPx(currentCircleSizeDp), dpToPx(currentCircleSizeDp)).apply {
+                        gravity = Gravity.CENTER_HORIZONTAL
+                    }
+                    scaleType = ImageView.ScaleType.FIT_CENTER
+                    setImageResource(getSymbolDrawable(state.symbol))
+                    background = createCircleBackground(state.color)
+                    elevation = 8f
+                    setPadding(dpToPx(16), dpToPx(16), dpToPx(16), dpToPx(16))
+                }
+
+                // Odtwórz obiekt koła
+                val circle = Circle(state.id, view, state.color, state.symbol)
+
+                // Dodaj do listy i widoku
+                circleQueue.add(circle)
+                trackContainer.addView(view)
+
+                // Ustaw listener
+                view.setOnClickListener {
+                    if (isGameRunning && !isProcessing && circleQueue.isNotEmpty() && circleQueue.last() == circle) {
+                        when (state.symbol) {
+                            Symbol.TARGET -> animateInstantSuccess(circle)
+                            else -> animateFailure(circle)
+                        }
+                    }
+                }
+            }
+        }
+
+        // Jeśli gra była aktywna – wznawia licznik
         if (timerRunning && pauseOverlay.visibility != View.VISIBLE && !isProcessing) {
             timerProgressBar.start()
         }
 
-        // Przywraca układ kół po załadowaniu widoku
+        // Przywraca logikę gry
         trackContainer.post {
             if (isGameRunning) {
-                updateCirclePositions()
-                startAutoShift()
+                adjustCircleQueueToView() // Dostosuj liczbę kół
+                startAutoShift() // Uruchom logikę gry (timery, przesuwanie)
                 if (circleQueue.isNotEmpty()) startActiveTimer()
             }
+        }
+    }
+
+    // Dynamicznie dostosowuje layout do orientacji
+    private fun updateLayoutForOrientation() {
+        val currentConfig = resources.configuration
+        val constraintLayout = findViewById<ConstraintLayout>(R.id.rootLayout)
+        val constraintSet = ConstraintSet()
+        constraintSet.clone(constraintLayout)
+
+        if (currentConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            // --- TRYB POZIOMY ---
+
+            // Zmień parametry kół (mniejsze i mniej)
+            currentCircleSizeDp = CIRCLE_SIZE_DP_LANDSCAPE
+            currentVisibleCircles = VISIBLE_CIRCLES_LANDSCAPE
+
+            // Zmień szerokość i wysokość kontenerów
+            val offscreenMargin = dpToPx(-30)
+            val landscapeWidth = dpToPx(220)
+            val landscapeHeight = dpToPx(260)
+
+            // Niebieski (lewy)
+            constraintSet.constrainWidth(R.id.blueContainer, landscapeWidth)
+            constraintSet.constrainHeight(R.id.blueContainer, landscapeHeight)
+            constraintSet.clear(R.id.blueContainer, ConstraintSet.START)
+            constraintSet.connect(R.id.blueContainer, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START, offscreenMargin)
+
+            // Czerwony (prawy)
+            constraintSet.constrainWidth(R.id.redContainer, landscapeWidth)
+            constraintSet.constrainHeight(R.id.redContainer, landscapeHeight)
+            constraintSet.clear(R.id.redContainer, ConstraintSet.END)
+            constraintSet.connect(R.id.redContainer, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END, offscreenMargin)
+
+        } else {
+            // --- TRYB PIONOWY (domyślny) ---
+
+            // Przywróć domyślne parametry kół
+            currentCircleSizeDp = CIRCLE_SIZE_DP
+            currentVisibleCircles = VISIBLE_CIRCLES
+
+            // Przywróć oryginalną szerokość i wysokość kontenerów
+            val originalMargin = dpToPx(-30)
+            val originalWidth = dpToPx(120)
+            val originalHeight = dpToPx(320)
+
+            // Niebieski (lewy)
+            constraintSet.constrainWidth(R.id.blueContainer, originalWidth)
+            constraintSet.constrainHeight(R.id.blueContainer, originalHeight)
+            constraintSet.clear(R.id.blueContainer, ConstraintSet.START)
+            constraintSet.connect(R.id.blueContainer, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START, originalMargin)
+
+            // Czerwony (prawy)
+            constraintSet.constrainWidth(R.id.redContainer, originalWidth)
+            constraintSet.constrainHeight(R.id.redContainer, originalHeight)
+            constraintSet.clear(R.id.redContainer, ConstraintSet.END)
+            constraintSet.connect(R.id.redContainer, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END, originalMargin)
+        }
+
+        // Zastosuj zmiany w layoucie
+        constraintSet.applyTo(constraintLayout)
+
+        // Wymuś ponowne przeliczenie pozycji kół, jeśli gra już trwa (po obrocie)
+        if (isGameRunning && !countdownManager.isInProgress()) {
+            updateCirclePositions()
         }
     }
 
@@ -333,7 +465,7 @@ class SymbolRaceActivity : BaseActivity() {
         tempoInfoText.visibility = View.VISIBLE
 
         // Tworzy początkowe koła
-        repeat(VISIBLE_CIRCLES) { createCircle() }
+        repeat(currentVisibleCircles) { createCircle() }
         updateCirclePositions()
         startAutoShift() // Uruchamia automatyczne przesuwanie
         startActiveTimer() // Uruchamia timer dla pierwszego koła
@@ -349,7 +481,7 @@ class SymbolRaceActivity : BaseActivity() {
 
         // Tworzy graficzną reprezentację koła
         val view = ImageView(this).apply {
-            layoutParams = FrameLayout.LayoutParams(dpToPx(CIRCLE_SIZE_DP), dpToPx(CIRCLE_SIZE_DP)).apply {
+            layoutParams = FrameLayout.LayoutParams(dpToPx(currentCircleSizeDp), dpToPx(currentCircleSizeDp)).apply {
                 gravity = Gravity.CENTER_HORIZONTAL
             }
             scaleType = ImageView.ScaleType.FIT_CENTER
@@ -360,7 +492,7 @@ class SymbolRaceActivity : BaseActivity() {
         }
 
         val circle = Circle(nextCircleId++, view, color, symbol)
-        circleQueue.add(0, circle)
+        circleQueue.add(0, circle) // Dodaje na górę listy
         trackContainer.addView(view)
 
         // Pozwala kliknąć tylko dolne (aktywne) koło
@@ -575,7 +707,7 @@ class SymbolRaceActivity : BaseActivity() {
         // Czyści stan oczekiwania jeśli dotyczyło tego koła
         if (awaitingDoubleForId == removedCircle.id) clearAwaitingDouble()
 
-        // Dodaje nowe koło i kontynuuje grę
+        // Dodaje nowe koło (na górę) i kontynuuje grę
         createCircle()
         updateCirclePositions()
         startActiveTimer()
@@ -692,7 +824,7 @@ class SymbolRaceActivity : BaseActivity() {
 
         fun scheduleNext() {
             runDelayed(currentReactionTimeMs) {
-                if (isGameRunning && !isProcessing && circleQueue.size >= VISIBLE_CIRCLES) {
+                if (isGameRunning && !isProcessing && circleQueue.size >= currentVisibleCircles) {
                     scheduleNext()
                 } else {
                     // Jeśli coś przerwało – spróbuj ponownie po krótkiej chwili
@@ -708,33 +840,88 @@ class SymbolRaceActivity : BaseActivity() {
     private fun updateCirclePositions() {
         val trackHeight = trackContainer.height
         if (trackHeight == 0) {
-            // Jeśli layout jeszcze się nie zmierzył – odłóż wykonanie
+            // Layout jeszcze niezmierzony, spróbuj ponownie za chwilę
             trackContainer.post { updateCirclePositions() }
             return
         }
 
-        val circleSize = dpToPx(CIRCLE_SIZE_DP).toFloat()
-        val topMargin = dpToPx(32).toFloat()
-        val bottomTargetY = trackHeight * 0.65f
-        val totalSpace = bottomTargetY - topMargin
-        val totalCirclesHeight = circleSize * VISIBLE_CIRCLES
-        val totalGaps = VISIBLE_CIRCLES - 1
-        val minSpacing = dpToPx(30).toFloat()
+        val circleSize = dpToPx(currentCircleSizeDp).toFloat()
 
-        val spacing = if (totalSpace < totalCirclesHeight + minSpacing * totalGaps) minSpacing
-        else (totalSpace - totalCirclesHeight) / totalGaps.toFloat()
+        val startY: Float
+        val spacing: Float
+
+        // Sprawdza czy jesteśmy w trybie pionowym na podstawie liczby kół
+        if (currentVisibleCircles == VISIBLE_CIRCLES) {
+            // --- TRYB PIONOWY ---
+            val topMargin = dpToPx(32).toFloat()
+            val bottomTargetY = trackHeight * 0.65f
+            val totalSpace = bottomTargetY - topMargin
+            val totalCirclesHeight = circleSize * currentVisibleCircles
+            val totalGaps = currentVisibleCircles - 1
+            val minSpacing = dpToPx(30).toFloat()
+
+            spacing = if (totalSpace < totalCirclesHeight + minSpacing * totalGaps) minSpacing
+            else (totalSpace - totalCirclesHeight) / totalGaps.toFloat()
+
+            startY = topMargin
+
+        } else {
+            // --- TRYB POZIOMY ---
+            val topMargin = dpToPx(2).toFloat()
+            val bottomMargin = dpToPx(80).toFloat() // Margines od dołu
+            spacing = dpToPx(8).toFloat() // Mniejszy odstęp
+
+            // Całkowita wysokość zajmowana przez koła i odstępy
+            val totalHeightOfCirclesAndGaps = (currentVisibleCircles * circleSize) +
+                    ((currentVisibleCircles - 1).coerceAtLeast(0) * spacing)
+
+            // Oblicz pozycję górnego koła tak aby dolne było nad marginesem
+            val topYOfTopCircle = (trackHeight - bottomMargin) - totalHeightOfCirclesAndGaps
+            startY = topYOfTopCircle.coerceAtLeast(topMargin)
+        }
 
         // Rozmieszcza widoczne koła w pionie
         circleQueue.forEachIndexed { index, circle ->
-            if (index < VISIBLE_CIRCLES) {
-                val y = topMargin + (circleSize + spacing) * index
+            if (index < currentVisibleCircles) {
+                // Ustaw pozycję i pokaż koło
+                val y = startY + (circleSize + spacing) * index
                 circle.view.y = y
                 circle.view.visibility = View.VISIBLE
                 circle.view.elevation = 8f
             } else {
+                // Ukryj nadmiarowe koła (przejście z pionu na poziom)
                 circle.view.visibility = View.GONE
             }
         }
+    }
+
+    // Dostosowuje liczbę kół w kolejce do wymagań widoku (pion/poziom)
+    private fun adjustCircleQueueToView() {
+        if (!isGameRunning) return
+
+        val needed = currentVisibleCircles
+        val current = circleQueue.size
+
+        if (current < needed) {
+            // Dodajemy brakujące koła na górę
+            val difference = needed - current
+            repeat(difference) {
+                createCircle()
+            }
+        } else if (current > needed) {
+            // Usuwamy nadmiarowe koła z góry
+            val difference = current - needed
+            repeat(difference) {
+                if (circleQueue.isNotEmpty()) {
+                    val circleToRemove = circleQueue.first() // Pobierz pierwsze (górne) koło
+                    circleQueue.remove(circleToRemove)
+                    trackContainer.removeView(circleToRemove.view)
+                }
+            }
+        }
+
+        // Po każdej zmianie, przelicz pozycje
+        updateCirclePositions()
     }
 
     // Zwraca odpowiednią grafikę dla danego symbolu
@@ -803,6 +990,7 @@ class SymbolRaceActivity : BaseActivity() {
     // Zatrzymuje grę, gdy aplikacja przechodzi w tło
     override fun onPause() {
         super.onPause()
+        // Pauzuj grę tylko jeśli nie jest to zmiana konfiguracji (obrót)
         if (!isGameEnding && !pauseMenu.isPaused && !isChangingConfigurations) {
             pauseMenu.pause()
             timerProgressBar.pause()

@@ -120,6 +120,11 @@
     <string name="na_desc_calculation">Practice fast arithmetic and logical reasoning</string>
 
     <!-- Path Change -->
+    <string name="pc_section_planning">Planning</string>
+    <string name="pc_desc_planning">Improve your ability to anticipate and plan sequences of actions to reach a goal</string>
+
+    <string name="pc_section_divided_attention">Divided Attention</string>
+    <string name="pc_desc_divided_attention">Develop the skill of tracking moving elements while simultaneously managing the environment</string>
 
     <!-- Word Search -->
     <string name="ws_section_active_vocab">Active Vocabulary</string>
@@ -132,19 +137,27 @@
     <string name="ws_desc_mind_speed">Reduce the time needed to complete mental tasks</string>
 
     <!-- Symbol Race -->
+    <string name="sr_section_visual_motor">Visual-Motor Coordination</string>
+    <string name="sr_desc_visual_motor">Synchronize your eyes and hands to react instantly to changes</string>
+
+    <string name="sr_section_processing_speed">Processing Speed</string>
+    <string name="sr_desc_processing_speed">Reduce the time needed to recognize a cue and make the right decision</string>
+
+    <string name="sr_section_selective_attention">Selective Attention</string>
+    <string name="sr_desc_selective_attention">Maintain concentration on the key task while ignoring other stimuli</string>
 
 
     <!-- HELP DIALOG -->
-    <string name="card_match_instruction"><![CDATA[Find matching pairs of fruits while avoiding bombs! You have 90 seconds to earn as many stars as you can.\n\nHow to play:\n• At the start of each level, the cards are shown for <b>2 seconds</b> – try to remember as many as possible before they flip over.\n• Tap cards to reveal them – select two to see if they match.\n• Matching pairs stay uncovered; mismatched ones flip back after a moment.\n• Watch out for bombs! Hitting one will cost you <b>10 seconds</b>.\n\nBonuses:\n• Earn a star for every correctly matched pair.\n• Gain an extra <b>30 seconds</b> for completing a level.]]></string>
-    <string name="color_sequence_instruction"><![CDATA[Repeat the shown sequence of colored buttons! You have 90 seconds to earn as many stars as you can.\n\nHow to play:\n• At the start of each round, a sequence of buttons is shown – each one has a unique color and sound.\n• After the preview, repeat the sequence by tapping the buttons <b>in the same order</b>.\n• If you make a mistake, the sequence will <b>replay automatically</b>.\n• <b>The timer pauses</b> during the preview and runs only during your turn.\n\nBonuses:\n• Earn a star for every correctly repeated sequence.\n• Gain an extra <b>15 seconds</b> for completing a level.]]></string>
+    <string name="card_match_instruction"><![CDATA[Find matching pairs of fruits while avoiding bombs! You have 90 seconds to earn as many stars as you can.\n\n<b>How to play:</b>\n• At the start of each level, the cards are shown for <b>2 seconds</b> – try to remember as many as possible before they flip over.\n• Tap cards to reveal them – select two to see if they match.\n• Matching pairs stay uncovered; mismatched ones flip back after a moment.\n• Watch out for bombs! Hitting one will cost you <b>10 seconds</b>.\n\n<b>Bonuses:</b>\n• Earn a star for every correctly matched pair.\n• Gain an extra <b>30 seconds</b> for completing a level.]]></string>
+    <string name="color_sequence_instruction"><![CDATA[Repeat the shown sequence of colored buttons! You have 90 seconds to earn as many stars as you can.\n\n<b>How to play:</b>\n• At the start of each round, a sequence of buttons is shown – each one has a unique color and sound.\n• After the preview, repeat the sequence by tapping the buttons <b>in the same order</b>.\n• If you make a mistake, the sequence will <b>replay automatically</b>.\n• The timer pauses during the preview and runs only during your turn.\n\n<b>Bonuses:</b>\n• Earn a star for every correctly repeated sequence.\n• Gain an extra <b>15 seconds</b> for completing a level.]]></string>
 
-    <string name="number_addition_instruction"><![CDATA[Select numbers whose sum equals the displayed result! You have 90 seconds to earn as many stars as you can.\n\nHow to play:\n• Tap number buttons to select them – <b>purple means selected</b>.\n• Choose the required number of buttons to check your answer – a correct combination turns gray permanently, while an incorrect one <b>flashes red</b> and resets after a moment.\n• Some levels include <b>extra cards</b> that are not needed to reach the target sum.\n\nBonuses:\n• Earn a star for every correctly found sum.\n• Gain an extra <b>20 seconds</b> for completing a level.]]></string>
+    <string name="number_addition_instruction"><![CDATA[Select numbers whose sum equals the displayed result! You have 90 seconds to earn as many stars as you can.\n\n<b>How to play:</b>\n• Tap number buttons to select them – purple means selected.\n• Choose the <b>required number of buttons</b> to check your answer – a correct combination turns gray permanently, while an incorrect one flashes red and resets after a moment.\n• Some levels include <b>extra cards</b> that are not needed to reach the target sum.\n\n<b>Bonuses:</b>\n• Earn a star for every correctly found sum.\n• Gain an extra <b>20 seconds</b> for completing a level.]]></string>
     <string name="path_change_instruction">Instructions will go here.</string>
 
     <string name="word_search_instruction">Instructions will go here.</string>
     <string name="fruit_sort_instruction">Instructions will go here.</string>
 
-    <string name="symbol_race_instruction"><![CDATA[React with the correct gesture to the appearing symbols! You have 90 seconds to earn as many stars as you can.\n\n<b>How to play:</b>\n• Watch the track – you only need to react to the <b>bottom, active symbol</b>.\n• Each symbol requires a different gesture (tapping a side, both sides, the symbol itself, or not reacting at all).\n• Perform the gesture before the symbol disappears. The time to react is limited and gradually gets shorter!\n• A wrong reaction (or lack of one) costs you <b>6 seconds</b> and resets your combo.\n\n<b>Symbols and gestures:</b>\n<img src="ic_empty_circle" /> – tap the side with the same color\n<img src="ic_arrow_left" /> – tap the left side\n<img src="ic_arrow_right" /> – tap the right side\n<img src="ic_close" /> – do not touch\n<img src="ic_target" /> – tap here\n<img src="ic_swap" /> – tap the opposite color\n<img src="ic_double_left" /> – tap the left side twice\n<img src="ic_double_right" /> – tap the right side twice\n<img src="ic_both_sides" /> – tap both sides at once\n\n<b>Bonuses:</b>\n• Earn a star for every correct symbol.\n• Gain extra time for correct reaction streaks (combos).]]></string>
+    <string name="symbol_race_instruction"><![CDATA[React with the correct gesture to the appearing symbols! You have 90 seconds to earn as many stars as you can.\n\n<b>How to play:</b>\n• Watch the track – it has a queue of circles; you must react to the <b>bottom symbol</b>.\n• Each symbol requires a different gesture (tapping a specific side, both sides, the symbol itself, or not reacting at all).\n• Perform the gesture before the symbol disappears. The time to react is limited and gradually gets shorter!\n• A wrong reaction (or lack of one) costs you <b>6 seconds</b> and resets your combo.\n\n<b>Symbols and gestures:</b>\n<img src="ic_empty_circle" /> – tap the side with the same color\n<img src="ic_arrow_left" /> – tap the left side\n<img src="ic_arrow_right" /> – tap the right side\n<img src="ic_close" /> – do not touch\n<img src="ic_target" /> – tap here\n<img src="ic_swap" /> – tap the opposite color\n<img src="ic_double_left" /> – tap the left side twice\n<img src="ic_double_right" /> – tap the right side twice\n<img src="ic_both_sides" /> – tap both sides at once\n\n<b>Bonuses:</b>\n• Earn a star for every correct symbol.\n• Gain extra time for correct reaction streaks – <b>the bigger the combo, the bigger the bonus!</b>]]></string>
     <string name="road_dash_instruction">Instructions will go here.</string>
 
 </resources>

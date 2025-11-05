@@ -13,7 +13,7 @@ import com.example.logicmind.common.GameTimerProgressBar
 import com.example.logicmind.common.PauseMenu
 import com.example.logicmind.common.StarManager
 
-class PathChangeActivity : BaseActivity() {
+class WordSearchActivity : BaseActivity() {
 
     private lateinit var gridLayout: GridLayout // Siatka do wyświetlania elementów
     private lateinit var countdownText: TextView // Pole tekstowe dla odliczania
@@ -32,7 +32,7 @@ class PathChangeActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_path_change)
+        setContentView(R.layout.activity_word_search)
         supportActionBar?.hide()
 
         // Inicjalizacja widoków
@@ -93,7 +93,7 @@ class PathChangeActivity : BaseActivity() {
             onPause = { timerProgressBar.pause() },  // Zatrzymuje timer podczas pauzy
             onExit = { finish() }, // Kończy aktywność
             instructionTitle = getString(R.string.instructions),
-            instructionMessage = getString(R.string.path_change_instruction),
+            instructionMessage = getString(R.string.word_search_instruction),
         )
 
         // Sprawdzenie, czy gra jest uruchamiana po raz pierwszy

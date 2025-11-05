@@ -59,7 +59,8 @@ object GameIntroProvider {
                 titleRes = R.string.path_change,
                 imageRes = R.drawable.ic_close, //ZMIEŃ
                 sections = listOf(
-
+                    IntroSection(R.string.pc_section_planning, R.string.pc_desc_planning),
+                    IntroSection(R.string.pc_section_divided_attention, R.string.pc_desc_divided_attention)
                 ),
                 gameActivity = PathChangeActivity::class.java,
                 instructionRes = R.string.path_change_instruction
@@ -73,7 +74,7 @@ object GameIntroProvider {
                     IntroSection(R.string.ws_section_attention, R.string.ws_desc_attention),
                     IntroSection(R.string.ws_section_mind_speed, R.string.ws_desc_mind_speed)
                 ),
-                gameActivity = NumberAdditionActivity::class.java, // ZMIEŃ
+                gameActivity = WordSearchActivity::class.java,
                 instructionRes = R.string.word_search_instruction
             )
             "symbol_race" -> GameIntroConfig(
@@ -81,7 +82,9 @@ object GameIntroProvider {
                 titleRes = R.string.symbol_race,
                 imageRes = R.drawable.image_symbol_race,
                 sections = listOf(
-
+                    IntroSection(R.string.sr_section_visual_motor, R.string.sr_desc_visual_motor),
+                    IntroSection(R.string.sr_section_processing_speed, R.string.sr_desc_processing_speed),
+                    IntroSection(R.string.sr_section_selective_attention, R.string.sr_desc_selective_attention)
                 ),
                 gameActivity = SymbolRaceActivity::class.java,
                 instructionRes = R.string.symbol_race_instruction
