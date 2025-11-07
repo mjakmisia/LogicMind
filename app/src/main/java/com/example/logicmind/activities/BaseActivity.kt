@@ -14,9 +14,9 @@ import com.example.logicmind.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.GenericTypeIndicator
 import com.google.firebase.database.MutableData
 import com.google.firebase.database.Transaction
+import java.util.Calendar
 
 /**
  * BaseActivity
@@ -138,10 +138,19 @@ open class BaseActivity : AppCompatActivity() {
     ) {
         val user = auth.currentUser
 
-        if (user != null) {
-            val uid = user.uid
+        if (user == null) {
+            Log.w("GAME_DEBUG", "Brak zalogowanego użytkownika — pomijam zapis lastPlayed")
+            return
+        }
+
+        isGuestUser { isGuest ->
+            if(isGuest){
+                Log.w("GAME_DEBUG", "Brak zalogowanego użytkownika, pomijam zapis LastPlayed")
+                return@isGuestUser
+            }
+            //jeśli nie jest gościem
             //zapis do bazy danych - operacja asynchroniczna, czyli nie blokuje wątku głównego
-            val dbRef = db.getReference("users").child(uid).child("categories").child(categoryKey)
+            val dbRef = db.getReference("users").child(user.uid).child("categories").child(categoryKey)
                 .child("games").child(gameKey)
 
             val timestamp = System.currentTimeMillis()
@@ -156,8 +165,6 @@ open class BaseActivity : AppCompatActivity() {
                 .addOnFailureListener { e ->
                     Log.e("GAME_DEBUG", "Błąd aktualizacji lastPlayed dla $gameKey", e)
                 }
-        } else {
-            Log.w("GAME_DEBUG", "Brak zalogowanego użytkownika, lastPlayed nie zaktualizowany")
         }
     }
 
@@ -167,7 +174,18 @@ open class BaseActivity : AppCompatActivity() {
     protected fun updateStreak() {
         val user = auth.currentUser
 
-        if (user != null) {
+        if (user == null) {
+            Log.w("STREAK_DEBUG", "Brak zalogowanego użytkownika — pomijam aktualizację streaka")
+            return
+        }
+
+        // czy użytkownik jest gościem
+        isGuestUser { isGuest ->
+            if (isGuest) {
+                Log.w("STREAK_DEBUG", "Użytkownik to gość — pomijam aktualizację streaka")
+                return@isGuestUser
+            }
+
             val uid = user.uid
             val userRef = db.getReference("users").child(uid)
 
@@ -177,35 +195,21 @@ open class BaseActivity : AppCompatActivity() {
                 val bestStreak = (snapshot.child("bestStreak").value as? Long ?: 0L).toInt()
                 val lastPlayTimestamp = snapshot.child("lastPlayDate").getValue(Long::class.java)
 
-                val today = java.util.Calendar.getInstance()
+                val today = Calendar.getInstance()
 
-                val isSameDay = lastPlayTimestamp?.let {
-                    val lastPlayDay = java.util.Calendar.getInstance().apply { timeInMillis = it }
-                    lastPlayDay.get(java.util.Calendar.YEAR) == today.get(java.util.Calendar.YEAR) &&
-                            lastPlayDay.get(java.util.Calendar.DAY_OF_YEAR) == today.get(java.util.Calendar.DAY_OF_YEAR)
-
-                } ?: false
-
-                val newStreak = if (isSameDay) {
-                    streak // gra w tym samym dniu - pozostaje bez zmian
+                val newStreak = if (lastPlayTimestamp == null) {
+                    // pierwsza gra użytkownika
+                    1
                 } else {
-                    if (lastPlayTimestamp != null) {
-                        val lastPlayDay = java.util.Calendar.getInstance()
-                            .apply { timeInMillis = lastPlayTimestamp }
-                        val diffDays =
-                            today.get(java.util.Calendar.DAY_OF_YEAR) - lastPlayDay.get(java.util.Calendar.DAY_OF_YEAR)
-                        val diffYears =
-                            today.get(java.util.Calendar.YEAR) - lastPlayDay.get(java.util.Calendar.YEAR)
-                        if (diffDays == 1 && diffYears == 0) {
-                            // user zagrał następnego dnia – zwiększ streak
-                            streak + 1
-                        } else {
-                            // Przerwa w grze – resetuj streak
-                            1
-                        }
-                    } else {
-                        // Pierwsza gra usera ever
-                        1
+                    val lastPlayDay = Calendar.getInstance().apply { timeInMillis = lastPlayTimestamp }
+
+                    //obliczenie różnicy dni między dzisiejszym dniem a ostatnią grą
+                    val daysBetween = ((today.timeInMillis - lastPlayDay.timeInMillis) / (1000 * 60 * 60 * 24)).toInt()
+
+                    when {
+                        daysBetween == 0 -> streak // gra w tym samym dniu - pozostaje bez zmian
+                        daysBetween == 1 -> streak + 1 // gra dzień po dniu — streak zwiększa się o 1
+                        else -> 0 // opuścił jeden dzień — streak resetuje się do 0
                     }
                 }
 
@@ -227,6 +231,7 @@ open class BaseActivity : AppCompatActivity() {
                             Log.e("STREAK_DEBUG", "Błąd aktualizacji bestStreak dla $uid", it)
                         }
                 }
+
                 //aktualizacja lastPlayDate
                 userRef.child("lastPlayDate").setValue(today.timeInMillis)
                 Log.d("STREAK_DEBUG", "Nowy streak:  $newStreak, BestStreak: $bestStreak")
@@ -236,6 +241,7 @@ open class BaseActivity : AppCompatActivity() {
             }
         }
     }
+
 
     protected fun isGuestUser(onResult: (Boolean) -> Unit) {
         val user = auth.currentUser
@@ -286,14 +292,12 @@ open class BaseActivity : AppCompatActivity() {
      * @param accuracy - celność
      * @param reactionTime - średni czas reakcji
      *
-     * TODO: score zamienic na star bo to jest to samo
      */
 
     protected fun updateUserStatistics(
         categoryKey: String,
         gameKey: String,
         starsEarned: Int = 0,
-        score: Int = 0,
         accuracy: Double = 0.0,
         reactionTime: Double = 0.0
     ) {
@@ -301,6 +305,8 @@ open class BaseActivity : AppCompatActivity() {
         val userRef = db.getReference("users").child(userId)
         //aktualizacja globalnych statystyk usera
         val statsRef = userRef.child("statistics")
+
+        //AKTUALIZACJA GLOBALNYCH STATYSTYK
 
         //runTransaction wykonuje aktualizacje "atomowo" czyli jedną grę na raz
         //używany do odczytu danych które są zależne od poprzednich danych
@@ -312,16 +318,12 @@ open class BaseActivity : AppCompatActivity() {
                 val currentStats = currentData.value as? Map<String, Any> ?: emptyMap()
 
                 val currentStars = (currentStats["totalStars"] as? Long ?: 0L).toInt()
-                val currentAvgScore = (currentStats["avgScore"] as? Long ?: 0L).toInt()
                 val currentAvgAccuracy = (currentStats["avgAccuracy"] as? Double ?: 0.0)
                 val currentAvgReactionTime = (currentStats["avgReactionTime"] as? Double ?: 0.0)
                 val gamesPlayed = (currentStats["gamesPlayed"] as? Long ?: 0L).toInt()
 
                 //obliczanie nowych średnich ważonych
                 val newGamesPlayed = gamesPlayed + 1
-                val newAvgScore =
-                    if (score > 0) (currentAvgScore * gamesPlayed + score) / newGamesPlayed
-                    else currentAvgScore
                 val newAvgAccuracy =
                     if (accuracy > 0) (currentAvgAccuracy * gamesPlayed + accuracy) / newGamesPlayed
                     else currentAvgAccuracy
@@ -330,10 +332,10 @@ open class BaseActivity : AppCompatActivity() {
                     else currentAvgReactionTime
 
                 val updatedStats = mapOf(
-                    "avgScore" to newAvgScore,
                     "avgAccuracy" to newAvgAccuracy,
                     "avgReactionTime" to newAvgReaction,
-                    "totalStars" to currentStars + starsEarned
+                    "totalStars" to currentStars + starsEarned,
+                    "gamesPlayed" to newGamesPlayed
                 )
 
                 currentData.value = updatedStats
@@ -359,7 +361,7 @@ open class BaseActivity : AppCompatActivity() {
         gameRef.get().addOnSuccessListener { snapshot ->
             val currentStars = snapshot.child("starsEarned").getValue(Int::class.java) ?: 0
             val currentGamesPlayed = snapshot.child("gamesPlayed").getValue(Int::class.java) ?: 0
-            val currentBestScore = snapshot.child("bestScore").getValue(Int::class.java) ?: 0
+            val currentBestStars = snapshot.child("bestStars").getValue(Int::class.java) ?: 0
             val currentAvgAccuracy = snapshot.child("accuracy").getValue(Double::class.java) ?: 0.0
             val currentAvgReaction = snapshot.child("avgReactionTime").getValue(Double::class.java) ?: 0.0
 
@@ -375,7 +377,7 @@ open class BaseActivity : AppCompatActivity() {
 
             val updatedGameData = mapOf(
                 "starsEarned" to (currentStars + starsEarned),
-                "bestScore" to maxOf(currentBestScore, score),
+                "bestStars" to maxOf(currentBestStars, starsEarned),
                 "accuracy" to newAvgAccuracy,
                 "avgReactionTime" to newAvgReaction,
                 "gamesPlayed" to newGamesPlayed,
@@ -390,6 +392,41 @@ open class BaseActivity : AppCompatActivity() {
         }.addOnFailureListener {
             Log.e("STATS_DEBUG", "Błąd pobierania danych gry $gameKey: ${it.message}")
         }
+    }
+
+    /*
+    Liczymy średni czas reakcji jako czas trwania rundy / liczba interakcji
+
+    - Zapamiętanie czas startu gry (startTime).
+    - W momencie zapisu statystyk (updateUserStatistics) liczenie ile trwała gra
+    - Obliczenia średniego czasu reakcji - czas gry / liczba kliknięć
+     */
+
+    private var gameStartTime: Long = 0L
+    private var gameClicks: Long = 0L
+
+    //śledzenie gry
+    //wywoływana na początku gry
+    protected fun startReactionTracking(){
+        gameStartTime = System.currentTimeMillis()
+        gameClicks = 0
+    }
+
+    //wywoływana na końcu gry
+    protected fun registerPlayerAction(){
+        gameClicks++
+    }
+
+    //TODO: trzeba zrobic tak żeby to był rzeczywisty średni czas a nie ostatniej gry
+    //zmiana żeby wyswietlaly sie 2 miejsca po przecinku
+    //obliczanie średniego czasu reakcji
+    protected fun getAverageReactionTime(): Double{
+        val duration = (System.currentTimeMillis() - gameStartTime).coerceAtLeast(1L)
+        //coerceAtLeast - upewnie sie ze liczba nie bedzie mniejsza niz dana wartość
+        //przez to unikamy dzielenia przez 0 jezeli gra bedzie trwała krótko
+        val clicks = gameClicks.coerceAtLeast(1)
+        //clicks nigdy nie bedzie 0
+        return duration.toDouble() / clicks / 1000.0 //sekundy
     }
 
 }

@@ -32,20 +32,24 @@ class SettingsActivity : BaseActivity() {
         val currentLang = sharedPrefs.getString("My_Lang", "pl") ?: "pl"
         selectedLanguage = currentLang
 
-        // ustaw język i tryb nocny przed setContentView
-        //setLocale(currentLang)
-//        AppCompatDelegate.setDefaultNightMode(
-//            if (darkModeEnabled) AppCompatDelegate.MODE_NIGHT_YES
-//            else AppCompatDelegate.MODE_NIGHT_NO
-//        )
 
         //stan przełączników na start
+        val isDarkModeNow = (resources.configuration.uiMode and
+                Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+
         binding.switchSound.isChecked = sharedPrefs.getBoolean("Sound_Enabled", true)
-        binding.switchDarkMode.isChecked = sharedPrefs.getBoolean("DarkMode_Enabled", false)
+
+        //jeśli istnieje zapisane ustawienie w SharedPrefs — użyj go,
+        //w przeciwnym razie ustaw zgodnie z aktualnym trybem systemowym
+        val savedDarkMode = sharedPrefs.contains("DarkMode_Enabled")
+        binding.switchDarkMode.isChecked = if (savedDarkMode) {
+            sharedPrefs.getBoolean("DarkMode_Enabled", false)
+        } else {
+            isDarkModeNow
+        }
+
         binding.switchNotification.isChecked = sharedPrefs.getBoolean("Notification_Enabled", true)
 
-        //val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-        //bottomNav.selectedItemId = R.id.nav_settings
 
         //wybór języka
         updateLanguageSelectionUI(currentLang)

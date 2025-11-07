@@ -70,32 +70,6 @@ class StatisticsActivity : BaseActivity() {
         }
     }
 
-//    /**
-//     * Pokazuje komunikat i przycisk, gdy użytkownik nie jest zalogowany
-//     */
-//    private fun showLoginPrompt() {
-//        val layoutLoggedIn = findViewById<ScrollView>(R.id.statisticsScrollView)
-//        val layoutNotLoggedIn = findViewById<TextView>(R.id.layoutNotLoggedIn)
-//        val buttonLogin = findViewById<Button>(R.id.buttonLogin)
-//
-//        // Ukrywa zawartość statystyk
-//        layoutLoggedIn.visibility = View.GONE
-//
-//        // Pokaż komunikat i przycisk
-//        layoutNotLoggedIn.visibility = View.VISIBLE
-//        buttonLogin.visibility = View.VISIBLE
-//
-//        //przejscie z przycisku do strony logowania/rejestracji
-//        buttonLogin.setOnClickListener {
-//            startActivity(Intent(this, WelcomeActivity::class.java))
-//            finish()
-//        }
-//
-////        // Ustaw domyślny tekst dla tvLastPlayedGame
-////        findViewById<TextView>(R.id.tvLastPlayedGame)?.text = "Ostatnio zagrana gra: Brak"
-//    }
-
-
     /**
      * Funkcja pozwalająca rozwijać i zwijać statystyki po kliknięciu w tytuł gry.
      * Każdy wpis to para: (layout gry, układ statystyk dla tej gry)
@@ -199,8 +173,8 @@ class StatisticsActivity : BaseActivity() {
                         if(data != null){
                             val reaction = data["avgReactionTime"]?.toString() ?: messageIfEmpty
                             val accuracy = data["accuracy"]?.toString() ?: messageIfEmpty
-                            val total = data["gamesPlayed"]?.toString() ?: messageIfEmpty
-                            val best = data["bestScore"]?.toString() ?: messageIfEmpty
+                            val total = data["starsEarned"]?.toString() ?: messageIfEmpty
+                            val best = data["bestStars"]?.toString() ?: messageIfEmpty
 
                             //Ustawia wartości statystyk dla pojedynczej gry.
                             //Każda gra ma 4 wskaźniki: czas reakcji, poprawność, punkty, najlepszy wynik.

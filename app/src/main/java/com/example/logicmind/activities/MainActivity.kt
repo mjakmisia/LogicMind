@@ -2,6 +2,7 @@ package com.example.logicmind.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import androidx.appcompat.app.AppCompatDelegate
 import com.example.logicmind.R
@@ -21,11 +22,15 @@ class MainActivity : BaseActivity() {
 
         supportActionBar?.hide()
 
+        //wyświetlanie streak pod ogniem
+        loadUserStreak()
+
         // Kategorie gier
 
         binding.btnKoordynacja.setOnClickListener {
             it.playSoundEffect(android.view.SoundEffectConstants.CLICK)
             val intent = Intent(this, GameSelectionActivity::class.java)
+            //putExtra - przekazywanie danych miedzy aktywnosciami
             intent.putExtra("CATEGORY_ID", "coordination")
             startActivity(intent)
         }
@@ -54,6 +59,40 @@ class MainActivity : BaseActivity() {
         // Obsługa bottom navigation
         setupBottomNavigation(binding.includeBottomNav.bottomNavigationView, R.id.nav_home)
     }
+
+    private fun loadUserStreak() {
+        val user = auth.currentUser
+
+        if (user == null) {
+            binding.streakText.text = "0 dni"
+            return
+        }
+
+        // czy jest gościem
+        isGuestUser { isGuest ->
+            if (isGuest) {
+                binding.streakText.text = "0 dni"
+                return@isGuestUser
+            }
+
+            // pobranie z bazy
+            //odniesienie do konkretnego usera w bazie
+            val userRef = db.getReference("users").child(user.uid)
+
+            //get - pobiera jednorazowo dane z bazy
+            userRef.child("streak").get()
+                .addOnSuccessListener { snapshot ->
+                    //próbujemy rzutować na Longa jeśli nie zadziała to użyj 0 i konwertujemy na int
+                    val streak = (snapshot.value as? Long ?: 0L).toInt()
+                    binding.streakText.text = "$streak dni"
+                }
+                .addOnFailureListener {
+                    binding.streakText.text = "błąd"
+                    Log.e("STREAK_DEBUG", "Błąd pobierania streaka", it)
+                }
+        }
+    }
+
 
 
 //    }

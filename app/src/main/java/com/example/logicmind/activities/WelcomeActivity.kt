@@ -168,8 +168,8 @@ class WelcomeActivity : BaseActivity() {
                         "statistics" to mapOf(
                             "avgReactionTime" to 0.0,
                             "avgAccuracy" to 0.0,
-                            "avgScore" to 0,
-                            "totalStars" to 0
+                            "totalStars" to 0,
+                            "gamesPlayed" to 0
                         )
                     )
 
@@ -225,7 +225,7 @@ class WelcomeActivity : BaseActivity() {
             //jeżeli jest null to wyrzuci NullPointerException
             for (game in defaultGames[category]!!) {
                 val gameData = mapOf(
-                    "bestScore" to 0,
+                    "bestStars" to 0,
                     "avgReactionTime" to 0.0,
                     "accuracy" to 0.0,
                     "starsEarned" to 0,

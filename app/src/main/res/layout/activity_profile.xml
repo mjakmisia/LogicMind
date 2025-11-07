@@ -50,7 +50,7 @@
                 android:id="@+id/textUsername"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="JanKowalski"
+                android:text="username"
                 android:textSize="25sp"
                 android:textStyle="bold"
                 android:textColor="?attr/text_dark"

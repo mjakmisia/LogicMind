@@ -147,9 +147,17 @@ class ProfileActivity : BaseActivity() {
      * Pobiera dane użytkownika (username, streak, bestStreak) z Realtime Database
      */
     private fun loadUserData(uid: String) {
+        //pokazuje progress bar podczas ładowania danych użytkownika
+        binding.progressBar.visibility = View.VISIBLE
+        binding.scrollView.visibility = View.GONE
+
         db.getReference("users").child(uid)
             .get()
             .addOnSuccessListener { snapshot ->
+                //dane pobrane: pokaż reszte
+                binding.progressBar.visibility = View.GONE
+                binding.scrollView.visibility = View.VISIBLE
+
                 if (snapshot.exists()) {
                     val username = snapshot.child("username").value as? String ?: "Brak nazwy"
                     val currentStreak = snapshot.child("streak").value as? Long ?: 0
@@ -166,6 +174,10 @@ class ProfileActivity : BaseActivity() {
                 }
             }
             .addOnFailureListener { e ->
+                // ukryj progress bar także w przypadku błędu
+                binding.progressBar.visibility = View.GONE
+                binding.scrollView.visibility = View.VISIBLE
+
                 Log.e("PROFILE", "Błąd pobierania danych użytkownika: ${e.message}")
                 Toast.makeText(this, "Błąd pobierania danych: ${e.message}", Toast.LENGTH_SHORT).show()
                 // Ustaw domyślne wartości w razie błędu
