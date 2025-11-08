@@ -36,7 +36,7 @@ object GameConfigProvider {
                     GameOption("number_addition", R.string.number_addition, R.drawable.image_number_addition,
                         GameIntroActivity::class.java),
                     GameOption("path_change", R.string.path_change, R.drawable.image_path_change,
-                        GameIntroActivity::class.java) //obrazek do zmiany
+                        GameIntroActivity::class.java)
                 )
             )
             "attention" -> GameCategoryConfig(

@@ -57,7 +57,7 @@ object GameIntroProvider {
             "path_change" -> GameIntroConfig(
                 colorRes = R.color.category_pink_dark_mode,
                 titleRes = R.string.path_change,
-                imageRes = R.drawable.ic_close, //ZMIEŃ
+                imageRes = R.drawable.image_path_change,
                 sections = listOf(
                     IntroSection(R.string.pc_section_planning, R.string.pc_desc_planning),
                     IntroSection(R.string.pc_section_divided_attention, R.string.pc_desc_divided_attention)
