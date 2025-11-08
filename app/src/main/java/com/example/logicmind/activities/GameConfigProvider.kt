@@ -58,7 +58,7 @@ object GameConfigProvider {
                 )
             )
             else -> GameCategoryConfig(
-                colorRes = R.color.grey,
+                colorRes = R.color.gray,
                 nameRes = R.string.unknown,
                 games = emptyList()
             )

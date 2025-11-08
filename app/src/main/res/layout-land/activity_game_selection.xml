@@ -58,7 +58,7 @@
             android:layout_marginTop="12dp"
             android:text="@string/game_1"
             android:textSize="20sp"
-            android:textColor="@color/grey" />
+            android:textColor="@color/gray" />
     </LinearLayout>
 
     <!-- Prawa połowa: Gra 2 -->
@@ -89,7 +89,7 @@
             android:layout_marginTop="12dp"
             android:text="@string/game_2"
             android:textSize="20sp"
-            android:textColor="@color/grey" />
+            android:textColor="@color/gray" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

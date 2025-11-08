@@ -4,9 +4,9 @@
     <style name="Theme.LogicMind" parent="Theme.MaterialComponents.DayNight.NoActionBar">
 
         <!-- Obecnie używane -->
-        <item name="text_dark">@color/textGrey</item>
+        <item name="text_dark">@color/textGray</item>
         <item name="text">@color/black</item>
-        <item name="text_light">@color/textGreyLight</item>
+        <item name="text_light">@color/textGrayLight</item>
         <item name="text_category">@color/white</item>
         <item name="cardview">@color/white</item>
 

@@ -1,11 +1,15 @@
 package com.example.logicmind.activities
+
+import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.children
 import androidx.gridlayout.widget.GridLayout
 import com.example.logicmind.R
 import com.example.logicmind.common.GameCountdownManager
@@ -15,19 +19,23 @@ import com.example.logicmind.common.StarManager
 
 class PathChangeActivity : BaseActivity() {
 
-    private lateinit var gridLayout: GridLayout // Siatka do wyświetlania elementów
-    private lateinit var countdownText: TextView // Pole tekstowe dla odliczania
-    private lateinit var pauseButton: ImageButton // Przycisk pauzy
-    private lateinit var pauseOverlay: ConstraintLayout // Nakładka menu pauzy
-    private lateinit var timerProgressBar: GameTimerProgressBar // Pasek postępu czasu gry
-    private lateinit var starManager: StarManager // Manager gwiazdek
-    private lateinit var pauseMenu: PauseMenu // Menu pauzy gry
-    private lateinit var countdownManager: GameCountdownManager // Manager odliczania
-    private var isGameEnding = false // Flaga końca gry
-    private var currentLevel = 1 // Aktualny poziom gry
+    private lateinit var gridLayout: GridLayout
+    private lateinit var countdownText: TextView
+    private lateinit var pauseButton: ImageButton
+    private lateinit var pauseOverlay: ConstraintLayout
+    private lateinit var timerProgressBar: GameTimerProgressBar
+    private lateinit var starManager: StarManager
+    private lateinit var pauseMenu: PauseMenu
+    private lateinit var countdownManager: GameCountdownManager
+    private var isGameEnding = false
+    private var isGameRunning = false
+    private var currentLevel = 1
+
+    private val switchStates = HashMap<String, Int>()
+    private val switchViews = mutableListOf<FrameLayout>()
 
     companion object {
-        private const val BASE_TIME_SECONDS = 90 // Czas trwania jednej rundy (w sekundach)
+        private const val BASE_TIME_SECONDS = 90
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,6 +57,7 @@ class PathChangeActivity : BaseActivity() {
         timerProgressBar.setOnFinishCallback {
             runOnUiThread {
                 isGameEnding = true
+                isGameRunning = false
                 Toast.makeText(this, "Czas minął! Koniec gry!", Toast.LENGTH_LONG).show()
                 gridLayout.isEnabled = false
                 pauseOverlay.visibility = View.GONE
@@ -86,25 +95,24 @@ class PathChangeActivity : BaseActivity() {
                 starManager.reset()
                 timerProgressBar.stop()
                 timerProgressBar.reset()
-
                 countdownManager.startCountdown()
             },
-            onResume = { timerProgressBar.start() }, // Wznawia timer po pauzie
-            onPause = { timerProgressBar.pause() },  // Zatrzymuje timer podczas pauzy
-            onExit = { finish() }, // Kończy aktywność
+            onResume = { if (isGameRunning) timerProgressBar.start() },
+            onPause = { if (isGameRunning) timerProgressBar.pause() },
+            onExit = {
+                finish()
+            },
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.path_change_instruction),
         )
 
-        // Sprawdzenie, czy gra jest uruchamiana po raz pierwszy
         if (savedInstanceState == null) {
-            countdownManager.startCountdown() // Rozpoczyna odliczanie początkowe
+            countdownManager.startCountdown()
         } else {
-            restoreGameState(savedInstanceState) // Przywraca stan po rotacji
+            restoreGameState(savedInstanceState)
         }
     }
 
-    // Zapisuje stan aktywności
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putInt("pauseOverlayVisibility", pauseOverlay.visibility)
@@ -116,10 +124,13 @@ class PathChangeActivity : BaseActivity() {
         outState.putInt("countdownIndex", countdownManager.getIndex())
         outState.putBoolean("countdownInProgress", countdownManager.isInProgress())
         outState.putInt("currentLevel", currentLevel)
+        outState.putBoolean("isGameRunning", isGameRunning)
+        // Zapisujemy całą mapę stanów przełączników
+        outState.putSerializable("switchStates", switchStates)
+
         starManager.saveState(outState)
     }
 
-    // Przywraca stan aktywności
     private fun restoreGameState(savedInstanceState: Bundle) {
         pauseOverlay.visibility = savedInstanceState.getInt("pauseOverlayVisibility", View.GONE)
         countdownText.visibility = savedInstanceState.getInt("countdownTextVisibility", View.GONE)
@@ -128,34 +139,139 @@ class PathChangeActivity : BaseActivity() {
         currentLevel = savedInstanceState.getInt("currentLevel", 1)
         starManager.restoreState(savedInstanceState)
 
-        // Przywracanie stanu timera
         val timerRemainingTimeMs = savedInstanceState.getLong("timerRemainingTimeMs", BASE_TIME_SECONDS * 1000L)
         val timerIsRunning = savedInstanceState.getBoolean("timerIsRunning", false)
         timerProgressBar.setRemainingTimeMs(timerRemainingTimeMs.coerceAtLeast(1L))
 
-        if (timerIsRunning && pauseOverlay.visibility != View.VISIBLE) {
-            timerProgressBar.start()
+        isGameRunning = savedInstanceState.getBoolean("isGameRunning", false)
+
+        // Bezpieczne odtwarzanie HashMapy
+        val savedStates = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // API 33+
+            @Suppress("UNCHECKED_CAST")
+            savedInstanceState.getSerializable("switchStates", HashMap::class.java) as? HashMap<String, Int>
+        } else {
+            // API < 33
+            @Suppress("DEPRECATION", "UNCHECKED_CAST")
+            savedInstanceState.getSerializable("switchStates") as? HashMap<String, Int>
         }
 
-        //Przywracanie stanu odliczania
+        if (savedStates != null) {
+            switchStates.clear()
+            switchStates.putAll(savedStates)
+        }
+
         val countdownIndex = savedInstanceState.getInt("countdownIndex", 0)
         val countdownInProgress = savedInstanceState.getBoolean("countdownInProgress", false)
-        // Kontynuowanie odliczania, jeśli było aktywne
+
         if (countdownInProgress) {
             countdownManager.startCountdown(countdownIndex)
+        } else if (isGameRunning) {
+            if (timerIsRunning && pauseOverlay.visibility != View.VISIBLE) {
+                timerProgressBar.start()
+            }
+            // Inicjalizacja planszy
+            gridLayout.post { setupGrid() }
         }
 
         pauseMenu.syncWithOverlay()
     }
 
+    // Funkcja wywoływana po odliczaniu
     private fun startNewGame() {
+        if (pauseMenu.isPaused) pauseMenu.resume()
 
+        isGameRunning = true
+        isGameEnding = false
+        gridLayout.isEnabled = true
+        switchStates.clear()
+
+        setupGrid()
+        spawnBall()
+    }
+
+    private fun setupGrid() {
+        switchViews.clear()
+
+        for (child in gridLayout.children) {
+            val cell = child as? FrameLayout ?: continue
+            val tag = cell.tag as? String ?: continue
+
+            if (tag.startsWith("switch_")) {
+                switchViews.add(cell)
+                val state = switchStates.getOrPut(tag) { 0 } // Ustaw 0 jako domyślny
+
+                // Znajdź właściwy ImageView
+                val pathImage = cell.getChildAt(1) as? ImageView
+                if (pathImage != null) {
+                    updateSwitchImage(pathImage, tag, state) // Zaktualizuj obrazek
+                }
+
+                cell.setOnClickListener {
+                    onSwitchClicked(it as FrameLayout)
+                }
+            }
+        }
+    }
+
+    private fun onSwitchClicked(cell: FrameLayout) {
+        if (!isGameRunning || isGameEnding) return
+
+        val tag = cell.tag as String
+        val currentState = switchStates[tag] ?: 0
+        val newState = (currentState + 1) % 2
+        switchStates[tag] = newState
+
+        // Znajdź właściwy ImageView
+        val pathImage = cell.getChildAt(1) as? ImageView
+        if (pathImage != null) {
+            updateSwitchImage(pathImage, tag, newState)
+        }
+    }
+
+    private fun updateSwitchImage(imageView: ImageView, tag: String, state: Int) {
+        // Logika wyboru odpowiedniej grafiki i rotacji
+        when (tag) {
+            "switch_A" -> {
+                if (state == 0) {
+                    imageView.setImageResource(R.drawable.path_straight)
+                    imageView.rotation = 0f // góra dół
+                } else {
+                    imageView.setImageResource(R.drawable.path_corner)
+                    imageView.rotation = 180f // dół prawa
+                }
+            }
+            "switch_B" -> {
+                if (state == 0) {
+                    imageView.setImageResource(R.drawable.path_corner)
+                    imageView.rotation = 0f // góra lewo
+                } else {
+                    imageView.setImageResource(R.drawable.path_corner)
+                    imageView.rotation = 270f // dół lewo
+                }
+            }
+            "switch_C" -> {
+                if (state == 0) {
+                    imageView.setImageResource(R.drawable.path_corner)
+                    imageView.rotation = 270f // dół lewo
+                } else {
+                    imageView.setImageResource(R.drawable.path_straight)
+                    imageView.rotation = 0f // góra dół
+                }
+            }
+            // Domyślna grafika błędu
+            else -> imageView.setImageResource(R.drawable.bg_rounded_card)
+        }
+    }
+
+    private fun spawnBall() {
+        // TODO: Logika spawnowania kulki
+        Toast.makeText(this, "Spawn kulki (level $currentLevel)", Toast.LENGTH_SHORT).show()
     }
 
     override fun onPause() {
         super.onPause()
-        // Pauzuje grę automatycznie przy wyjściu z aktywności
-        if (!pauseMenu.isPaused && !isChangingConfigurations) {
+        if (isGameRunning && !isGameEnding && !pauseMenu.isPaused && !isChangingConfigurations) {
             pauseMenu.pause()
         }
     }

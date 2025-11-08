@@ -12,7 +12,6 @@
     <color name="purple_dark_mode">#967BDC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
-    <!--<color name="teal_200">#FF03DAC5</color>-->
     <color name="teal_200">#203B86</color>
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
@@ -24,12 +23,12 @@
     <color name="background_dark_transparent">#333333</color>
     <color name="background_dark_menu">#141414</color>
     <color name="gray_blue">#2a3342</color>
-    <color name="grey">#383535</color>
-    <color name="textGrey">#333333</color>
-    <color name="textGreyLight">#666666</color>
-    <color name="dark_grey">#222222</color>
-    <color name="darker_grey">#181818</color>
-    <color name="light_grey">#BFBFBF</color>
+    <color name="gray">#383535</color>
+    <color name="textGray">#333333</color>
+    <color name="textGrayLight">#666666</color>
+    <color name="dark_gray">#222222</color>
+    <color name="darker_gray">#181818</color>
+    <color name="light_gray_2">#BFBFBF</color>
     <color name="light_blue">#7C8FC3</color>
     <color name="navy_blue">#3F51B5</color>
     <color name="purple">#FFBB86FC</color>
@@ -43,6 +42,12 @@
     <color name="red_lighter">#fa1436</color>
     <color name="green">#00A406</color>
     <color name="light_gray">#737373</color>
+    <color name="blue">#0D6CFF</color>
+    <color name="yellow">#FFE927</color>
+    <color name="dark_red">#980505</color>
+    <color name="dark_yellow">#BAB100</color>
+    <color name="dark_green">#007104</color>
+    <color name="dark_blue">#0B47A6</color>
 
 
 </resources>

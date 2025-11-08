@@ -57,7 +57,7 @@
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:text="Anuluj"
-                android:backgroundTint="@color/textGreyLight"
+                android:backgroundTint="@color/textGrayLight"
                 android:textColor="@android:color/white"
                 android:layout_marginEnd="8dp"/>
 

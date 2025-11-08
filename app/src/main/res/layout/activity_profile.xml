@@ -181,7 +181,7 @@
                         android:layout_width="50dp"
                         android:layout_height="50dp"
                         android:src="@drawable/ic_flame"
-                        app:tint="@color/light_grey"
+                        app:tint="@color/light_gray_2"
                         android:layout_marginTop="4dp"/>
                 </LinearLayout>
 
@@ -216,7 +216,7 @@
                         android:layout_width="50dp"
                         android:layout_height="50dp"
                         android:src="@drawable/ic_flame"
-                        app:tint="@color/light_grey"
+                        app:tint="@color/light_gray_2"
                         android:layout_marginTop="4dp"/>
                 </LinearLayout>
 
@@ -251,7 +251,7 @@
                         android:layout_width="50dp"
                         android:layout_height="50dp"
                         android:src="@drawable/ic_flame"
-                        app:tint="@color/light_grey"
+                        app:tint="@color/light_gray_2"
                         android:layout_marginTop="4dp"/>
                 </LinearLayout>
 
@@ -286,7 +286,7 @@
                         android:layout_width="50dp"
                         android:layout_height="50dp"
                         android:src="@drawable/ic_flame"
-                        app:tint="@color/light_grey"
+                        app:tint="@color/light_gray_2"
                         android:layout_marginTop="4dp"/>
                 </LinearLayout>
 
@@ -321,7 +321,7 @@
                         android:layout_width="50dp"
                         android:layout_height="50dp"
                         android:src="@drawable/ic_flame"
-                        app:tint="@color/light_grey"
+                        app:tint="@color/light_gray_2"
                         android:layout_marginTop="4dp"/>
                 </LinearLayout>
 
@@ -356,7 +356,7 @@
                         android:layout_width="50dp"
                         android:layout_height="50dp"
                         android:src="@drawable/ic_flame"
-                        app:tint="@color/light_grey"
+                        app:tint="@color/light_gray_2"
                         android:layout_marginTop="4dp"/>
                 </LinearLayout>
 
@@ -390,7 +390,7 @@
                         android:layout_width="50dp"
                         android:layout_height="50dp"
                         android:src="@drawable/ic_flame"
-                        app:tint="@color/light_grey"
+                        app:tint="@color/light_gray_2"
                         android:layout_marginTop="4dp"/>
                 </LinearLayout>
             </LinearLayout>
@@ -446,7 +446,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/ic_arrow_play"
-                    app:tint="@color/textGrey" />
+                    app:tint="@color/textGray" />
             </LinearLayout>
 
             <!-- Przycisk Wyloguj się -->

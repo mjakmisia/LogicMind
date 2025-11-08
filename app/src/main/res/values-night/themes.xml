@@ -6,7 +6,7 @@
         <!-- Obecnie używane -->
         <item name="text_dark">@color/white</item>
         <item name="text">@color/white</item>
-        <item name="text_light">@color/light_grey</item>
+        <item name="text_light">@color/light_gray_2</item>
         <item name="text_category">@color/white</item>
         <item name="cardview">@color/gray_for_cardview</item>
 
@@ -34,7 +34,7 @@
         <item name="colorSecondaryVariant">@color/teal_700</item>
         <item name="colorOnSecondary">@color/white</item>
 
-        <item name="pause_background">@color/dark_grey</item>
+        <item name="pause_background">@color/dark_gray</item>
 
         <!--      -->
 
