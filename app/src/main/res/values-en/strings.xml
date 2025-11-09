@@ -40,7 +40,7 @@
     <string name="current_streak">Current streak</string>
     <string name="best_streak">Best streak</string>
     <string name="word_search">Word Search</string>
-    <string name="fruit_sort">Fruit Sort</string>
+    <string name="left_or_right">Left or Right</string>
     <string name="color_sequence">Color Sequence</string>
     <string name="card_match">Card Match</string>
     <string name="number_addition">Number Addition</string>
@@ -136,6 +136,8 @@
     <string name="ws_section_mind_speed">Mental Speed</string>
     <string name="ws_desc_mind_speed">Reduce the time needed to complete mental tasks</string>
 
+    <!-- Left or Right -->
+
     <!-- Symbol Race -->
     <string name="sr_section_visual_motor">Visual-Motor Coordination</string>
     <string name="sr_desc_visual_motor">Synchronize your eyes and hands to react instantly to changes</string>
@@ -146,6 +148,8 @@
     <string name="sr_section_selective_attention">Selective Attention</string>
     <string name="sr_desc_selective_attention">Maintain concentration on the key task while ignoring other stimuli</string>
 
+    <!-- Road Dash -->
+
 
     <!-- HELP DIALOG -->
     <string name="card_match_instruction"><![CDATA[Find matching pairs of fruits while avoiding bombs! You have 90 seconds to earn as many stars as you can.\n\n<b>How to play:</b>\n• At the start of each level, the cards are shown for <b>2 seconds</b> – try to remember as many as possible before they flip over.\n• Tap cards to reveal them – select two to see if they match.\n• Matching pairs stay uncovered; mismatched ones flip back after a moment.\n• Watch out for bombs! Hitting one will cost you <b>10 seconds</b>.\n\n<b>Bonuses:</b>\n• Earn a star for every correctly matched pair.\n• Gain an extra <b>30 seconds</b> for completing a level.]]></string>
@@ -155,7 +159,7 @@
     <string name="path_change_instruction">Instructions will go here.</string>
 
     <string name="word_search_instruction">Instructions will go here.</string>
-    <string name="fruit_sort_instruction">Instructions will go here.</string>
+    <string name="left_or_right_instruction">Instructions will go here.</string>
 
     <string name="symbol_race_instruction"><![CDATA[React with the correct gesture to the appearing symbols! You have 90 seconds to earn as many stars as you can.\n\n<b>How to play:</b>\n• Watch the track – it has a queue of circles; you must react to the <b>bottom symbol</b>.\n• Each symbol requires a different gesture (tapping a specific side, both sides, the symbol itself, or not reacting at all).\n• Perform the gesture before the symbol disappears. The time to react is limited and gradually gets shorter!\n• A wrong reaction (or lack of one) costs you <b>6 seconds</b> and resets your combo.\n\n<b>Symbols and gestures:</b>\n<img src="ic_empty_circle" /> – tap the side with the same color\n<img src="ic_arrow_left" /> – tap the left side\n<img src="ic_arrow_right" /> – tap the right side\n<img src="ic_close" /> – do not touch\n<img src="ic_target" /> – tap here\n<img src="ic_swap" /> – tap the opposite color\n<img src="ic_double_left" /> – tap the left side twice\n<img src="ic_double_right" /> – tap the right side twice\n<img src="ic_both_sides" /> – tap both sides at once\n\n<b>Bonuses:</b>\n• Earn a star for every correct symbol.\n• Gain extra time for correct reaction streaks – <b>the bigger the combo, the bigger the bonus!</b>]]></string>
     <string name="road_dash_instruction">Instructions will go here.</string>

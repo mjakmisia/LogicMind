@@ -6,6 +6,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import com.example.logicmind.R
+import com.example.logicmind.additional.SymbolRaceInstructionHelper
 
 /**
  * Fragment wyświetlający instrukcje w formie dialogu.

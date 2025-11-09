@@ -1,6 +1,14 @@
-package com.example.logicmind.activities
+package com.example.logicmind.additional
 
 import com.example.logicmind.R
+import com.example.logicmind.activities.CardMatchActivity
+import com.example.logicmind.activities.ColorSequenceActivity
+import com.example.logicmind.activities.LeftOrRightActivity
+import com.example.logicmind.activities.NumberAdditionActivity
+import com.example.logicmind.activities.PathChangeActivity
+import com.example.logicmind.activities.RoadDashActivity
+import com.example.logicmind.activities.SymbolRaceActivity
+import com.example.logicmind.activities.WordSearchActivity
 
 data class IntroSection(
     val titleRes: Int,
@@ -77,6 +85,16 @@ object GameIntroProvider {
                 gameActivity = WordSearchActivity::class.java,
                 instructionRes = R.string.word_search_instruction
             )
+            "left_or_right" -> GameIntroConfig(
+                colorRes = R.color.category_yellow_dark_mode,
+                titleRes = R.string.left_or_right,
+                imageRes = R.drawable.ic_close, //obrazek do zmiany
+                sections = listOf(
+                    //do uzupełnienia
+                ),
+                gameActivity = LeftOrRightActivity::class.java,
+                instructionRes = R.string.left_or_right_instruction
+            )
             "symbol_race" -> GameIntroConfig(
                 colorRes = R.color.category_blue_dark_mode,
                 titleRes = R.string.symbol_race,
@@ -88,6 +106,16 @@ object GameIntroProvider {
                 ),
                 gameActivity = SymbolRaceActivity::class.java,
                 instructionRes = R.string.symbol_race_instruction
+            )
+            "road_dash" -> GameIntroConfig(
+                colorRes = R.color.category_blue_dark_mode,
+                titleRes = R.string.road_dash,
+                imageRes = R.drawable.ic_close, //obrazek do zmiany
+                sections = listOf(
+                    //do uzupełnienia
+                ),
+                gameActivity = RoadDashActivity::class.java,
+                instructionRes = R.string.road_dash_instruction
             )
             else -> throw IllegalArgumentException("Unknown gameId: $gameId")
         }

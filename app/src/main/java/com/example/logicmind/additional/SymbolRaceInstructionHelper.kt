@@ -1,7 +1,8 @@
-package com.example.logicmind.common
+package com.example.logicmind.additional
 
 import android.content.Context
-import android.graphics.drawable.*
+import android.graphics.drawable.LayerDrawable
+import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.OvalShape
 import android.text.Html
 import android.text.Spanned

@@ -57,7 +57,15 @@
             android:exported="false"/>
 
         <activity
+            android:name=".activities.LeftOrRightActivity"
+            android:exported="false"/>
+
+        <activity
             android:name=".activities.SymbolRaceActivity"
+            android:exported="false"/>
+
+        <activity
+            android:name=".activities.RoadDashActivity"
             android:exported="false"/>
 
         <activity

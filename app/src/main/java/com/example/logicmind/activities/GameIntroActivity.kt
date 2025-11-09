@@ -9,6 +9,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.example.logicmind.R
+import com.example.logicmind.additional.GameIntroProvider
 import com.example.logicmind.common.InstructionDialogFragment
 
 class GameIntroActivity : BaseActivity() {

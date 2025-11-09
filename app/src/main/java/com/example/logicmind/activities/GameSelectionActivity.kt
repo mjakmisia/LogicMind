@@ -8,6 +8,8 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.example.logicmind.R
+import com.example.logicmind.additional.GameConfigProvider
+import com.example.logicmind.additional.GameOption
 
 class GameSelectionActivity : BaseActivity() {
 
@@ -53,11 +55,10 @@ class GameSelectionActivity : BaseActivity() {
 
         container.setOnClickListener { view ->
             view.playSoundEffect(SoundEffectConstants.CLICK)
-            gameOption.introActivity?.let {
-                val intent = Intent(this, it)
-                intent.putExtra("GAME_ID", gameOption.gameId)
-                startActivity(intent)
-            }
+
+            val intent = Intent(this, GameIntroActivity::class.java)
+            intent.putExtra("GAME_ID", gameOption.gameId)
+            startActivity(intent)
         }
     }
 }

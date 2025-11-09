@@ -427,7 +427,7 @@
                             android:id="@+id/tvAttentionGame2Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/fruit_sort"
+                            android:text="@string/left_or_right"
                             android:textColor="?attr/text_dark"
                             android:textSize="18sp" />
 
