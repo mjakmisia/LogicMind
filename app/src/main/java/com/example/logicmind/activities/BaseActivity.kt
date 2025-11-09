@@ -268,6 +268,9 @@ open class BaseActivity : AppCompatActivity() {
      * @param accuracy - celność
      * @param reactionTime - średni czas reakcji
      *
+     * Średni czas reakcji i celność są obliczane jako średnia ważona:
+     * newAvg = (oldAvg * gamesPlayed + newValue) / (gamesPlayed + 1)
+     *
      */
 
     protected fun updateUserStatistics(
@@ -346,7 +349,8 @@ open class BaseActivity : AppCompatActivity() {
 
             val newGamesPlayed = currentGamesPlayed + 1
 
-            //obliczanie rzeczywistych średnich dla gry
+            // średnia ważona: uwzględniamy wszystkie wcześniejsze gry
+            // newAvg = (oldAvg * liczbaStarychGier + nowaWartość) / (gamesPlayed + 1)
             val newAvgAccuracy =
                 if (accuracy > 0) ((currentAvgAccuracy * currentGamesPlayed + accuracy) / newGamesPlayed)
                 else currentAvgAccuracy
@@ -396,6 +400,9 @@ open class BaseActivity : AppCompatActivity() {
         isPaused = false
         pauseStartTime = 0L
 
+        //resetuje liczniki poprawnosci i prob
+        resetAccuracyCounters()
+
         Handler(Looper.getMainLooper()).postDelayed({
             gameStartTime = System.currentTimeMillis()
             Toast.makeText(this, "Rozpoczęcie gry", Toast.LENGTH_SHORT).show()
@@ -425,7 +432,7 @@ open class BaseActivity : AppCompatActivity() {
     //kliknięcia gracza
     protected fun registerPlayerAction() {
         gameClicks++
-        Toast.makeText(this, "Kliknięcia: ${gameClicks}", Toast.LENGTH_SHORT).show()
+        //Toast.makeText(this, "Kliknięcia: ${gameClicks}", Toast.LENGTH_SHORT).show()
     }
 
     //TODO: trzeba zrobic tak żeby to był rzeczywisty średni czas a nie ostatniej gry
@@ -451,13 +458,63 @@ open class BaseActivity : AppCompatActivity() {
         //coerceAtLeast - upewnie sie ze liczba nie bedzie mniejsza niz dana wartość
         //przez to unikamy dzielenia przez 0 jezeli gra bedzie trwała krótko
 
-        Toast.makeText(
-            this,
-            "Rzeczywisty czas gry: %.2f s".format(duration.toDouble() / 1000),
-            Toast.LENGTH_SHORT
-        ).show()
+        // Pobranie globalnej średniej z bazy
+        //pożniej usuń Toasty
+        if (isUserLoggedIn()) {
+            val userId = auth.currentUser!!.uid
+            val statsRef = db.getReference("users").child(userId).child("statistics").child("avgReactionTime")
+
+            statsRef.get().addOnSuccessListener { snapshot ->
+                val globalAvg = snapshot.getValue(Double::class.java) ?: 0.0
+                Toast.makeText(
+                    this,
+                    "Średni czas reakcji (tej gry): %.2f s\nŚredni czas reakcji (globalny): %.2f s".format(avgReactionSec, globalAvg),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        } else {
+            // Dla niezalogowanego użytkownika pokazujemy tylko średni czas tej gry
+            Toast.makeText(
+                this,
+                "Średni czas reakcji (tej gry): %.2f s".format(avgReactionSec),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
 
         return avgReactionSec
+    }
+
+    /**
+     * Liczenie poprawności
+     *
+     */
+
+    protected var totalAttempts: Int = 0 //liczba prób
+    protected var successfulAttempts: Int = 0 //liczba poprawnych prób
+
+    //resetuje licznik na start
+    protected fun resetAccuracyCounters(){
+        totalAttempts = 0
+        successfulAttempts = 0
+    }
+
+    /**
+     * Rejestruje próbę gracza
+     * @param isSuccessful - true jeśli była poprawna np trafienie pary
+     */
+    protected fun registerAttempt(isSuccessful: Boolean){
+        totalAttempts++
+        if (isSuccessful) successfulAttempts++
+    }
+
+    /**
+     * Oblicza procent poprawnych prób
+     * Zwraca wartość od 0.0 do 100.0
+     */
+    protected fun calculateAccuracy(): Double{
+        return if (totalAttempts > 0)
+            (successfulAttempts.toDouble() / totalAttempts.toDouble()) * 100.0
+        else 0.0
     }
 
 }

@@ -83,7 +83,6 @@ class CardMatchActivity : BaseActivity() {
 
 
         //TODO: Usuń po implementacji funkcji które to rzeczywiście liczą
-        val avgReactionTime = 1.0
         val avgAccuracy = 0.5
 
         // Inicjalizacja paska czasu
@@ -99,7 +98,7 @@ class CardMatchActivity : BaseActivity() {
                     categoryKey = GameKeys.CATEGORY_MEMORY,
                     gameKey = GameKeys.GAME_CARD_MATCH,
                     starsEarned = starManager.starCount,
-                    avgAccuracy,
+                    accuracy = calculateAccuracy(),
                     reactionTime = getAverageReactionTime(stars = starManager.starCount),
                 )
 
@@ -153,7 +152,7 @@ class CardMatchActivity : BaseActivity() {
                     categoryKey = GameKeys.CATEGORY_MEMORY,
                     gameKey = GameKeys.GAME_CARD_MATCH,
                     starsEarned = starManager.starCount,
-                    avgAccuracy,
+                    accuracy = calculateAccuracy(),
                     reactionTime = getAverageReactionTime(stars = starManager.starCount),
                 )
 
@@ -491,7 +490,12 @@ class CardMatchActivity : BaseActivity() {
     private fun checkMatch() {
         if (firstCard == null || secondCard == null) return
 
-        if (firstCard!!.value == secondCard!!.value) {
+        val isMatch = firstCard!!.value == secondCard!!.value
+
+        //rejestruj probe i sukces
+        registerAttempt(isMatch)
+
+        if (isMatch) {
             // Karty pasują
             firstCard!!.isMatched = true
             secondCard!!.isMatched = true

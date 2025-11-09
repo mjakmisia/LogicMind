@@ -54,6 +54,8 @@ class StatisticsActivity : BaseActivity() {
         } else {
             // Zalogowany użytkownik
             Log.d("StatisticsActivity", "Widok dla zalogowanego użytkownika")
+            // Ukryj progressbar
+            binding.progressBar.visibility = View.GONE
             binding.statisticsScrollView.visibility = View.VISIBLE
             binding.layoutNotLoggedIn.visibility = View.GONE
             setupExpandableStats() //rozwijanie statystyk
@@ -183,8 +185,8 @@ class StatisticsActivity : BaseActivity() {
                         val data = snapshot.value as? Map<*, *>
 
                         if (data != null) {
-                            val reaction = data["avgReactionTime"]?.toString() ?: messageIfEmpty
-                            val accuracy = data["accuracy"]?.toString() ?: messageIfEmpty
+                            val reaction = (data["avgReactionTime"] as? Double) ?: -1.0
+                            val accuracy = (data["accuracy"] as? Double) ?: -1.0
                             val total = data["starsEarned"]?.toString() ?: messageIfEmpty
                             val best = data["bestStars"]?.toString() ?: messageIfEmpty
 
@@ -315,10 +317,23 @@ class StatisticsActivity : BaseActivity() {
         reactionId: Int, accuracyId: Int, totalId: Int, bestId: Int,
         reactionValue: Any?, accuracyValue: Any?, totalValue: Any?, bestValue: Any?
     ) {
+        //2 miejsca po przecinku
+        val formattedReaction = if (reactionValue is Double && reactionValue >= 0) {
+            String.format("%.2f s", reactionValue)
+        } else {
+            "0"
+        }
+
+        //2 miejsca po przecinku
+        val formattedAccuracy = if (accuracyValue is Double && accuracyValue >= 0) {
+            String.format("%.2f%%", accuracyValue)
+        } else {
+            "0"
+        }
         binding.root.findViewById<TextView>(reactionId).text =
-            getString(R.string.avg_reaction_time_value, reactionValue ?: "N/A")
+            getString(R.string.avg_reaction_time_value, formattedReaction ?: "N/A")
         binding.root.findViewById<TextView>(accuracyId).text =
-            getString(R.string.accuracy_value, accuracyValue ?: "N/A")
+            getString(R.string.accuracy_value, formattedAccuracy ?: "N/A")
         binding.root.findViewById<TextView>(totalId).text =
             getString(R.string.total_points_value, totalValue ?: "0")
         binding.root.findViewById<TextView>(bestId).text =
