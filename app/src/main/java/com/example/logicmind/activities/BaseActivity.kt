@@ -3,20 +3,23 @@ package com.example.logicmind.activities
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
-import java.util.Locale
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.example.logicmind.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.MutableData
 import com.google.firebase.database.Transaction
 import java.util.Calendar
+import java.util.Locale
 
 /**
  * BaseActivity
@@ -124,6 +127,20 @@ open class BaseActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Sprawdza, czy użytkownik jest zalogowany i nie jest anonimowy.
+     * @return true jeśli użytkownik jest zalogowany i nie anonimowy, false w przeciwnym wypadku
+     */
+    protected fun isUserLoggedIn(): Boolean {
+        val user = auth.currentUser
+        return if (user == null || user.isAnonymous) {
+            Log.w("AUTH_DEBUG", "Użytkownik niezalogowany lub anonimowy — pomijam zapis do bazy")
+            false
+        } else {
+            true
+        }
+    }
+
 
     /**
      * Ustawia daną grę jako lastPlayed w bazie
@@ -136,132 +153,91 @@ open class BaseActivity : AppCompatActivity() {
         displayName: String,
         onSuccess: (() -> Unit)? = null
     ) {
-        val user = auth.currentUser
+        if (!isUserLoggedIn()) return
+        val user = auth.currentUser!!
 
-        if (user == null) {
-            Log.w("GAME_DEBUG", "Brak zalogowanego użytkownika — pomijam zapis lastPlayed")
-            return
-        }
+        //jeśli nie jest gościem
+        //zapis do bazy danych - operacja asynchroniczna, czyli nie blokuje wątku głównego
+        val dbRef = db.getReference("users").child(user.uid).child("categories").child(categoryKey)
+            .child("games").child(gameKey)
 
-        isGuestUser { isGuest ->
-            if(isGuest){
-                Log.w("GAME_DEBUG", "Brak zalogowanego użytkownika, pomijam zapis LastPlayed")
-                return@isGuestUser
+        val timestamp = System.currentTimeMillis()
+
+        dbRef.child("lastPlayed").setValue(timestamp)
+            .addOnSuccessListener {
+                Log.d("GAME_DEBUG", "Zaktualizowano lastPlayed dla $gameKey")
+                onSuccess?.invoke() //callback - domyślnie null
+                //używa się aby wykonać akcję dopiero po zapisie do bazy
+                updateStreak() //wywołanie tutaj aby nie powtarzać kodu
             }
-            //jeśli nie jest gościem
-            //zapis do bazy danych - operacja asynchroniczna, czyli nie blokuje wątku głównego
-            val dbRef = db.getReference("users").child(user.uid).child("categories").child(categoryKey)
-                .child("games").child(gameKey)
-
-            val timestamp = System.currentTimeMillis()
-
-            dbRef.child("lastPlayed").setValue(timestamp)
-                .addOnSuccessListener {
-                    Log.d("GAME_DEBUG", "Zaktualizowano lastPlayed dla $gameKey")
-                    onSuccess?.invoke() //callback - domyślnie null
-                    //używa się aby wykonać akcję dopiero po zapisie do bazy
-                    updateStreak() //wywołanie tutaj aby nie powtarzać kodu
-                }
-                .addOnFailureListener { e ->
-                    Log.e("GAME_DEBUG", "Błąd aktualizacji lastPlayed dla $gameKey", e)
-                }
-        }
+            .addOnFailureListener { e ->
+                Log.e("GAME_DEBUG", "Błąd aktualizacji lastPlayed dla $gameKey", e)
+            }
     }
 
     /**
      * Aktualizuje streak oraz bestStreak użytkownika w bazie
      */
     protected fun updateStreak() {
-        val user = auth.currentUser
+        if (!isUserLoggedIn()) return
 
-        if (user == null) {
-            Log.w("STREAK_DEBUG", "Brak zalogowanego użytkownika — pomijam aktualizację streaka")
-            return
-        }
 
-        // czy użytkownik jest gościem
-        isGuestUser { isGuest ->
-            if (isGuest) {
-                Log.w("STREAK_DEBUG", "Użytkownik to gość — pomijam aktualizację streaka")
-                return@isGuestUser
+        val uid = auth.currentUser!!.uid
+        val userRef = db.getReference("users").child(uid)
+
+        userRef.get().addOnSuccessListener { snapshot ->
+            //pobieramy aktualny streak i bestStreak
+            val streak = (snapshot.child("streak").value as? Long ?: 0L).toInt()
+            val bestStreak = (snapshot.child("bestStreak").value as? Long ?: 0L).toInt()
+            val lastPlayTimestamp = snapshot.child("lastPlayDate").getValue(Long::class.java)
+
+            val today = Calendar.getInstance()
+
+            val newStreak = if (lastPlayTimestamp == null) {
+                // pierwsza gra użytkownika
+                1
+            } else {
+                val lastPlayDay = Calendar.getInstance().apply { timeInMillis = lastPlayTimestamp }
+
+                //obliczenie różnicy dni między dzisiejszym dniem a ostatnią grą
+                val daysBetween =
+                    ((today.timeInMillis - lastPlayDay.timeInMillis) / (1000 * 60 * 60 * 24)).toInt()
+
+                when {
+                    daysBetween == 0 -> streak // gra w tym samym dniu - pozostaje bez zmian
+                    daysBetween == 1 -> streak + 1 // gra dzień po dniu — streak zwiększa się o 1
+                    else -> 0 // opuścił jeden dzień — streak resetuje się do 0
+                }
             }
 
-            val uid = user.uid
-            val userRef = db.getReference("users").child(uid)
-
-            userRef.get().addOnSuccessListener { snapshot ->
-                //pobieramy aktualny streak i bestStreak
-                val streak = (snapshot.child("streak").value as? Long ?: 0L).toInt()
-                val bestStreak = (snapshot.child("bestStreak").value as? Long ?: 0L).toInt()
-                val lastPlayTimestamp = snapshot.child("lastPlayDate").getValue(Long::class.java)
-
-                val today = Calendar.getInstance()
-
-                val newStreak = if (lastPlayTimestamp == null) {
-                    // pierwsza gra użytkownika
-                    1
-                } else {
-                    val lastPlayDay = Calendar.getInstance().apply { timeInMillis = lastPlayTimestamp }
-
-                    //obliczenie różnicy dni między dzisiejszym dniem a ostatnią grą
-                    val daysBetween = ((today.timeInMillis - lastPlayDay.timeInMillis) / (1000 * 60 * 60 * 24)).toInt()
-
-                    when {
-                        daysBetween == 0 -> streak // gra w tym samym dniu - pozostaje bez zmian
-                        daysBetween == 1 -> streak + 1 // gra dzień po dniu — streak zwiększa się o 1
-                        else -> 0 // opuścił jeden dzień — streak resetuje się do 0
-                    }
+            //zapisanie do bazy
+            userRef.child("streak").setValue(newStreak)
+                .addOnSuccessListener {
+                    Log.d("STREAK_DEBUG", "Zaktualizowano streak dla $uid")
+                }
+                .addOnFailureListener {
+                    Log.e("STREAK_DEBUG", "Błąd aktualizacji streak dla $uid", it)
                 }
 
-                //zapisanie do bazy
-                userRef.child("streak").setValue(newStreak)
+            if (newStreak > bestStreak) {
+                userRef.child("bestStreak").setValue(newStreak)
                     .addOnSuccessListener {
-                        Log.d("STREAK_DEBUG", "Zaktualizowano streak dla $uid")
+                        Log.d("STREAK_DEBUG", "Zaktualizowano bestStreak dla $uid")
                     }
                     .addOnFailureListener {
-                        Log.e("STREAK_DEBUG", "Błąd aktualizacji streak dla $uid", it)
+                        Log.e("STREAK_DEBUG", "Błąd aktualizacji bestStreak dla $uid", it)
                     }
-
-                if (newStreak > bestStreak) {
-                    userRef.child("bestStreak").setValue(newStreak)
-                        .addOnSuccessListener {
-                            Log.d("STREAK_DEBUG", "Zaktualizowano bestStreak dla $uid")
-                        }
-                        .addOnFailureListener {
-                            Log.e("STREAK_DEBUG", "Błąd aktualizacji bestStreak dla $uid", it)
-                        }
-                }
-
-                //aktualizacja lastPlayDate
-                userRef.child("lastPlayDate").setValue(today.timeInMillis)
-                Log.d("STREAK_DEBUG", "Nowy streak:  $newStreak, BestStreak: $bestStreak")
-
-            }.addOnFailureListener { e ->
-                Log.e("STREAK_DEBUG", "Błąd pobierania danych użytkownika", e)
             }
+
+            //aktualizacja lastPlayDate
+            userRef.child("lastPlayDate").setValue(today.timeInMillis)
+            Log.d("STREAK_DEBUG", "Nowy streak:  $newStreak, BestStreak: $bestStreak")
+
+        }.addOnFailureListener { e ->
+            Log.e("STREAK_DEBUG", "Błąd pobierania danych użytkownika", e)
         }
     }
 
-
-    protected fun isGuestUser(onResult: (Boolean) -> Unit) {
-        val user = auth.currentUser
-
-        if (user == null || !user.isAnonymous) {
-            onResult(false)
-            return
-        }
-
-        //sprawdza czy w bazie istnieje wpisa dla tego uid
-        db.getReference("users").child(user.uid).get()
-            .addOnSuccessListener { snapshot ->
-                //jeżeli snapshot nie istnieje = gość
-                onResult(!snapshot.exists())
-            }
-            .addOnFailureListener {
-                onResult(true)
-            }
-
-    }
 
     /*
     Stałe używane do dostępu do kategorii i gier w bazie danych Firebase.
@@ -301,6 +277,8 @@ open class BaseActivity : AppCompatActivity() {
         accuracy: Double = 0.0,
         reactionTime: Double = 0.0
     ) {
+        if (!isUserLoggedIn()) return
+
         val userId = auth.currentUser?.uid ?: return
         val userRef = db.getReference("users").child(userId)
         //aktualizacja globalnych statystyk usera
@@ -363,7 +341,8 @@ open class BaseActivity : AppCompatActivity() {
             val currentGamesPlayed = snapshot.child("gamesPlayed").getValue(Int::class.java) ?: 0
             val currentBestStars = snapshot.child("bestStars").getValue(Int::class.java) ?: 0
             val currentAvgAccuracy = snapshot.child("accuracy").getValue(Double::class.java) ?: 0.0
-            val currentAvgReaction = snapshot.child("avgReactionTime").getValue(Double::class.java) ?: 0.0
+            val currentAvgReaction =
+                snapshot.child("avgReactionTime").getValue(Double::class.java) ?: 0.0
 
             val newGamesPlayed = currentGamesPlayed + 1
 
@@ -395,38 +374,90 @@ open class BaseActivity : AppCompatActivity() {
     }
 
     /*
-    Liczymy średni czas reakcji jako czas trwania rundy / liczba interakcji
+    Liczymy średni czas reakcji jako czas trwania gry / liczba gwiazdek
 
-    - Zapamiętanie czas startu gry (startTime).
-    - W momencie zapisu statystyk (updateUserStatistics) liczenie ile trwała gra
-    - Obliczenia średniego czasu reakcji - czas gry / liczba kliknięć
+    - startReactionTracking() — startuje licznik czasu.
+    - pauseReactionTracking() — zatrzymuje czas gry (np. gdy gracz pauzuje).
+    - resumeReactionTracking() — wznawia licznik po pauzie.
+    - getAverageReactionTime() — zwraca średni czas reakcji (w sekundach)
      */
 
     private var gameStartTime: Long = 0L
+    private var totalActiveTime: Long = 0L
+    private var pauseStartTime: Long = 0L
     private var gameClicks: Long = 0L
+    private var isPaused: Boolean = false
 
     //śledzenie gry
     //wywoływana na początku gry
-    protected fun startReactionTracking(){
-        gameStartTime = System.currentTimeMillis()
-        gameClicks = 0
+    protected fun startReactionTracking() {
+        totalActiveTime = 0L
+        gameClicks = 0L
+        isPaused = false
+        pauseStartTime = 0L
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            gameStartTime = System.currentTimeMillis()
+            Toast.makeText(this, "Rozpoczęcie gry", Toast.LENGTH_SHORT).show()
+        }, 4000)
     }
 
-    //wywoływana na końcu gry
-    protected fun registerPlayerAction(){
+    //pauzowanie gry
+    protected fun onGamePaused() {
+        if (!isPaused) {
+            pauseStartTime = System.currentTimeMillis()
+            isPaused = true
+            //Toast.makeText(this, "Gra zapauzowana o ${pauseStartTime}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    //wznowienie gry
+    protected fun onGameResumed() {
+        if (isPaused) {
+            //przesuwamy startTime żeby nie liczyc pauzy
+            val pauseDuration = System.currentTimeMillis() - pauseStartTime
+            gameStartTime += pauseDuration
+            isPaused = false
+            //Toast.makeText(this, "Gra wznowiona o ${pauseDuration}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    //kliknięcia gracza
+    protected fun registerPlayerAction() {
         gameClicks++
+        Toast.makeText(this, "Kliknięcia: ${gameClicks}", Toast.LENGTH_SHORT).show()
     }
 
     //TODO: trzeba zrobic tak żeby to był rzeczywisty średni czas a nie ostatniej gry
     //zmiana żeby wyswietlaly sie 2 miejsca po przecinku
-    //obliczanie średniego czasu reakcji
-    protected fun getAverageReactionTime(): Double{
-        val duration = (System.currentTimeMillis() - gameStartTime).coerceAtLeast(1L)
+    /**obliczanie średniego czasu reakcji = czas gry / liczba gwiazdek
+     * gdy gra się zaczyna = startReactionTracking(),
+
+     * gdy użytkownik kliknie pauzę = onGamePaused() zapisuje czas rozpoczęcia pauzy,
+
+     * gdy wznawia = onGameResumed() przesuwa gameStartTime o długość pauzy -ten okres nie liczy się do średniego czasu,
+
+     * getAverageReactionTime() używa już tylko aktywnego czasu.
+     */
+    protected fun getAverageReactionTime(stars: Int = 0): Double {
+        val currentTime = System.currentTimeMillis()
+        val duration = (currentTime - gameStartTime).coerceAtLeast(1L)
+
+        //jezeli przekazemy w argumatrze gwiazdki to wykorzytsa gwiazdki, jeżeli nie - użyje kliknięć
+        val starsEarned = if (stars > 0) stars else gameClicks.coerceAtLeast(1)
+
+        val avgReactionSec = duration.toDouble() / starsEarned.toDouble() / 1000.0 //w sekundach
+
         //coerceAtLeast - upewnie sie ze liczba nie bedzie mniejsza niz dana wartość
         //przez to unikamy dzielenia przez 0 jezeli gra bedzie trwała krótko
-        val clicks = gameClicks.coerceAtLeast(1)
-        //clicks nigdy nie bedzie 0
-        return duration.toDouble() / clicks / 1000.0 //sekundy
+
+        Toast.makeText(
+            this,
+            "Rzeczywisty czas gry: %.2f s".format(duration.toDouble() / 1000),
+            Toast.LENGTH_SHORT
+        ).show()
+
+        return avgReactionSec
     }
 
 }

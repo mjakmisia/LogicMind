@@ -1,23 +1,15 @@
 package com.example.logicmind.activities
 
 import android.app.AlertDialog
-import android.content.Intent
 import android.content.res.Configuration
-import android.graphics.Color
 import android.os.Bundle
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.appcompat.widget.SwitchCompat
 import com.example.logicmind.R
 import com.example.logicmind.databinding.ActivitySettingsBinding
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import java.util.*
 
 class SettingsActivity : BaseActivity() {
 
-    private var selectedLanguage: String? = "pl"  // "pl" lub "en"
+    private var selectedLanguage: String? = "pl"
     private lateinit var binding :ActivitySettingsBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {

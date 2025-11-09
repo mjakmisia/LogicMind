@@ -8,7 +8,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.gridlayout.widget.GridLayout
 import com.example.logicmind.R
-import com.example.logicmind.activities.BaseActivity.GameKeys
 import com.example.logicmind.common.GameCountdownManager
 import com.example.logicmind.common.GameTimerProgressBar
 import com.example.logicmind.common.PauseMenu
@@ -69,8 +68,6 @@ class CardMatchActivity : BaseActivity() {
 
         supportActionBar?.hide()
 
-        //zaczynamy liczyć średni czas reakcji
-        startReactionTracking()
 
         // Inicjalizacja dźwięku
         SoundManager.init(this)
@@ -103,7 +100,7 @@ class CardMatchActivity : BaseActivity() {
                     gameKey = GameKeys.GAME_CARD_MATCH,
                     starsEarned = starManager.starCount,
                     avgAccuracy,
-                    getAverageReactionTime(),
+                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
                 )
 
                 lastPlayedGame(GameKeys.CATEGORY_MEMORY, GameKeys.GAME_CARD_MATCH, getString(R.string.card_match))
@@ -143,11 +140,13 @@ class CardMatchActivity : BaseActivity() {
                 if (!isPreviewPhase) {
                     timerProgressBar.start()
                 }
+                onGameResumed()
             }, // Wznawia timer po pauzie pod warunkiem że nie jesteśmy w preview
             onPause = {
                 if (!isPreviewPhase) {
                     timerProgressBar.pause()
                 }
+                onGamePaused()
             }, // Zatrzymuje timer podczas pauzy pod warunkiem że nie jesteśmy w preview
             onExit = {
                 updateUserStatistics(
@@ -155,7 +154,7 @@ class CardMatchActivity : BaseActivity() {
                     gameKey = GameKeys.GAME_CARD_MATCH,
                     starsEarned = starManager.starCount,
                     avgAccuracy,
-                    getAverageReactionTime(),
+                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
                 )
 
                 lastPlayedGame(GameKeys.CATEGORY_MEMORY, GameKeys.GAME_CARD_MATCH, getString(R.string.card_match))
@@ -164,9 +163,16 @@ class CardMatchActivity : BaseActivity() {
             instructionMessage = getString(R.string.card_match_instruction),
         )
 
+
         // Sprawdzenie, czy gra jest uruchamiana po raz pierwszy
         if (savedInstanceState == null) {
             countdownManager.startCountdown() // Rozpoczyna odliczanie początkowe
+
+            startReactionTracking()
+            //zaczynamy liczyć średni czas reakcji z 4s opoznieniem (na odliczanie 3, 2, 1 start)
+//            Handler(Looper.getMainLooper()).postDelayed({
+//                startReactionTracking()
+//            }, 4000)
         } else {
             restoreGameState(savedInstanceState) // Przywraca stan gry
         }
