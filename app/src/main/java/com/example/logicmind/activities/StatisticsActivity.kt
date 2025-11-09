@@ -1,19 +1,15 @@
 package com.example.logicmind.activities
+
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.Button
 import android.widget.LinearLayout
-import android.widget.ScrollView
 import android.widget.TextView
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.example.logicmind.R
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.core.view.isGone
+import com.example.logicmind.R
 import com.example.logicmind.databinding.ActivityStatisticsBinding
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -42,30 +38,28 @@ class StatisticsActivity : BaseActivity() {
         // Debugowanie: Logowanie stanu użytkownika
         Log.d("StatisticsActivity", "User: ${user?.uid ?: "null"}")
 
-        isGuestUser { isGuest ->
+        if (!isUserLoggedIn()) {
             // Ukryj progressbar
             binding.progressBar.visibility = View.GONE
-            if(isGuest){
-                // Niezalogowany użytkownik
-                Log.d("StatisticsActivity", "Widok dla niezalogowanego użytkownika")
-                binding.statisticsScrollView.visibility = View.GONE
-                binding.layoutNotLoggedIn.visibility = View.VISIBLE
-                binding.buttonLogin.visibility = View.VISIBLE
-                binding.buttonLogin.setOnClickListener {
-                    startActivity(Intent(this, WelcomeActivity::class.java))
-                    finish()
+            // Niezalogowany użytkownik
+            Log.d("StatisticsActivity", "Widok dla niezalogowanego użytkownika")
+            binding.statisticsScrollView.visibility = View.GONE
+            binding.layoutNotLoggedIn.visibility = View.VISIBLE
+            binding.buttonLogin.visibility = View.VISIBLE
+            binding.buttonLogin.setOnClickListener {
+                startActivity(Intent(this, WelcomeActivity::class.java))
+                finish()
             }
 
         } else {
-                // Zalogowany użytkownik
-                Log.d("StatisticsActivity", "Widok dla zalogowanego użytkownika")
-                binding.statisticsScrollView.visibility = View.VISIBLE
-                binding.layoutNotLoggedIn.visibility = View.GONE
-                setupExpandableStats() //rozwijanie statystyk
-                auth.currentUser?.let {
-                    loadUserStats(it.uid)
-                    loadLastPlayedGame(it.uid)
-                }
+            // Zalogowany użytkownik
+            Log.d("StatisticsActivity", "Widok dla zalogowanego użytkownika")
+            binding.statisticsScrollView.visibility = View.VISIBLE
+            binding.layoutNotLoggedIn.visibility = View.GONE
+            setupExpandableStats() //rozwijanie statystyk
+            auth.currentUser?.let {
+                loadUserStats(it.uid)
+                loadLastPlayedGame(it.uid)
             }
         }
     }
@@ -104,61 +98,79 @@ class StatisticsActivity : BaseActivity() {
      */
     private fun loadUserStats(uid: String) {
         // Mapowanie gier na widoki (nazwy gier z bazy na ID widoków)
-        val gameMapping = listOf( //gameMapping - lista par (List<Triple<String, String, List<Int>>>)
-            Triple("Koordynacja", "road_dash", listOf(
-                R.id.tvCoordinationGame1Reaction,
-                R.id.tvCoordinationGame1Accuracy,
-                R.id.tvCoordinationGame1Total,
-                R.id.tvCoordinationGame1Best
-            )),
-            Triple("Koordynacja", "symbol_race", listOf(
-                R.id.tvCoordinationGame2Reaction,
-                R.id.tvCoordinationGame2Accuracy,
-                R.id.tvCoordinationGame2Total,
-                R.id.tvCoordinationGame2Best
-            )),
-            Triple("Skupienie", "word_search", listOf(
-                R.id.tvAttentionGame1Reaction,
-                R.id.tvAttentionGame1Accuracy,
-                R.id.tvAttentionGame1Total,
-                R.id.tvAttentionGame1Best
-            )),
-            Triple("Skupienie", "fruit_sort", listOf(
-                R.id.tvAttentionGame2Reaction,
-                R.id.tvAttentionGame2Accuracy,
-                R.id.tvAttentionGame2Total,
-                R.id.tvAttentionGame2Best
-            )),
-            Triple("Pamiec", "color_sequence", listOf(
-                R.id.tvMemoryGame1Reaction,
-                R.id.tvMemoryGame1Accuracy,
-                R.id.tvMemoryGame1Total,
-                R.id.tvMemoryGame1Best
-            )),
-            Triple("Pamiec", "card_match", listOf(
-                R.id.tvMemoryGame2Reaction,
-                R.id.tvMemoryGame2Accuracy,
-                R.id.tvMemoryGame2Total,
-                R.id.tvMemoryGame2Best
-            )),
-            Triple("Rozwiazywanie_problemow", "number_addition", listOf(
-                R.id.tvReasoningGame1Reaction,
-                R.id.tvReasoningGame1Accuracy,
-                R.id.tvReasoningGame1Total,
-                R.id.tvReasoningGame1Best
-            )),
-            Triple("Rozwiazywanie_problemow", "path_change", listOf(
-                R.id.tvReasoningGame2Reaction,
-                R.id.tvReasoningGame2Accuracy,
-                R.id.tvReasoningGame2Total,
-                R.id.tvReasoningGame2Best
-            ))
-        )
+        val gameMapping =
+            listOf( //gameMapping - lista par (List<Triple<String, String, List<Int>>>)
+                Triple(
+                    "Koordynacja", "road_dash", listOf(
+                        R.id.tvCoordinationGame1Reaction,
+                        R.id.tvCoordinationGame1Accuracy,
+                        R.id.tvCoordinationGame1Total,
+                        R.id.tvCoordinationGame1Best
+                    )
+                ),
+                Triple(
+                    "Koordynacja", "symbol_race", listOf(
+                        R.id.tvCoordinationGame2Reaction,
+                        R.id.tvCoordinationGame2Accuracy,
+                        R.id.tvCoordinationGame2Total,
+                        R.id.tvCoordinationGame2Best
+                    )
+                ),
+                Triple(
+                    "Skupienie", "word_search", listOf(
+                        R.id.tvAttentionGame1Reaction,
+                        R.id.tvAttentionGame1Accuracy,
+                        R.id.tvAttentionGame1Total,
+                        R.id.tvAttentionGame1Best
+                    )
+                ),
+                Triple(
+                    "Skupienie", "fruit_sort", listOf(
+                        R.id.tvAttentionGame2Reaction,
+                        R.id.tvAttentionGame2Accuracy,
+                        R.id.tvAttentionGame2Total,
+                        R.id.tvAttentionGame2Best
+                    )
+                ),
+                Triple(
+                    "Pamiec", "color_sequence", listOf(
+                        R.id.tvMemoryGame1Reaction,
+                        R.id.tvMemoryGame1Accuracy,
+                        R.id.tvMemoryGame1Total,
+                        R.id.tvMemoryGame1Best
+                    )
+                ),
+                Triple(
+                    "Pamiec", "card_match", listOf(
+                        R.id.tvMemoryGame2Reaction,
+                        R.id.tvMemoryGame2Accuracy,
+                        R.id.tvMemoryGame2Total,
+                        R.id.tvMemoryGame2Best
+                    )
+                ),
+                Triple(
+                    "Rozwiazywanie_problemow", "number_addition", listOf(
+                        R.id.tvReasoningGame1Reaction,
+                        R.id.tvReasoningGame1Accuracy,
+                        R.id.tvReasoningGame1Total,
+                        R.id.tvReasoningGame1Best
+                    )
+                ),
+                Triple(
+                    "Rozwiazywanie_problemow", "path_change", listOf(
+                        R.id.tvReasoningGame2Reaction,
+                        R.id.tvReasoningGame2Accuracy,
+                        R.id.tvReasoningGame2Total,
+                        R.id.tvReasoningGame2Best
+                    )
+                )
+            )
 
         // Pobieranie danych dla każdej gry
         //gameMapping - lista par (List<Triple<String, String, List<Int>>>)
         gameMapping.forEach { (category, gameName, viewIds) ->
-            db.getReference("users").child(uid).child("categories").child(category).child("games").child(gameName)
+            db.getReference("users").child(uid).child("categories").child(category).child("games")
+                .child(gameName)
                 .get() //pobiera jednorazowo dane z bazy
                 .addOnSuccessListener { snapshot ->
                     val messageIfEmpty = "Zagraj w grę aby zobaczyć statystyki"
@@ -170,7 +182,7 @@ class StatisticsActivity : BaseActivity() {
                         //sprawdza czy snapshot jest mapą
                         val data = snapshot.value as? Map<*, *>
 
-                        if(data != null){
+                        if (data != null) {
                             val reaction = data["avgReactionTime"]?.toString() ?: messageIfEmpty
                             val accuracy = data["accuracy"]?.toString() ?: messageIfEmpty
                             val total = data["starsEarned"]?.toString() ?: messageIfEmpty
@@ -185,21 +197,25 @@ class StatisticsActivity : BaseActivity() {
                         } else {
                             // Dane istnieją ale nie są mapą
                             //czyli są w złym formacie
-                            setStatsForGame(viewIds[0], viewIds[1], viewIds[2], viewIds[3],
+                            setStatsForGame(
+                                viewIds[0], viewIds[1], viewIds[2], viewIds[3],
                                 messageIfEmpty, messageIfEmpty, messageIfEmpty, messageIfEmpty
                             )
                         }
                     } else {
                         //Dane nie są w bazie
                         //czyli gra nie została rozegrana
-                        setStatsForGame(viewIds[0], viewIds[1], viewIds[2], viewIds[3],
-                            messageIfEmpty, messageIfEmpty, messageIfEmpty, messageIfEmpty)
+                        setStatsForGame(
+                            viewIds[0], viewIds[1], viewIds[2], viewIds[3],
+                            messageIfEmpty, messageIfEmpty, messageIfEmpty, messageIfEmpty
+                        )
 
                     }
                 }
                 .addOnFailureListener {
                     val messageIfError = "Błąd pobierania danych"
-                    setStatsForGame(viewIds[0], viewIds[1], viewIds[2], viewIds[3],
+                    setStatsForGame(
+                        viewIds[0], viewIds[1], viewIds[2], viewIds[3],
                         messageIfError, messageIfError, messageIfError, messageIfError
                     )
                 }
@@ -230,7 +246,8 @@ class StatisticsActivity : BaseActivity() {
 
         // Pobieranie lastPlayed dla każdej gry
         gameMapping.forEach { (category, gameName) ->
-            db.getReference("users").child(uid).child("categories").child(category).child("games").child(gameName)
+            db.getReference("users").child(uid).child("categories").child(category).child("games")
+                .child(gameName)
                 .child("lastPlayed")
                 .get() //pobiera jednorazowo dane z bazy
                 .addOnSuccessListener { snapshot ->
@@ -240,7 +257,10 @@ class StatisticsActivity : BaseActivity() {
                         //można wyswietlic dokładną datę i godzinę ostatniej gry
                         //jeżeli timestamp nie jest Long to będzie null
                         val timestamp = snapshot.value as? Long
-                        Log.d("LAST_PLAYED_DEBUG (StatisticsActivity)", "Gra: $gameName | Timestamp: $timestamp")
+                        Log.d(
+                            "LAST_PLAYED_DEBUG (StatisticsActivity)",
+                            "Gra: $gameName | Timestamp: $timestamp"
+                        )
 
                         if (timestamp != null && (latestTimestamp == null || timestamp > latestTimestamp!!)) {
                             latestTimestamp = timestamp
@@ -249,7 +269,10 @@ class StatisticsActivity : BaseActivity() {
                     }
                     //wszystkie pytania zakończone - aktualizuje textview
                     if (completedRequests == gameMapping.size) {
-                        Log.d("LAST_PLAYED_DEBUG (StatisticsActivity)", "Wybrana gra (LastPlayedGame): $latestGameKey | Timestamp: $latestTimestamp")
+                        Log.d(
+                            "LAST_PLAYED_DEBUG (StatisticsActivity)",
+                            "Wybrana gra (LastPlayedGame): $latestGameKey | Timestamp: $latestTimestamp"
+                        )
                         updateLastPlayedText(latestGameKey, latestTimestamp)
                     }
                 }
@@ -266,23 +289,23 @@ class StatisticsActivity : BaseActivity() {
     /**
      * Ustawia tekst ostatnio zagranej gry
      */
-     //gameKey - klucz zapisany w Firebase
+    //gameKey - klucz zapisany w Firebase
     private fun updateLastPlayedText(gameKey: String?, timestamp: Long?) {
-            if (gameKey == null || timestamp == null) {
-                binding.tvLastPlayedGame.text = "Ostatnio zagrana gra: Brak"
-                return
-            }
-
-            val resID = resources.getIdentifier(gameKey, "string", packageName)
-            val displayName = if (resID != 0) {
-                getString(resID)
-            } else {
-                gameKey
-            }
-            val dateFormat = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault())
-            val lastPlayedDate = dateFormat.format(Date(timestamp))
-            binding.tvLastPlayedGame.text = "Ostatnio zagrana gra: $displayName ($lastPlayedDate)"
+        if (gameKey == null || timestamp == null) {
+            binding.tvLastPlayedGame.text = "Ostatnio zagrana gra: Brak"
+            return
         }
+
+        val resID = resources.getIdentifier(gameKey, "string", packageName)
+        val displayName = if (resID != 0) {
+            getString(resID)
+        } else {
+            gameKey
+        }
+        val dateFormat = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault())
+        val lastPlayedDate = dateFormat.format(Date(timestamp))
+        binding.tvLastPlayedGame.text = "Ostatnio zagrana gra: $displayName ($lastPlayedDate)"
+    }
 
     /**
      * Ustawia wartości statystyk dla pojedynczej gry.

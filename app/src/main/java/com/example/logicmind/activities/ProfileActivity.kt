@@ -10,13 +10,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.example.logicmind.R
 import com.example.logicmind.databinding.ActivityProfileBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
 import java.util.Calendar
 
 class ProfileActivity : BaseActivity() {
@@ -52,7 +49,10 @@ class ProfileActivity : BaseActivity() {
 
         arrows[dayOfWeek]?.visibility = View.VISIBLE
 
-        Log.d("PROFILE", "Aktualny użytkownik: ${FirebaseAuth.getInstance().currentUser?.uid ?: "brak"}")
+        Log.d(
+            "PROFILE",
+            "Aktualny użytkownik: ${FirebaseAuth.getInstance().currentUser?.uid ?: "brak"}"
+        )
 
         // Odwołania do widoków
         val scrollView = findViewById<View>(R.id.scrollView)
@@ -66,19 +66,17 @@ class ProfileActivity : BaseActivity() {
         binding.progressBar.visibility = View.VISIBLE
 
         // Pobranie danych użytkownika
-        val user = FirebaseAuth.getInstance().currentUser
+        val user = auth.currentUser
+
+        binding.progressBar.visibility = View.GONE
+
         //poczekaj na wynik czy jest gościem
-        isGuestUser { isGuest ->
-            binding.progressBar.visibility = View.GONE
-            if (isGuest) {
-                // Użytkownik jest gościem
-                showLoginPrompt()
-            } else {
-                binding.scrollView.visibility = View.VISIBLE
-                auth.currentUser?.let {
-                    loadUserData((it.uid))
-                }
-            }
+        if (!isUserLoggedIn()) {
+            showLoginPrompt()
+        } else {
+            binding.scrollView.visibility = View.VISIBLE
+            loadUserData((user!!.uid))
+
         }
         //val btnDeleteAccount = findViewById<Button>(R.id.buttonDeleteAccount)
 
@@ -179,7 +177,8 @@ class ProfileActivity : BaseActivity() {
                 binding.scrollView.visibility = View.VISIBLE
 
                 Log.e("PROFILE", "Błąd pobierania danych użytkownika: ${e.message}")
-                Toast.makeText(this, "Błąd pobierania danych: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Błąd pobierania danych: ${e.message}", Toast.LENGTH_SHORT)
+                    .show()
                 // Ustaw domyślne wartości w razie błędu
                 findViewById<TextView>(R.id.textUsername).text = "Błąd pobierania danych użytkownik"
                 findViewById<TextView>(R.id.textCurrentStreak).text = "0 dni"
@@ -191,9 +190,9 @@ class ProfileActivity : BaseActivity() {
      * Usuwa konto użytkownika
      * Firebase Auth wymaga, aby użytkownik był zalogowany ostatnio – jeśli sesja jest za stara, trzeba go ponownie uwierzytelnić
      */
-    private fun deleteAccount(){
+    private fun deleteAccount() {
         val user = FirebaseAuth.getInstance().currentUser
-        if(user != null) {
+        if (user != null) {
             val uid = user.uid
 
             // usunięcie danych z Realtime Database
@@ -206,7 +205,8 @@ class ProfileActivity : BaseActivity() {
                     user.delete()
                         .addOnSuccessListener {
                             Log.d("PROFILE", "Konto użytkownika usunięte: $uid")
-                            Toast.makeText(this, "Konto zostało usunięte", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "Konto zostało usunięte", Toast.LENGTH_SHORT)
+                                .show()
 
                             // przekierowanie do WelcomeActivity
                             startActivity(Intent(this, WelcomeActivity::class.java))
@@ -215,12 +215,20 @@ class ProfileActivity : BaseActivity() {
                         }
                         .addOnFailureListener { e ->
                             Log.e("PROFILE", "Błąd usuwania konta użytkownika: ${e.message}")
-                            Toast.makeText(this, "Nie udało się usunąć konta: ${e.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this,
+                                "Nie udało się usunąć konta: ${e.message}",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                 }
                 .addOnFailureListener { e ->
                     Log.e("PROFILE", "Błąd usuwania danych użytkownika: ${e.message}")
-                    Toast.makeText(this, "Nie udało się usunąć danych: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "Nie udało się usunąć danych: ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
         } else {
             Toast.makeText(this, "Brak zalogowanego użytkownika", Toast.LENGTH_SHORT).show()
