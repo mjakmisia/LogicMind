@@ -165,10 +165,6 @@ class CardMatchActivity : BaseActivity() {
             countdownManager.startCountdown() // Rozpoczyna odliczanie początkowe
 
             startReactionTracking()
-            //zaczynamy liczyć średni czas reakcji z 4s opoznieniem (na odliczanie 3, 2, 1 start)
-//            Handler(Looper.getMainLooper()).postDelayed({
-//                startReactionTracking()
-//            }, 4000)
         } else {
             restoreGameState(savedInstanceState) // Przywraca stan gry
         }

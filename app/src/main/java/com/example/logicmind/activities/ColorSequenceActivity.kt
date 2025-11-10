@@ -103,6 +103,13 @@ class ColorSequenceActivity : BaseActivity() {
                 gridLayout.isEnabled = false
                 keyButtons.forEach { it.view.isEnabled = false }
                 pauseOverlay.visibility = View.GONE
+                updateUserStatistics(
+                    categoryKey = GameKeys.CATEGORY_MEMORY,
+                    gameKey = GameKeys.GAME_COLOR_SEQUENCE,
+                    starsEarned = starManager.starCount,
+                    accuracy = calculateAccuracy(),
+                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
+                )
                 lastPlayedGame(GameKeys.CATEGORY_MEMORY, GameKeys.GAME_COLOR_SEQUENCE, getString(R.string.color_sequence))
                 finish()
             }
@@ -150,9 +157,17 @@ class ColorSequenceActivity : BaseActivity() {
                     timerProgressBar.pause()
                 }
                 gridLayout.isEnabled = false
-                keyButtons.forEach { it.view.isEnabled = false }
+                keyButtons.forEach { it.view.isEnabled = false
+                    onGamePaused()}
             }, // Zatrzymuje timer podczas pauzy
             onExit = {
+                updateUserStatistics(
+                    categoryKey = GameKeys.CATEGORY_MEMORY,
+                    gameKey = GameKeys.GAME_COLOR_SEQUENCE,
+                    starsEarned = starManager.starCount,
+                    accuracy = calculateAccuracy(),
+                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
+                )
                 lastPlayedGame(GameKeys.CATEGORY_MEMORY, GameKeys.GAME_COLOR_SEQUENCE, getString(R.string.color_sequence))
                 finish() },
             instructionTitle = getString(R.string.instructions),
@@ -162,6 +177,7 @@ class ColorSequenceActivity : BaseActivity() {
         // Sprawdzenie, czy gra jest uruchamiana po raz pierwszy
         if (savedInstanceState == null) {
             countdownManager.startCountdown() // Rozpoczyna odliczanie początkowe
+            startReactionTracking()
         } else {
             restoreGameState(savedInstanceState) // Przywraca stan gry
         }
