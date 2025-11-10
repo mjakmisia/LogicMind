@@ -231,7 +231,7 @@ class WordSearchActivity : BaseActivity() {
                 return
             }
 
-            currentBoard = WordSearchGenerator.generate(boardSize, words)
+            currentBoard = WordSearchGenerator.generate(boardSize, words, lang)
             wordsToFind = currentBoard?.placedWords ?: emptyList()
         }
 
