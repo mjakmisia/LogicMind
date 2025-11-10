@@ -12,13 +12,19 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import com.example.logicmind.R
 import com.example.logicmind.databinding.ActivityProfileBinding
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
-import java.util.Calendar
+import java.util.Calendar.DAY_OF_WEEK
+import java.util.Calendar.FRIDAY
+import java.util.Calendar.MONDAY
+import java.util.Calendar.SATURDAY
+import java.util.Calendar.SUNDAY
+import java.util.Calendar.THURSDAY
+import java.util.Calendar.TUESDAY
+import java.util.Calendar.WEDNESDAY
+import java.util.Calendar.getInstance
 
 class ProfileActivity : BaseActivity() {
 
-    private lateinit var bottomNav: BottomNavigationView
     private lateinit var binding: ActivityProfileBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,18 +40,17 @@ class ProfileActivity : BaseActivity() {
 
 
         // Logika kalendarza
-        val calendar = Calendar.getInstance()
-        val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) // 1=Sunday, 2=Monday, ... 7=Saturday
+        val calendar = getInstance()
+        val dayOfWeek = calendar.get(DAY_OF_WEEK) // 1=Sunday, 2=Monday, ... 7=Saturday
 
         val arrows = mapOf(
-            Calendar.MONDAY to findViewById<ImageView>(R.id.arrowMon),
-            Calendar.TUESDAY to findViewById<ImageView>(R.id.arrowTue),
-            Calendar.WEDNESDAY to findViewById<ImageView>(R.id.arrowWed),
-            Calendar.THURSDAY to findViewById<ImageView>(R.id.arrowThu),
-            Calendar.FRIDAY to findViewById<ImageView>(R.id.arrowFri),
-            Calendar.SATURDAY to findViewById<ImageView>(R.id.arrowSat),
-            Calendar.SUNDAY to findViewById<ImageView>(R.id.arrowSun)
-        )
+            MONDAY to findViewById(R.id.arrowMon),
+            TUESDAY to findViewById(R.id.arrowTue),
+            WEDNESDAY to findViewById(R.id.arrowWed),
+            THURSDAY to findViewById(R.id.arrowThu),
+            FRIDAY to findViewById(R.id.arrowFri),
+            SATURDAY to findViewById(R.id.arrowSat),
+            SUNDAY to findViewById<ImageView>(R.id.arrowSun))
 
         arrows[dayOfWeek]?.visibility = View.VISIBLE
 
@@ -162,8 +167,8 @@ class ProfileActivity : BaseActivity() {
                     val bestStreak = snapshot.child("bestStreak").value as? Long ?: 0
 
                     findViewById<TextView>(R.id.textUsername).text = username
-                    findViewById<TextView>(R.id.textCurrentStreak).text = "$currentStreak dni"
-                    findViewById<TextView>(R.id.textBestStreak).text = "$bestStreak dni"
+                    findViewById<TextView>(R.id.textCurrentStreak).text = getString(R.string.current_streak_text, currentStreak)
+                    findViewById<TextView>(R.id.textBestStreak).text = getString(R.string.best_streak_text, bestStreak)
                 } else {
                     Log.e("PROFILE", "Brak danych użytkownika w bazie dla UID: $uid")
                     // Wyloguj użytkownika i pokaż widok logowania
@@ -180,9 +185,9 @@ class ProfileActivity : BaseActivity() {
                 Toast.makeText(this, "Błąd pobierania danych: ${e.message}", Toast.LENGTH_SHORT)
                     .show()
                 // Ustaw domyślne wartości w razie błędu
-                findViewById<TextView>(R.id.textUsername).text = "Błąd pobierania danych użytkownik"
-                findViewById<TextView>(R.id.textCurrentStreak).text = "0 dni"
-                findViewById<TextView>(R.id.textBestStreak).text = "0 dni"
+                findViewById<TextView>(R.id.textUsername).text = getString(R.string.error_fetching_user_data)
+                findViewById<TextView>(R.id.textCurrentStreak).text = getString(R.string.zero_days)
+                findViewById<TextView>(R.id.textBestStreak).text = getString(R.string.zero_days)
             }
     }
 

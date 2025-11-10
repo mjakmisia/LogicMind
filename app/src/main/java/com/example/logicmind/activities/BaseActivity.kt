@@ -43,7 +43,7 @@ open class BaseActivity : AppCompatActivity() {
         val lang = sharedPrefs.getString("My_Lang", "pl") ?: "pl"
 
         //obiekt Locale dla wybranego języka
-        val locale = Locale(lang)
+        val locale = Locale.forLanguageTag(lang)
         Locale.setDefault(locale)
 
         //modyfikacja konfiguracji kontekstu tak, aby używała wybranego języka
@@ -83,10 +83,6 @@ open class BaseActivity : AppCompatActivity() {
      * Metoda do ustawiania menu na dole
      */
     protected fun setupBottomNavigation(bottomNav: BottomNavigationView, selectedItemId: Int) {
-        if (bottomNav == null) {
-            Log.e("NAV_DEBUG", "BottomNavigationView is null")
-            return
-        }
         bottomNav.selectedItemId = selectedItemId
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -150,8 +146,7 @@ open class BaseActivity : AppCompatActivity() {
     protected fun lastPlayedGame(
         categoryKey: String,
         gameKey: String,
-        displayName: String,
-        onSuccess: (() -> Unit)? = null
+        onSuccess: String? = null
     ) {
         if (!isUserLoggedIn()) return
         val user = auth.currentUser!!
@@ -166,8 +161,9 @@ open class BaseActivity : AppCompatActivity() {
         dbRef.child("lastPlayed").setValue(timestamp)
             .addOnSuccessListener {
                 Log.d("GAME_DEBUG", "Zaktualizowano lastPlayed dla $gameKey")
-                onSuccess?.invoke() //callback - domyślnie null
-                //używa się aby wykonać akcję dopiero po zapisie do bazy
+                if (onSuccess != null) {
+                    Log.d("GAME_DEBUG", onSuccess)
+                }
                 updateStreak() //wywołanie tutaj aby nie powtarzać kodu
             }
             .addOnFailureListener { e ->
@@ -178,7 +174,7 @@ open class BaseActivity : AppCompatActivity() {
     /**
      * Aktualizuje streak oraz bestStreak użytkownika w bazie
      */
-    protected fun updateStreak() {
+    private fun updateStreak() {
         if (!isUserLoggedIn()) return
 
 
@@ -203,9 +199,9 @@ open class BaseActivity : AppCompatActivity() {
                 val daysBetween =
                     ((today.timeInMillis - lastPlayDay.timeInMillis) / (1000 * 60 * 60 * 24)).toInt()
 
-                when {
-                    daysBetween == 0 -> streak // gra w tym samym dniu - pozostaje bez zmian
-                    daysBetween == 1 -> streak + 1 // gra dzień po dniu — streak zwiększa się o 1
+                when (daysBetween) {
+                    0 -> streak // gra w tym samym dniu - pozostaje bez zmian
+                    1 -> streak + 1 // gra dzień po dniu — streak zwiększa się o 1
                     else -> 0 // opuścił jeden dzień — streak resetuje się do 0
                 }
             }
@@ -262,11 +258,11 @@ open class BaseActivity : AppCompatActivity() {
 
     /**
      * Aktualizuje statystyki gracza w Firestore po zakończeniu gry
-     * @param gameId - id gry
-     * @param starsEarned - liczba zdobytych gwiazdek
-     * @param score - punktacja w grze
-     * @param accuracy - celność
-     * @param reactionTime - średni czas reakcji
+     * @param categoryKey: String  - id kategorii gry
+     * @param gameKey: String - id gry
+     * @param starsEarned: Int - liczba zdobytych gwiazdek
+     * @param accuracy: Double - celność
+     * @param reactionTime: Double - średni czas reakcji
      *
      * Średni czas reakcji i celność są obliczane jako średnia ważona:
      * newAvg = (oldAvg * gamesPlayed + newValue) / (gamesPlayed + 1)
@@ -296,7 +292,7 @@ open class BaseActivity : AppCompatActivity() {
             override fun doTransaction(currentData: MutableData): Transaction.Result {
                 //mutableData - tymczasowy lokalny obiekt reprezentuje dane węzła na którym robimy transakcje
 
-                val currentStats = currentData.value as? Map<String, Any> ?: emptyMap()
+                val currentStats = currentData.value as? Map<*, *> ?: emptyMap<String, Any>()
 
                 val currentStars = (currentStats["totalStars"] as? Long ?: 0L).toInt()
                 val currentAvgAccuracy = (currentStats["avgAccuracy"] as? Double ?: 0.0)
@@ -489,11 +485,11 @@ open class BaseActivity : AppCompatActivity() {
      *
      */
 
-    protected var totalAttempts: Int = 0 //liczba prób
-    protected var successfulAttempts: Int = 0 //liczba poprawnych prób
+    private var totalAttempts: Int = 0 //liczba prób
+    private var successfulAttempts: Int = 0 //liczba poprawnych prób
 
     //resetuje licznik na start
-    protected fun resetAccuracyCounters(){
+    private fun resetAccuracyCounters(){
         totalAttempts = 0
         successfulAttempts = 0
     }

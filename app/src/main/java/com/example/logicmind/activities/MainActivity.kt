@@ -60,13 +60,13 @@ class MainActivity : BaseActivity() {
         val user = auth.currentUser
 
         if (user == null) {
-            binding.streakText.text = "0 dni"
+            binding.streakText.text = getString(R.string.zero_days)
             return
         }
 
         // czy jest gościem
         if (!isUserLoggedIn()) {
-            binding.streakText.text = "0 dni"
+            binding.streakText.text = getString(R.string.zero_days)
             return
         }
 
@@ -79,7 +79,7 @@ class MainActivity : BaseActivity() {
             .addOnSuccessListener { snapshot ->
                 //próbujemy rzutować na Longa jeśli nie zadziała to użyj 0 i konwertujemy na int
                 val streak = (snapshot.value as? Long ?: 0L).toInt()
-                binding.streakText.text = "$streak dni"
+                binding.streakText.text = getString(R.string.current_streak_text, streak)
             }
             .addOnFailureListener {
                 binding.streakText.text = "błąd"

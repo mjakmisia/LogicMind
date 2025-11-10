@@ -123,8 +123,7 @@ class NumberAdditionActivity : BaseActivity() {
                 timerProgressBar.pause()
             },
             onExit = {
-                lastPlayedGame(GameKeys.CATEGORY_REASONING, GameKeys.GAME_NUMBER_ADDITION, getString(R.string.number_addition),
-                    onSuccess = {  } )
+                lastPlayedGame(GameKeys.CATEGORY_REASONING, GameKeys.GAME_NUMBER_ADDITION, getString(R.string.number_addition))
                 finish() },
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.number_addition_instruction),

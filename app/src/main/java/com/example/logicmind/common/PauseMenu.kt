@@ -6,6 +6,7 @@ import android.widget.Button
 import android.widget.ImageView
 import androidx.fragment.app.FragmentActivity
 import com.example.logicmind.R
+import androidx.core.view.isVisible
 
 /**
  * Uniwersalne menu pauzy dla gier.
@@ -80,6 +81,6 @@ class PauseMenu(
     }
 
     fun syncWithOverlay() {
-        isPaused = (pauseOverlay.visibility == View.VISIBLE)
+        isPaused = (pauseOverlay.isVisible)
     }
 }

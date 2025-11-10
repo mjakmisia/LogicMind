@@ -82,9 +82,6 @@ class CardMatchActivity : BaseActivity() {
         starManager.init(findViewById(R.id.starCountText))
 
 
-        //TODO: Usuń po implementacji funkcji które to rzeczywiście liczą
-        val avgAccuracy = 0.5
-
         // Inicjalizacja paska czasu
         timerProgressBar.setTotalTime(90) // Ustaw czas na 1,5 minuty
         timerProgressBar.setOnFinishCallback {

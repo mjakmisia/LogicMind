@@ -1,5 +1,6 @@
 package com.example.logicmind.activities
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -9,14 +10,12 @@ import android.widget.TextView
 import androidx.core.view.isGone
 import com.example.logicmind.R
 import com.example.logicmind.databinding.ActivityStatisticsBinding
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 class StatisticsActivity : BaseActivity() {
 
-    private lateinit var bottomNav: BottomNavigationView
     private lateinit var binding: ActivityStatisticsBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -96,7 +95,7 @@ class StatisticsActivity : BaseActivity() {
 
     /**
      * Wczytuje dane statystyk użytkownika z Firebase
-     * Struktura danych: users/[uid]/categories/[category]/games/[gameName]
+     * Struktura danych: users/[uid]/categories/[category]/games/gameName
      */
     private fun loadUserStats(uid: String) {
         // Mapowanie gier na widoki (nazwy gier z bazy na ID widoków)
@@ -292,9 +291,10 @@ class StatisticsActivity : BaseActivity() {
      * Ustawia tekst ostatnio zagranej gry
      */
     //gameKey - klucz zapisany w Firebase
+    @SuppressLint("DiscouragedApi")
     private fun updateLastPlayedText(gameKey: String?, timestamp: Long?) {
         if (gameKey == null || timestamp == null) {
-            binding.tvLastPlayedGame.text = "Ostatnio zagrana gra: Brak"
+            binding.tvLastPlayedGame.text = getString(R.string.last_played_game_none)
             return
         }
 
@@ -306,13 +306,14 @@ class StatisticsActivity : BaseActivity() {
         }
         val dateFormat = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault())
         val lastPlayedDate = dateFormat.format(Date(timestamp))
-        binding.tvLastPlayedGame.text = "Ostatnio zagrana gra: $displayName ($lastPlayedDate)"
+        binding.tvLastPlayedGame.text = getString(R.string.last_played_game, displayName, lastPlayedDate)
     }
 
     /**
      * Ustawia wartości statystyk dla pojedynczej gry.
      * Każda gra ma 4 wskaźniki: czas reakcji, poprawność, punkty, najlepszy wynik.
      */
+    @SuppressLint("DefaultLocale")
     private fun setStatsForGame(
         reactionId: Int, accuracyId: Int, totalId: Int, bestId: Int,
         reactionValue: Any?, accuracyValue: Any?, totalValue: Any?, bestValue: Any?
@@ -331,9 +332,9 @@ class StatisticsActivity : BaseActivity() {
             "0"
         }
         binding.root.findViewById<TextView>(reactionId).text =
-            getString(R.string.avg_reaction_time_value, formattedReaction ?: "N/A")
+            getString(R.string.avg_reaction_time_value, formattedReaction)
         binding.root.findViewById<TextView>(accuracyId).text =
-            getString(R.string.accuracy_value, formattedAccuracy ?: "N/A")
+            getString(R.string.accuracy_value, formattedAccuracy)
         binding.root.findViewById<TextView>(totalId).text =
             getString(R.string.total_points_value, totalValue ?: "0")
         binding.root.findViewById<TextView>(bestId).text =
