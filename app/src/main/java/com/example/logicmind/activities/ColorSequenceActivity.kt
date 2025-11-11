@@ -144,6 +144,7 @@ class ColorSequenceActivity : BaseActivity() {
                 countdownManager.startCountdown() // Rozpoczyna odliczanie początkowe
             },
             onResume = {
+                onGameResumed()
                 if (!isShowingSequence && !isUserTurn) {
                     timerProgressBar.start()
                 }
@@ -153,12 +154,12 @@ class ColorSequenceActivity : BaseActivity() {
                 }
             }, // Wznawia timer po pauzie
             onPause = {
+                onGamePaused()
                 if (!isShowingSequence) {
                     timerProgressBar.pause()
                 }
                 gridLayout.isEnabled = false
-                keyButtons.forEach { it.view.isEnabled = false
-                    onGamePaused()}
+                keyButtons.forEach { it.view.isEnabled = false }
             }, // Zatrzymuje timer podczas pauzy
             onExit = {
                 updateUserStatistics(
@@ -449,6 +450,10 @@ class ColorSequenceActivity : BaseActivity() {
         isShowingSequence = true
         gridLayout.isEnabled = false
         keyButtons.forEach { it.view.isEnabled = false }
+
+        //zatrzymaj czas reakcji gdy jest pokazywana sekwencja
+        onGamePaused()
+
         timerProgressBar.pause()
         sequenceShowIndex = 0
         playSequenceStep()
@@ -481,6 +486,10 @@ class ColorSequenceActivity : BaseActivity() {
         keyButtons.forEach { it.view.isEnabled = true }
         isUserTurn = true
         userSequence.clear()
+
+        //wznawia czar reakcji gdy sie konczy sekwencja
+        onGameResumed()
+
         timerProgressBar.start()
     }
 
@@ -492,11 +501,15 @@ class ColorSequenceActivity : BaseActivity() {
         highlightKey(keyIndex, true)
         runDelayed(200L) { highlightKey(keyIndex, false) }
 
+        registerPlayerAction()
+        registerAttempt(true)
+
         userSequence.add(keyIndex)
 
         // Sprawdź błąd (po każdym kliknięciu)
         if (userSequence.size > currentSequence.size ||
             userSequence[userSequence.size - 1] != currentSequence[userSequence.size - 1]) {
+            registerAttempt(false)
             checkUserSequence()
             return
         }

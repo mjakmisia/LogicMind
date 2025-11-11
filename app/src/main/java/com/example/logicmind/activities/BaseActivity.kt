@@ -385,14 +385,12 @@ open class BaseActivity : AppCompatActivity() {
     private var gameStartTime: Long = 0L
     private var totalActiveTime: Long = 0L
     private var pauseStartTime: Long = 0L
-    private var gameClicks: Long = 0L
     private var isPaused: Boolean = false
 
     //śledzenie gry
     //wywoływana na początku gry
     protected fun startReactionTracking() {
         totalActiveTime = 0L
-        gameClicks = 0L
         isPaused = false
         pauseStartTime = 0L
 
@@ -401,7 +399,7 @@ open class BaseActivity : AppCompatActivity() {
 
         Handler(Looper.getMainLooper()).postDelayed({
             gameStartTime = System.currentTimeMillis()
-            Toast.makeText(this, "Rozpoczęcie gry", Toast.LENGTH_SHORT).show()
+            //Toast.makeText(this, "Rozpoczęcie gry", Toast.LENGTH_SHORT).show()
         }, 4000)
     }
 
@@ -425,14 +423,7 @@ open class BaseActivity : AppCompatActivity() {
         }
     }
 
-    //kliknięcia gracza
-    protected fun registerPlayerAction() {
-        gameClicks++
-        //Toast.makeText(this, "Kliknięcia: ${gameClicks}", Toast.LENGTH_SHORT).show()
-    }
 
-    //TODO: trzeba zrobic tak żeby to był rzeczywisty średni czas a nie ostatniej gry
-    //zmiana żeby wyswietlaly sie 2 miejsca po przecinku
     /**obliczanie średniego czasu reakcji = czas gry / liczba gwiazdek
      * gdy gra się zaczyna = startReactionTracking(),
 
@@ -447,9 +438,10 @@ open class BaseActivity : AppCompatActivity() {
         val duration = (currentTime - gameStartTime).coerceAtLeast(1L)
 
         //jezeli przekazemy w argumatrze gwiazdki to wykorzytsa gwiazdki, jeżeli nie - użyje kliknięć
-        val starsEarned = if (stars > 0) stars else gameClicks.coerceAtLeast(1)
+        val starsEarned = stars.coerceAtLeast(1)
 
         val avgReactionSec = duration.toDouble() / starsEarned.toDouble() / 1000.0 //w sekundach
+        val durationSec = duration.toDouble()/ 1000.0 //w sekundach
 
         //coerceAtLeast - upewnie sie ze liczba nie bedzie mniejsza niz dana wartość
         //przez to unikamy dzielenia przez 0 jezeli gra bedzie trwała krótko
@@ -462,19 +454,17 @@ open class BaseActivity : AppCompatActivity() {
 
             statsRef.get().addOnSuccessListener { snapshot ->
                 val globalAvg = snapshot.getValue(Double::class.java) ?: 0.0
-                Toast.makeText(
-                    this,
-                    "Średni czas reakcji (tej gry): %.2f s\nŚredni czas reakcji (globalny): %.2f s".format(avgReactionSec, globalAvg),
-                    Toast.LENGTH_SHORT
-                ).show()
+//                Toast.makeText(
+//                    this,
+//                    "Czas trwania gry: %.2f s\nŚredni czas reakcji (tej gry): %.2f s\nŚredni czas reakcji (globalny): %.2f s".format(durationSec, avgReactionSec, globalAvg),
+//                    Toast.LENGTH_SHORT
+//                ).show()
             }
         } else {
             // Dla niezalogowanego użytkownika pokazujemy tylko średni czas tej gry
-            Toast.makeText(
-                this,
-                "Średni czas reakcji (tej gry): %.2f s".format(avgReactionSec),
-                Toast.LENGTH_SHORT
-            ).show()
+//            Toast.makeText(
+//                this, "Średni czas reakcji (tej gry): %.2f s".format(avgReactionSec), Toast.LENGTH_SHORT
+//            ).show()
         }
 
         return avgReactionSec
@@ -496,7 +486,7 @@ open class BaseActivity : AppCompatActivity() {
 
     /**
      * Rejestruje próbę gracza
-     * @param isSuccessful - true jeśli była poprawna np trafienie pary
+     * @param isSuccessful - true jeśli była poprawna np. trafienie pary
      */
     protected fun registerAttempt(isSuccessful: Boolean){
         totalAttempts++

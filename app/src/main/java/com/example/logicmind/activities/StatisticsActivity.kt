@@ -184,8 +184,22 @@ class StatisticsActivity : BaseActivity() {
                         val data = snapshot.value as? Map<*, *>
 
                         if (data != null) {
-                            val reaction = (data["avgReactionTime"] as? Double) ?: -1.0
-                            val accuracy = (data["accuracy"] as? Double) ?: -1.0
+                            val reaction = when (val r = data["avgReactionTime"]) {
+                                is Double -> r
+                                is Long -> r.toDouble()
+                                is Int -> r.toDouble()
+                                is String -> r.toDoubleOrNull() ?: -1.0
+                                else -> -1.0
+                            }
+                            //sprawdzamy jak zapisywana jest accuracy i reaction żeby dobrze ja zmienic na Double
+                            val accuracy = when (val acc = data["accuracy"]) {
+                                is Double -> acc
+                                is Long -> acc.toDouble()
+                                is Int -> acc.toDouble()
+                                is String -> acc.toDoubleOrNull() ?: -1.0
+                                else -> -1.0
+                            }
+                            //Log.d("STATS_DEBUG", "accuracy=${data["accuracy"]} (${data["accuracy"]?.javaClass?.simpleName})")
                             val total = data["starsEarned"]?.toString() ?: messageIfEmpty
                             val best = data["bestStars"]?.toString() ?: messageIfEmpty
 
