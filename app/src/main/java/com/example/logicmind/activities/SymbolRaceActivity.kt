@@ -1,7 +1,9 @@
 package com.example.logicmind.activities
 
+import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -15,17 +17,15 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.graphics.toColorInt
 import com.example.logicmind.R
 import com.example.logicmind.common.GameCountdownManager
 import com.example.logicmind.common.GameTimerProgressBar
 import com.example.logicmind.common.PauseMenu
 import com.example.logicmind.common.StarManager
-import kotlin.random.Random
-import androidx.core.graphics.toColorInt
-import android.content.res.Configuration
-import androidx.constraintlayout.widget.ConstraintSet
 import java.io.Serializable
-import android.os.Build
+import kotlin.random.Random
 
 class SymbolRaceActivity : BaseActivity() {
 
@@ -140,6 +140,14 @@ class SymbolRaceActivity : BaseActivity() {
                 isGameEnding = true
                 Toast.makeText(this, "Czas minął!", Toast.LENGTH_LONG).show()
                 trackContainer.isEnabled = false
+                updateUserStatistics(
+                    categoryKey = GameKeys.CATEGORY_COORDINATION,
+                    gameKey = GameKeys.GAME_SYMBOL_RACE,
+                    starsEarned = starManager.starCount,
+                    accuracy = calculateAccuracy(),
+                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
+                )
+
                 lastPlayedGame(GameKeys.CATEGORY_COORDINATION, GameKeys.GAME_SYMBOL_RACE, getString(R.string.symbol_race))
                 finish()
             }
@@ -196,13 +204,24 @@ class SymbolRaceActivity : BaseActivity() {
                     updateTempoDisplay()
                     if (circleQueue.isNotEmpty()) startActiveTimer()
                 }
+                onGameResumed()
             },
             onPause = {
                 // Pauza zatrzymuje zegar
                 timerProgressBar.pause()
+                onGamePaused()
             },
             onExit = {
                 // Wyjście z gry
+
+                updateUserStatistics(
+                    categoryKey = GameKeys.CATEGORY_COORDINATION,
+                    gameKey = GameKeys.GAME_SYMBOL_RACE,
+                    starsEarned = starManager.starCount,
+                    accuracy = calculateAccuracy(),
+                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
+                )
+
                 lastPlayedGame(GameKeys.CATEGORY_COORDINATION, GameKeys.GAME_SYMBOL_RACE, getString(R.string.symbol_race))
                 finish()
             },
@@ -233,6 +252,7 @@ class SymbolRaceActivity : BaseActivity() {
             redContainer.visibility = View.INVISIBLE
             tempoInfoText.visibility = View.GONE
             countdownManager.startCountdown()
+            startReactionTracking()
         } else {
             // Jeśli gra była już aktywna – przywracamy stan
             restoreGameState(savedInstanceState)
@@ -721,6 +741,8 @@ class SymbolRaceActivity : BaseActivity() {
         checkComboBonus() // Sprawdza bonusy za serię
         accelerateIfNeeded() // Przyspiesza tempo
         updateTempoDisplay()
+
+        registerAttempt(true)
     }
 
     // Obsługuje błąd gracza
@@ -730,6 +752,8 @@ class SymbolRaceActivity : BaseActivity() {
         totalMoves++
         accelerateIfNeeded()
         updateTempoDisplay()
+
+        registerAttempt(false)
     }
 
     // Sprawdza, czy osiągnięto próg combo i przyznaje bonus
