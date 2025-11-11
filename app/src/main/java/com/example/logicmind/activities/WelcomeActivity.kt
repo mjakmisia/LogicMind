@@ -167,7 +167,9 @@ class WelcomeActivity : BaseActivity() {
                             "avgReactionTime" to 0.0,
                             "avgAccuracy" to 0.0,
                             "totalStars" to 0,
-                            "gamesPlayed" to 0
+                            "gamesPlayed" to 0,
+                            "sumAccuracy" to 0.0,
+                            "sumReactionTime" to 0.0
                         )
                     )
 
@@ -228,7 +230,9 @@ class WelcomeActivity : BaseActivity() {
                     "accuracy" to 0.0,
                     "starsEarned" to 0,
                     "lastPlayed" to null,
-                    "gamesPlayed" to 0
+                    "gamesPlayed" to 0,
+                    "sumAccuracy" to 0.0,
+                    "sumReactionTime" to 0.0,
                 )
                 catRef.child("games").child(game).setValue(gameData)
             }

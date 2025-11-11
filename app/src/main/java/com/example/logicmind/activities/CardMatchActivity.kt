@@ -428,8 +428,6 @@ class CardMatchActivity : BaseActivity() {
 
     // Obsługuje kliknięcie karty
     private fun onCardClick(card: Card) {
-        //rejestrujemy kliki użytkownika
-        registerPlayerAction()
 
         if (pauseMenu.isPaused || isPreviewPhase) return // Ignoruj kliknięcia, gdy gra jest w trybie preview lub pauzy
         if (isFlipping || card.isFlipped || card.isMatched || !gridLayout.isEnabled) return // Ignoruj, jeśli karta jest zablokowana

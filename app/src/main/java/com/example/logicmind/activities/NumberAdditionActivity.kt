@@ -1,5 +1,6 @@
 package com.example.logicmind.activities
 
+import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
@@ -9,6 +10,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.gridlayout.widget.GridLayout
 import com.example.logicmind.R
 import com.example.logicmind.common.GameCountdownManager
@@ -17,9 +20,6 @@ import com.example.logicmind.common.PauseMenu
 import com.example.logicmind.common.StarManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.shape.CornerFamily
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
-import android.content.res.Configuration
 
 class NumberAdditionActivity : BaseActivity() {
 
@@ -63,6 +63,13 @@ class NumberAdditionActivity : BaseActivity() {
                 Toast.makeText(this, "Czas minął! Koniec gry!", Toast.LENGTH_LONG).show()
                 numberGrid.isEnabled = false
                 pauseOverlay.visibility = View.GONE
+                updateUserStatistics(
+                    categoryKey = GameKeys.CATEGORY_REASONING,
+                    gameKey = GameKeys.GAME_NUMBER_ADDITION,
+                    starsEarned = starManager.starCount,
+                    accuracy = calculateAccuracy(),
+                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
+                )
                 lastPlayedGame(GameKeys.CATEGORY_REASONING, GameKeys.GAME_NUMBER_ADDITION, getString(R.string.number_addition))
                 finish()
             }
@@ -86,6 +93,8 @@ class NumberAdditionActivity : BaseActivity() {
                 targetNumberText.visibility = View.VISIBLE
                 numberGrid.visibility = View.VISIBLE
                 isGameActive = true
+
+                startReactionTracking()
                 startLevel()
             }
         )
@@ -117,12 +126,21 @@ class NumberAdditionActivity : BaseActivity() {
                 countdownManager.startCountdown() // Rozpoczyna odliczanie początkowe
             },
             onResume = {
+                onGameResumed()
                 timerProgressBar.start()
             },
             onPause = {
+                onGamePaused()
                 timerProgressBar.pause()
             },
             onExit = {
+                updateUserStatistics(
+                    categoryKey = GameKeys.CATEGORY_REASONING,
+                    gameKey = GameKeys.GAME_NUMBER_ADDITION,
+                    starsEarned = starManager.starCount,
+                    accuracy = calculateAccuracy(),
+                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
+                )
                 lastPlayedGame(GameKeys.CATEGORY_REASONING, GameKeys.GAME_NUMBER_ADDITION, getString(R.string.number_addition))
                 finish() },
             instructionTitle = getString(R.string.instructions),
@@ -379,6 +397,8 @@ class NumberAdditionActivity : BaseActivity() {
                     btn.setBackgroundColor(Color.LTGRAY)
                     btn.setOnClickListener(null)
                 }
+                //poprawna próba
+                registerAttempt(true)
                 starManager.increment()
                 selectedButtons.clear()
 
@@ -387,6 +407,7 @@ class NumberAdditionActivity : BaseActivity() {
                     return
                 }
             } else {
+                registerAttempt(false)
                 selectedButtons.forEach { btn -> btn.setBackgroundColor(Color.RED) }
                 isShowingError = true
                 runDelayed {
@@ -441,6 +462,13 @@ class NumberAdditionActivity : BaseActivity() {
         Toast.makeText(this, "Koniec gry!", Toast.LENGTH_LONG).show()
         numberGrid.isEnabled = false
         pauseOverlay.visibility = View.GONE
+        updateUserStatistics(
+            categoryKey = GameKeys.CATEGORY_REASONING,
+            gameKey = GameKeys.GAME_NUMBER_ADDITION,
+            starsEarned = starManager.starCount,
+            accuracy = calculateAccuracy(),
+            reactionTime = getAverageReactionTime(stars = starManager.starCount),
+        )
         lastPlayedGame(GameKeys.CATEGORY_REASONING, GameKeys.GAME_NUMBER_ADDITION, getString(R.string.number_addition))
         finish()
     }
