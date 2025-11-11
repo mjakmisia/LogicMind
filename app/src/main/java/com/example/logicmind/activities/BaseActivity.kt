@@ -6,7 +6,6 @@ import android.content.res.Configuration
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -441,7 +440,6 @@ open class BaseActivity : AppCompatActivity() {
         val starsEarned = stars.coerceAtLeast(1)
 
         val avgReactionSec = duration.toDouble() / starsEarned.toDouble() / 1000.0 //w sekundach
-        val durationSec = duration.toDouble()/ 1000.0 //w sekundach
 
         //coerceAtLeast - upewnie sie ze liczba nie bedzie mniejsza niz dana wartość
         //przez to unikamy dzielenia przez 0 jezeli gra bedzie trwała krótko
@@ -453,7 +451,7 @@ open class BaseActivity : AppCompatActivity() {
             val statsRef = db.getReference("users").child(userId).child("statistics").child("avgReactionTime")
 
             statsRef.get().addOnSuccessListener { snapshot ->
-                val globalAvg = snapshot.getValue(Double::class.java) ?: 0.0
+                //val globalAvg = snapshot.getValue(Double::class.java) ?: 0.0
 //                Toast.makeText(
 //                    this,
 //                    "Czas trwania gry: %.2f s\nŚredni czas reakcji (tej gry): %.2f s\nŚredni czas reakcji (globalny): %.2f s".format(durationSec, avgReactionSec, globalAvg),
