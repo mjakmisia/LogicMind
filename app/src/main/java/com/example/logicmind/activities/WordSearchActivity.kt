@@ -294,6 +294,31 @@ class WordSearchActivity : BaseActivity() {
         setupTouchListener()
     }
 
+    // Zwraca ustawienia dla danego poziomu
+    private fun getLevelSettings(level: Int): Pair<Int, Int> {
+        return when (level) {
+            1 -> Pair(5, 4)
+            2 -> Pair(5, 5)
+            3 -> Pair(6, 4)
+            4 -> Pair(6, 5)
+            5 -> Pair(6, 6)
+            6 -> Pair(7, 5)
+            7 -> Pair(7, 6)
+            8 -> Pair(7, 7)
+            9 -> Pair(8, 6)
+            10 -> Pair(8, 7)
+            11 -> Pair(8, 8)
+            12 -> Pair(8, 9)
+            13 -> Pair(9, 7)
+            14 -> Pair(9, 8)
+            15 -> Pair(9, 9)
+            16 -> Pair(10, 8)
+            17 -> Pair(10, 9)
+            18 -> Pair(10, 10)
+            else -> Pair(10, 10)
+        }
+    }
+
     private fun startNewGame() {
         // Wyczyść stany
         currentBoard = null
@@ -310,9 +335,8 @@ class WordSearchActivity : BaseActivity() {
         availableColors.clear()
         availableColors.addAll(pastelColors.shuffled())
 
-        // Ustawienia poziomu
-        val boardSize = 5
-        val wordCount = 4
+        // Ustawienia poziomu pobierane dynamicznie
+        val (boardSize, wordCount) = getLevelSettings(currentLevel)
         val lang = Locale.getDefault().language.take(2)
 
         // Generuj planszę
@@ -512,6 +536,8 @@ class WordSearchActivity : BaseActivity() {
             // Znaleziono słowo
             foundWords.add(wordToFind)
 
+            starManager.increment()
+
             val startCoords = currentSelectionCoords.first()
             val endCoords = currentSelectionCoords.last()
             val startPixels = getCellCenter(startCoords.first, startCoords.second)
@@ -539,10 +565,16 @@ class WordSearchActivity : BaseActivity() {
             // Zaktualizuj listę słów (przekreślenie)
             updateFoundWordsUi()
 
-            // Sprawdź warunek zwycięstwa - TYMCZASOWE
+            // Sprawdź warunek ukończenia poziomu
             if (foundWords.size == wordsToFind.size) {
-                timerProgressBar.pause()
-                Toast.makeText(this, "Wszystkie słowa znalezione!", Toast.LENGTH_LONG).show()
+
+                timerProgressBar.addTime(15)
+
+                currentLevel++
+
+                Toast.makeText(this, "+15 sekund! Poziom $currentLevel", Toast.LENGTH_SHORT).show()
+
+                startNewGame()
             }
         }
     }
