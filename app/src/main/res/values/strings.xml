@@ -94,8 +94,8 @@
     <string name="best_streak_text">%1$d dni</string>
     <string name="error_fetching_user_data">Błąd pobierania danych użytkownika</string>
     <string name="zero_days">0 dni</string>
-
-
+    <string name="reset_progress_message">Czy na pewno chcesz zresetować wszystkie postępy? Tej operacji nie można cofnąć.</string>
+    <string name="reset_progress_title">Reset postępów</string>
 
 
     <!-- OPISY GIER DO INTRO -->

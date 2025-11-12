@@ -94,9 +94,8 @@
     <string name="best_streak_text">%1$d days</string>
     <string name="error_fetching_user_data">Error fetching user data</string>
     <string name="zero_days">0 days</string>
-
-
-
+    <string name="reset_progress_message">Are you sure you want to reset all your progress? This action cannot be undone.</string>
+    <string name="reset_progress_title">Reset Progress</string>
 
 
     <!-- GAME INTRO DESCRIPTIONS -->

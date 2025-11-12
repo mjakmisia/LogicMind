@@ -83,7 +83,10 @@ class ProfileActivity : BaseActivity() {
             loadUserData((user!!.uid))
 
         }
-        //val btnDeleteAccount = findViewById<Button>(R.id.buttonDeleteAccount)
+        binding.buttonResetProgress.setOnClickListener {
+            resetUserProgress()
+        }
+
 
         // Ustawienie koloru przycisku programowo
         val btnDeleteAccount = binding.buttonDeleteAccount
@@ -240,4 +243,77 @@ class ProfileActivity : BaseActivity() {
 
         }
     }
+
+    private fun resetUserProgress() {
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user == null) {
+            Toast.makeText(this, "Brak zalogowanego użytkownika", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val uid = user.uid
+        val userRef = db.getReference("users").child(uid)
+
+        AlertDialog.Builder(this)
+            .setTitle(R.string.reset_progress_title)
+            .setMessage(getString(R.string.reset_progress_message))
+            .setPositiveButton("Tak") { _, _ ->
+                // Pobranie całego węzła użytkownika w celu przygotowania mapy resetu
+                userRef.get().addOnSuccessListener { snapshot ->
+                    if (!snapshot.exists()) return@addOnSuccessListener
+
+                    val updates = mutableMapOf<String, Any>()
+
+                    // Reset głównych danych
+                    updates["streak"] = 0
+                    updates["bestStreak"] = 0
+                    updates["statistics/totalStars"] = 0
+                    updates["statistics/gamesPlayed"] = 0
+                    updates["statistics/avgAccuracy"] = 0.0
+                    updates["statistics/avgReactionTime"] = 0.0
+                    updates["statistics/sumAccuracy"] = 0.0
+                    updates["statistics/sumReactionTime"] = 0.0
+
+                    // Reset wszystkich gier w każdej kategorii
+                    val categoriesSnap = snapshot.child("categories")
+                    categoriesSnap.children.forEach { categorySnap ->
+                        val categoryKey = categorySnap.key ?: return@forEach
+                        val gamesSnap = categorySnap.child("games")
+                        gamesSnap.children.forEach { gameSnap ->
+                            val gameKey = gameSnap.key ?: return@forEach
+                            val basePath = "categories/$categoryKey/games/$gameKey"
+                            updates["$basePath/bestStars"] = 0
+                            updates["$basePath/starsEarned"] = 0
+                            updates["$basePath/gamesPlayed"] = 0
+                            updates["$basePath/accuracy"] = 0.0
+                            updates["$basePath/avgReactionTime"] = 0.0
+                            updates["$basePath/sumAccuracy"] = 0.0
+                            updates["$basePath/sumReactionTime"] = 0.0
+                            updates["$basePath/lastPlayed"] = 0L
+                        }
+                    }
+
+                    // Wysyłamy wszystkie zmiany w jednym updateChildren
+                    userRef.updateChildren(updates)
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "Postępy zostały zresetowane", Toast.LENGTH_SHORT)
+                                .show()
+                            loadUserData(uid) // odśwież UI
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(
+                                this,
+                                "Błąd resetowania danych: ${e.message}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                }.addOnFailureListener { e ->
+                    Toast.makeText(this, "Błąd pobierania danych: ${e.message}", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
+            .setNegativeButton("Nie", null)
+            .show()
+    }
+
 }
