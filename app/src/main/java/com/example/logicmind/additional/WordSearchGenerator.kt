@@ -1,6 +1,6 @@
 package com.example.logicmind.additional
 
-import android.util.Log
+import java.util.Locale
 
 object WordSearchGenerator {
 
@@ -14,59 +14,57 @@ object WordSearchGenerator {
     // Klasa do przechowywania wyniku
     data class Board(
         val size: Int,
-        val grid: List<List<Char>>, // Gotowa siatka 2D z literami
-        val placedWords: List<String> // Słowa które umieszczono
+        val grid: List<List<Char>>,
+        val placedWords: List<String>
     )
 
-    fun generate(size: Int, words: List<String>): Board? {
+    //Tworzy planszę
+    fun generate(size: Int, words: List<String>, lang: String): Board? {
         var attempts = 0
-        while (attempts < 10) { // Próbuj wygenerować planszę max 10 razy
+        while (attempts < 10) {
             val grid: Array<Array<Char?>> = Array(size) { Array(size) { null } }
             val placedWords = mutableListOf<String>()
 
             var allWordsPlaced = true
-            for (word in words.shuffled()) { // Tasujemy, by kolejność była różna
+            // Spróbuj umieścić każde słowo
+            for (word in words.shuffled()) {
                 if (!tryPlaceWord(grid, word, size)) {
                     allWordsPlaced = false
-                    break // Nie udało się umieścić słowa, przerwij i spróbuj od nowa
+                    break // nie udało się - zacznij od nowa
                 }
                 placedWords.add(word)
             }
 
             if (allWordsPlaced) {
-                // Wypełnij puste pola i zwróć planszę
-                val finalGrid = fillEmptyCells(grid, size)
+                // Wszystkie słowa na miejscu, wypełnij puste pola
+                val finalGrid = fillEmptyCells(grid, size, lang)
                 return Board(size, finalGrid, placedWords)
             }
             attempts++
         }
 
-        Log.e("WordSearchGenerator", "Nie udało się wygenerować planszy po $attempts próbach.")
-        return null // Nie udało się
+        return null
     }
 
+    // Próbuje znaleźć losowe, pasujące miejsce dla słowa
     private fun tryPlaceWord(grid: Array<Array<Char?>>, word: String, size: Int): Boolean {
-
         val positions = (0 until size * size).toList().shuffled()
-
         for (pos in positions) {
             val startRow = pos / size
             val startCol = pos % size
-
-            // Teraz dla każdej nowej pozycji losujemy nową kolejność kierunków
             val directions = Direction.entries.shuffled()
-
             for (dir in directions) {
+                // Sprawdza czy dane miejsce pasuje
                 if (canPlace(grid, word, size, startRow, startCol, dir)) {
                     place(grid, word, startRow, startCol, dir)
-                    return true // Słowo umieszczone pomyślnie
+                    return true
                 }
             }
         }
-        return false // Nie znaleziono miejsca dla tego słowa
+        return false
     }
 
-    // Sprawdza, czy słowo zmieści się i nie koliduje
+    // Sprawdza czy słowo zmieści się w danym miejscu
     private fun canPlace(
         grid: Array<Array<Char?>>,
         word: String,
@@ -84,16 +82,16 @@ object WordSearchGenerator {
                 return false
             }
 
-            // Sprawdzenie kolizji
+            // Sprawdzenie kolizji - dopuszczalne jeśli litery się zgadzają
             val existingChar = grid[row][col]
             if (existingChar != null && existingChar != word[i]) {
                 return false
             }
         }
-        return true // Miejsce jest dobre
+        return true
     }
 
-    // Fizycznie umieszcza słowo na siatce
+    // Umieszcza litery słowa na siatce
     private fun place(
         grid: Array<Array<Char?>>,
         word: String,
@@ -108,11 +106,22 @@ object WordSearchGenerator {
         }
     }
 
-    // Wypełnia puste komórki losowymi literami A-Z
-    private fun fillEmptyCells(grid: Array<Array<Char?>>, size: Int): List<List<Char>> {
+    // Wypełnia puste pola losowymi literami
+    private fun fillEmptyCells(grid: Array<Array<Char?>>, size: Int, lang: String): List<List<Char>> {
+
+        val alphabetEN = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        val alphabetPL = "ABCDEFGHIJKLMNOPQRSTUVWXYZĄĆĘŁŃÓŚŹŻ"
+
+        val alphabetChars = if (lang.lowercase(Locale.ROOT) == "pl") {
+            alphabetPL.toList()
+        } else {
+            alphabetEN.toList()
+        }
+
         return List(size) { row ->
             List(size) { col ->
-                grid[row][col] ?: ('A'..'Z').random()
+                // Losuje literę z wybranego alfabetu
+                grid[row][col] ?: alphabetChars.random()
             }
         }
     }
