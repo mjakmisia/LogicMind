@@ -50,7 +50,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
-    implementation(libs.material)
 
     //implementation(libs.google.firebase.auth.ktx)
     testImplementation(libs.junit)

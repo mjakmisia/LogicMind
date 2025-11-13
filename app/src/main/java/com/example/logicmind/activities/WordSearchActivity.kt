@@ -6,10 +6,11 @@ import android.view.Gravity
 import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import android.graphics.PointF
+import android.content.res.Configuration
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.gridlayout.widget.GridLayout
 import androidx.core.graphics.toColorInt
@@ -36,7 +37,8 @@ class WordSearchActivity : BaseActivity() {
     private lateinit var overlayView: SelectionOverlayView
     private var isGameEnding = false
     private var currentLevel = 1
-    private lateinit var wordsToFindLayout: LinearLayout // Kontener na słowa
+    private lateinit var rootLayout: ConstraintLayout // Layout do którego dynamicznie dodajemy widoki słów
+    private val wordViews = mutableListOf<TextView>() // Lista przechowująca widoki słów (dla Flow)
     private var currentBoard: WordSearchGenerator.Board? = null // Logika planszy
     private var wordsToFind: List<String> = emptyList() // Słowa do znalezienia w danej rundzie
     private val foundWords = mutableSetOf<String>() // Słowa już znalezione
@@ -49,7 +51,7 @@ class WordSearchActivity : BaseActivity() {
         val color: Int
     )
 
-    private val permanentLinesList = mutableListOf<PermanentLineData>()
+    private val permanentLinesList = mutableListOf<PermanentLineData>() // Lista narysowanych linii
 
     // Zmienne do zarządzania kolorami
     private val pastelColors = listOf(
@@ -58,7 +60,7 @@ class WordSearchActivity : BaseActivity() {
         "#A8B1DD".toColorInt(), "#FFDAB9".toColorInt(),
         "#E6E6FA".toColorInt(), "#DDA0DD".toColorInt()
     )
-    private val availableColors = mutableListOf<Int>()
+    private val availableColors = mutableListOf<Int>() // Kolory nieużyte w danej rundzie
     private val assignedWordColors = mutableMapOf<String, Int>() // Mapa: słowo -> kolor
 
     // Zmienne stanu dotyku
@@ -82,9 +84,25 @@ class WordSearchActivity : BaseActivity() {
         pauseButton = findViewById(R.id.pauseButton)
         pauseOverlay = findViewById(R.id.pauseOverlay)
         timerProgressBar = findViewById(R.id.gameTimerProgressBar)
-        wordsToFindLayout = findViewById(R.id.wordsToFindLayout)
+        rootLayout = findViewById(R.id.rootLayout)
         starManager = StarManager()
         starManager.init(findViewById(R.id.starCountText))
+
+        // Dynamiczne dostosowanie layoutu do orientacji ekranu
+        val flow = findViewById<androidx.constraintlayout.helper.widget.Flow>(R.id.wordsToFindFlow)
+        val orientation = resources.configuration.orientation
+        val gridContainer = findViewById<android.widget.FrameLayout>(R.id.gridContainer)
+        val params = gridContainer.layoutParams as ConstraintLayout.LayoutParams
+
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            // PION - max 2 słowa w rzędzie + grid przymocowany do timera
+            flow.setMaxElementsWrap(2)
+            params.topToBottom = R.id.gameTimerProgressBar
+        } else {
+            // POZIOM - max 6 słów w rzędzie + grid przymocowany do paska słów
+            flow.setMaxElementsWrap(6)
+            params.topToBottom = R.id.wordsToFindFlow
+        }
 
         // Inicjalizacja paska czasu
         timerProgressBar.setTotalTime(BASE_TIME_SECONDS)
@@ -107,7 +125,7 @@ class WordSearchActivity : BaseActivity() {
                 findViewById<TextView>(R.id.starCountText),
                 findViewById<ImageView>(R.id.starIcon),
                 timerProgressBar,
-                wordsToFindLayout,
+                findViewById<androidx.constraintlayout.helper.widget.Flow>(R.id.wordsToFindFlow),
                 overlayView
             ),
             onCountdownFinished = {
@@ -326,7 +344,6 @@ class WordSearchActivity : BaseActivity() {
         foundWords.clear()
         letterViews.clear()
         gridLayout.removeAllViews()
-        wordsToFindLayout.removeAllViews()
 
         // Wyczyść nakładkę i kolory
         overlayView.clearAllLines()
@@ -359,19 +376,33 @@ class WordSearchActivity : BaseActivity() {
         setupTouchListener()
     }
 
-    // Wypełnie tekstu nad planszą ze słowami
+    // Wypełnia listę słów do znalezienia na ekranie
     private fun populateWordListUi() {
-        wordsToFindLayout.removeAllViews()
+        // Usuń stare widoki słów
+        wordViews.forEach { rootLayout.removeView(it) }
+        wordViews.clear()
+
+        // Pobierz referencję do Flow (automatyczne ułożenie widoków)
+        val flow = findViewById<androidx.constraintlayout.helper.widget.Flow>(R.id.wordsToFindFlow)
+
+        // Utwórz nowy widok TextView dla każdego słowa do znalezienia
         wordsToFind.forEach { word ->
             val textView = TextView(this).apply {
+                id = View.generateViewId() // unikalne ID do śledzenia widoku
                 text = word
                 textSize = 16f
                 setTextColor(Color.WHITE)
-                setPadding(16, 8, 16, 8)
+                setPadding(20, 10, 20, 10)
+                background = AppCompatResources.getDrawable(context, R.drawable.bg_word_chip)
                 tag = word
             }
-            wordsToFindLayout.addView(textView)
+            // Dodaj widok do głównego layoutu i listy śledzącej
+            rootLayout.addView(textView)
+            wordViews.add(textView)
         }
+
+        // Przekaż do Flow listę ID widoków
+        flow.referencedIds = wordViews.map { it.id }.toIntArray()
     }
 
     // Wypełnia GridLayout z literami
@@ -420,15 +451,12 @@ class WordSearchActivity : BaseActivity() {
 
     // Aktualizuje UI, przekreślając znalezione słowa
     private fun updateFoundWordsUi() {
-        for (i in 0 until wordsToFindLayout.childCount) {
-            val view = wordsToFindLayout.getChildAt(i)
-            if (view is TextView) {
-                val word = view.tag as? String
-                if (word != null && word in foundWords) {
-                    // Zastosuj przekreślenie
-                    view.paintFlags = view.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-                    view.setTextColor(Color.GRAY)
-                }
+        wordViews.forEach { view ->
+            val word = view.tag as? String
+            if (word != null && word in foundWords) {
+                // Zastosuj przekreślenie
+                view.paintFlags = view.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+                view.setTextColor(Color.GRAY)
             }
         }
     }
@@ -568,11 +596,11 @@ class WordSearchActivity : BaseActivity() {
             // Sprawdź warunek ukończenia poziomu
             if (foundWords.size == wordsToFind.size) {
 
-                timerProgressBar.addTime(15)
+                timerProgressBar.addTime(20)
 
                 currentLevel++
 
-                Toast.makeText(this, "+15 sekund! Poziom $currentLevel", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "+20 sekund! Poziom $currentLevel", Toast.LENGTH_SHORT).show()
 
                 startNewGame()
             }
