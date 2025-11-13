@@ -146,6 +146,20 @@ class PathChangeActivity : BaseActivity() {
                 Toast.makeText(this, "Czas minął! Koniec gry!", Toast.LENGTH_LONG).show()
                 gridLayout.isEnabled = false
                 pauseOverlay.visibility = View.GONE
+                updateUserStatistics(
+                    categoryKey = GameKeys.CATEGORY_REASONING,
+                    gameKey = GameKeys.GAME_PATH_CHANGE,
+                    starsEarned = starManager.starCount,
+                    accuracy = calculateAccuracy(),
+                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
+                )
+
+                lastPlayedGame(
+                    GameKeys.CATEGORY_REASONING,
+                    GameKeys.GAME_PATH_CHANGE,
+                    getString(R.string.card_match)
+                )
+
                 finish()
             }
         }
@@ -192,6 +206,7 @@ class PathChangeActivity : BaseActivity() {
                     startSpawningBalls()
                     resumeAllBalls()
                 }
+                onGameResumed()
             },
             onPause = {
                 if (isGameRunning) {
@@ -199,8 +214,23 @@ class PathChangeActivity : BaseActivity() {
                     stopSpawningBalls()
                     pauseAllBalls()
                 }
+                onGamePaused()
             },
             onExit = {
+                updateUserStatistics(
+                    categoryKey = GameKeys.CATEGORY_REASONING,
+                    gameKey = GameKeys.GAME_PATH_CHANGE,
+                    starsEarned = starManager.starCount,
+                    accuracy = calculateAccuracy(),
+                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
+                )
+
+                lastPlayedGame(
+                    GameKeys.CATEGORY_REASONING,
+                    GameKeys.GAME_PATH_CHANGE,
+                    getString(R.string.card_match)
+                )
+
                 finish()
             },
             instructionTitle = getString(R.string.instructions),
@@ -210,6 +240,8 @@ class PathChangeActivity : BaseActivity() {
         // Sprawdzenie, czy gra jest uruchamiana po raz pierwszy
         if (savedInstanceState == null) {
             countdownManager.startCountdown()
+
+            startReactionTracking()
         } else {
             restoreGameState(savedInstanceState)
         }
@@ -645,11 +677,15 @@ class PathChangeActivity : BaseActivity() {
             starManager.increment()
             successfulStreak++
             checkComboBonus() // Sprawdź, czy należy się bonus
+
+            registerAttempt(true)
         } else {
             // BŁĄD
             successfulStreak = 0 // Zeruj serię
             timerProgressBar.subtractTime(PENALTY_TIME_SECONDS)
             Toast.makeText(this, String.format(Locale.US, "-%ds!", PENALTY_TIME_SECONDS), Toast.LENGTH_SHORT).show()
+
+            registerAttempt(false)
         }
 
         // Zawsze aktualizuj wyświetlacz serii

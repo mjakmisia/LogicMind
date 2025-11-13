@@ -82,9 +82,6 @@ class CardMatchActivity : BaseActivity() {
         starManager.init(findViewById(R.id.starCountText))
 
 
-        //TODO: Usuń po implementacji funkcji które to rzeczywiście liczą
-        val avgAccuracy = 0.5
-
         // Inicjalizacja paska czasu
         timerProgressBar.setTotalTime(90) // Ustaw czas na 1,5 minuty
         timerProgressBar.setOnFinishCallback {
@@ -168,10 +165,6 @@ class CardMatchActivity : BaseActivity() {
             countdownManager.startCountdown() // Rozpoczyna odliczanie początkowe
 
             startReactionTracking()
-            //zaczynamy liczyć średni czas reakcji z 4s opoznieniem (na odliczanie 3, 2, 1 start)
-//            Handler(Looper.getMainLooper()).postDelayed({
-//                startReactionTracking()
-//            }, 4000)
         } else {
             restoreGameState(savedInstanceState) // Przywraca stan gry
         }
@@ -435,8 +428,6 @@ class CardMatchActivity : BaseActivity() {
 
     // Obsługuje kliknięcie karty
     private fun onCardClick(card: Card) {
-        //rejestrujemy kliki użytkownika
-        registerPlayerAction()
 
         if (pauseMenu.isPaused || isPreviewPhase) return // Ignoruj kliknięcia, gdy gra jest w trybie preview lub pauzy
         if (isFlipping || card.isFlipped || card.isMatched || !gridLayout.isEnabled) return // Ignoruj, jeśli karta jest zablokowana

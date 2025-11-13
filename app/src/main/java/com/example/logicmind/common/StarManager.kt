@@ -43,7 +43,4 @@ class StarManager {
         updateUI()
     }
 
-    fun getCurrentStarCount(): Int{
-        return starCount
-    }
 }

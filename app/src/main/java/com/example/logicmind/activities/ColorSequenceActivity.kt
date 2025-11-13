@@ -18,8 +18,8 @@ import com.example.logicmind.R
 import com.example.logicmind.common.GameCountdownManager
 import com.example.logicmind.common.GameTimerProgressBar
 import com.example.logicmind.common.PauseMenu
-import com.example.logicmind.common.StarManager
 import com.example.logicmind.common.SoundManager
+import com.example.logicmind.common.StarManager
 import kotlin.random.Random
 
 class ColorSequenceActivity : BaseActivity() {
@@ -103,6 +103,13 @@ class ColorSequenceActivity : BaseActivity() {
                 gridLayout.isEnabled = false
                 keyButtons.forEach { it.view.isEnabled = false }
                 pauseOverlay.visibility = View.GONE
+                updateUserStatistics(
+                    categoryKey = GameKeys.CATEGORY_MEMORY,
+                    gameKey = GameKeys.GAME_COLOR_SEQUENCE,
+                    starsEarned = starManager.starCount,
+                    accuracy = calculateAccuracy(),
+                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
+                )
                 lastPlayedGame(GameKeys.CATEGORY_MEMORY, GameKeys.GAME_COLOR_SEQUENCE, getString(R.string.color_sequence))
                 finish()
             }
@@ -137,6 +144,7 @@ class ColorSequenceActivity : BaseActivity() {
                 countdownManager.startCountdown() // Rozpoczyna odliczanie początkowe
             },
             onResume = {
+                onGameResumed()
                 if (!isShowingSequence && !isUserTurn) {
                     timerProgressBar.start()
                 }
@@ -146,6 +154,7 @@ class ColorSequenceActivity : BaseActivity() {
                 }
             }, // Wznawia timer po pauzie
             onPause = {
+                onGamePaused()
                 if (!isShowingSequence) {
                     timerProgressBar.pause()
                 }
@@ -153,6 +162,13 @@ class ColorSequenceActivity : BaseActivity() {
                 keyButtons.forEach { it.view.isEnabled = false }
             }, // Zatrzymuje timer podczas pauzy
             onExit = {
+                updateUserStatistics(
+                    categoryKey = GameKeys.CATEGORY_MEMORY,
+                    gameKey = GameKeys.GAME_COLOR_SEQUENCE,
+                    starsEarned = starManager.starCount,
+                    accuracy = calculateAccuracy(),
+                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
+                )
                 lastPlayedGame(GameKeys.CATEGORY_MEMORY, GameKeys.GAME_COLOR_SEQUENCE, getString(R.string.color_sequence))
                 finish() },
             instructionTitle = getString(R.string.instructions),
@@ -162,6 +178,7 @@ class ColorSequenceActivity : BaseActivity() {
         // Sprawdzenie, czy gra jest uruchamiana po raz pierwszy
         if (savedInstanceState == null) {
             countdownManager.startCountdown() // Rozpoczyna odliczanie początkowe
+            startReactionTracking()
         } else {
             restoreGameState(savedInstanceState) // Przywraca stan gry
         }
@@ -433,6 +450,10 @@ class ColorSequenceActivity : BaseActivity() {
         isShowingSequence = true
         gridLayout.isEnabled = false
         keyButtons.forEach { it.view.isEnabled = false }
+
+        //zatrzymaj czas reakcji gdy jest pokazywana sekwencja
+        onGamePaused()
+
         timerProgressBar.pause()
         sequenceShowIndex = 0
         playSequenceStep()
@@ -465,6 +486,10 @@ class ColorSequenceActivity : BaseActivity() {
         keyButtons.forEach { it.view.isEnabled = true }
         isUserTurn = true
         userSequence.clear()
+
+        //wznawia czar reakcji gdy sie konczy sekwencja
+        onGameResumed()
+
         timerProgressBar.start()
     }
 
@@ -476,11 +501,14 @@ class ColorSequenceActivity : BaseActivity() {
         highlightKey(keyIndex, true)
         runDelayed(200L) { highlightKey(keyIndex, false) }
 
+        registerAttempt(true)
+
         userSequence.add(keyIndex)
 
         // Sprawdź błąd (po każdym kliknięciu)
         if (userSequence.size > currentSequence.size ||
             userSequence[userSequence.size - 1] != currentSequence[userSequence.size - 1]) {
+            registerAttempt(false)
             checkUserSequence()
             return
         }

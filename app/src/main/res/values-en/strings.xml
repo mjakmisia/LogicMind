@@ -88,6 +88,14 @@
     <string name="tempo_display">%1$s  %2$.1f s</string>
     <string name="blue_container">Blue touch zone</string>
     <string name="red_container">Red touch zone</string>
+    <string name="last_played_game">Last played game: %1$s (%2$s)</string>
+    <string name="last_played_game_none">Ostatnio zagrana gra: none</string>
+    <string name="current_streak_text">%1$d days</string>
+    <string name="best_streak_text">%1$d days</string>
+    <string name="error_fetching_user_data">Error fetching user data</string>
+    <string name="zero_days">0 days</string>
+    <string name="reset_progress_message">Are you sure you want to reset all your progress? This action cannot be undone.</string>
+    <string name="reset_progress_title">Reset Progress</string>
 
 
     <!-- GAME INTRO DESCRIPTIONS -->

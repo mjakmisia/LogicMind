@@ -6,7 +6,6 @@ import android.content.res.Configuration
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -43,7 +42,7 @@ open class BaseActivity : AppCompatActivity() {
         val lang = sharedPrefs.getString("My_Lang", "pl") ?: "pl"
 
         //obiekt Locale dla wybranego języka
-        val locale = Locale(lang)
+        val locale = Locale.forLanguageTag(lang)
         Locale.setDefault(locale)
 
         //modyfikacja konfiguracji kontekstu tak, aby używała wybranego języka
@@ -66,8 +65,7 @@ open class BaseActivity : AppCompatActivity() {
         // Ukrywamy paski systemowe
         val insetsController = WindowInsetsControllerCompat(window, window.decorView)
         insetsController.hide(
-            androidx.core.view.WindowInsetsCompat.Type.statusBars() or
-                    androidx.core.view.WindowInsetsCompat.Type.navigationBars()
+            androidx.core.view.WindowInsetsCompat.Type.statusBars() or androidx.core.view.WindowInsetsCompat.Type.navigationBars()
         )
         insetsController.systemBarsBehavior =
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
@@ -83,10 +81,6 @@ open class BaseActivity : AppCompatActivity() {
      * Metoda do ustawiania menu na dole
      */
     protected fun setupBottomNavigation(bottomNav: BottomNavigationView, selectedItemId: Int) {
-        if (bottomNav == null) {
-            Log.e("NAV_DEBUG", "BottomNavigationView is null")
-            return
-        }
         bottomNav.selectedItemId = selectedItemId
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -148,10 +142,7 @@ open class BaseActivity : AppCompatActivity() {
      * Unit - odpowiednik void w Kotlinie, ? - opcjonalna funkcja
      */
     protected fun lastPlayedGame(
-        categoryKey: String,
-        gameKey: String,
-        displayName: String,
-        onSuccess: (() -> Unit)? = null
+        categoryKey: String, gameKey: String, onSuccess: String? = null
     ) {
         if (!isUserLoggedIn()) return
         val user = auth.currentUser!!
@@ -163,14 +154,13 @@ open class BaseActivity : AppCompatActivity() {
 
         val timestamp = System.currentTimeMillis()
 
-        dbRef.child("lastPlayed").setValue(timestamp)
-            .addOnSuccessListener {
+        dbRef.child("lastPlayed").setValue(timestamp).addOnSuccessListener {
                 Log.d("GAME_DEBUG", "Zaktualizowano lastPlayed dla $gameKey")
-                onSuccess?.invoke() //callback - domyślnie null
-                //używa się aby wykonać akcję dopiero po zapisie do bazy
+                if (onSuccess != null) {
+                    Log.d("GAME_DEBUG", onSuccess)
+                }
                 updateStreak() //wywołanie tutaj aby nie powtarzać kodu
-            }
-            .addOnFailureListener { e ->
+        }.addOnFailureListener { e ->
                 Log.e("GAME_DEBUG", "Błąd aktualizacji lastPlayed dla $gameKey", e)
             }
     }
@@ -178,7 +168,7 @@ open class BaseActivity : AppCompatActivity() {
     /**
      * Aktualizuje streak oraz bestStreak użytkownika w bazie
      */
-    protected fun updateStreak() {
+    private fun updateStreak() {
         if (!isUserLoggedIn()) return
 
 
@@ -203,28 +193,24 @@ open class BaseActivity : AppCompatActivity() {
                 val daysBetween =
                     ((today.timeInMillis - lastPlayDay.timeInMillis) / (1000 * 60 * 60 * 24)).toInt()
 
-                when {
-                    daysBetween == 0 -> streak // gra w tym samym dniu - pozostaje bez zmian
-                    daysBetween == 1 -> streak + 1 // gra dzień po dniu — streak zwiększa się o 1
+                when (daysBetween) {
+                    0 -> streak // gra w tym samym dniu - pozostaje bez zmian
+                    1 -> streak + 1 // gra dzień po dniu — streak zwiększa się o 1
                     else -> 0 // opuścił jeden dzień — streak resetuje się do 0
                 }
             }
 
             //zapisanie do bazy
-            userRef.child("streak").setValue(newStreak)
-                .addOnSuccessListener {
+            userRef.child("streak").setValue(newStreak).addOnSuccessListener {
                     Log.d("STREAK_DEBUG", "Zaktualizowano streak dla $uid")
-                }
-                .addOnFailureListener {
+            }.addOnFailureListener {
                     Log.e("STREAK_DEBUG", "Błąd aktualizacji streak dla $uid", it)
                 }
 
             if (newStreak > bestStreak) {
-                userRef.child("bestStreak").setValue(newStreak)
-                    .addOnSuccessListener {
+                userRef.child("bestStreak").setValue(newStreak).addOnSuccessListener {
                         Log.d("STREAK_DEBUG", "Zaktualizowano bestStreak dla $uid")
-                    }
-                    .addOnFailureListener {
+                }.addOnFailureListener {
                         Log.e("STREAK_DEBUG", "Błąd aktualizacji bestStreak dla $uid", it)
                     }
             }
@@ -262,11 +248,11 @@ open class BaseActivity : AppCompatActivity() {
 
     /**
      * Aktualizuje statystyki gracza w Firestore po zakończeniu gry
-     * @param gameId - id gry
-     * @param starsEarned - liczba zdobytych gwiazdek
-     * @param score - punktacja w grze
-     * @param accuracy - celność
-     * @param reactionTime - średni czas reakcji
+     * @param categoryKey: String  - id kategorii gry
+     * @param gameKey: String - id gry
+     * @param starsEarned: Int - liczba zdobytych gwiazdek
+     * @param accuracy: Double - celność
+     * @param reactionTime: Double - średni czas reakcji
      *
      * Średni czas reakcji i celność są obliczane jako średnia ważona:
      * newAvg = (oldAvg * gamesPlayed + newValue) / (gamesPlayed + 1)
@@ -287,8 +273,6 @@ open class BaseActivity : AppCompatActivity() {
         //aktualizacja globalnych statystyk usera
         val statsRef = userRef.child("statistics")
 
-        //AKTUALIZACJA GLOBALNYCH STATYSTYK
-
         //runTransaction wykonuje aktualizacje "atomowo" czyli jedną grę na raz
         //używany do odczytu danych które są zależne od poprzednich danych
         //wykonuje się w pętli retry - jeśli ktoś inny zmienił dane między odczytem i zapisem to odczyt jest wykonywany ponownie
@@ -296,27 +280,31 @@ open class BaseActivity : AppCompatActivity() {
             override fun doTransaction(currentData: MutableData): Transaction.Result {
                 //mutableData - tymczasowy lokalny obiekt reprezentuje dane węzła na którym robimy transakcje
 
-                val currentStats = currentData.value as? Map<String, Any> ?: emptyMap()
+                val currentStats = currentData.value as? Map<*, *> ?: emptyMap<String, Any>()
 
                 val currentStars = (currentStats["totalStars"] as? Long ?: 0L).toInt()
-                val currentAvgAccuracy = (currentStats["avgAccuracy"] as? Double ?: 0.0)
-                val currentAvgReactionTime = (currentStats["avgReactionTime"] as? Double ?: 0.0)
-                val gamesPlayed = (currentStats["gamesPlayed"] as? Long ?: 0L).toInt()
+                val currentGamesPlayed = (currentStats["gamesPlayed"] as? Long ?: 0L).toInt()
+                val currentSumAccuracy = (currentStats["sumAccuracy"] as? Double ?: 0.0)
+                val currentSumReaction = (currentStats["sumReactionTime"] as? Double ?: 0.0)
 
-                //obliczanie nowych średnich ważonych
-                val newGamesPlayed = gamesPlayed + 1
+                // dodanie wartości z obecnej gry
+                val newGamesPlayed = currentGamesPlayed + 1
+                val newSumAccuracy = currentSumAccuracy + accuracy
+                val newSumReaction = currentSumReaction + reactionTime
+
+                // obliczenie rzeczywistej średniej globalnie
                 val newAvgAccuracy =
-                    if (accuracy > 0) (currentAvgAccuracy * gamesPlayed + accuracy) / newGamesPlayed
-                    else currentAvgAccuracy
+                    if (newGamesPlayed > 0) newSumAccuracy / newGamesPlayed else 0.0
                 val newAvgReaction =
-                    if (reactionTime > 0) (currentAvgReactionTime * gamesPlayed + reactionTime) / newGamesPlayed
-                    else currentAvgReactionTime
+                    if (newGamesPlayed > 0) newSumReaction / newGamesPlayed else 0.0
 
                 val updatedStats = mapOf(
-                    "avgAccuracy" to newAvgAccuracy,
-                    "avgReactionTime" to newAvgReaction,
-                    "totalStars" to currentStars + starsEarned,
-                    "gamesPlayed" to newGamesPlayed
+                    "totalStars" to (currentStars + starsEarned),
+                    "gamesPlayed" to newGamesPlayed,
+                    "sumAccuracy" to newSumAccuracy,       // suma używana do dokładnej średniej
+                    "sumReactionTime" to newSumReaction,  // suma używana do dokładnej średniej
+                    "avgAccuracy" to newAvgAccuracy,      // rzeczywista średnia
+                    "avgReactionTime" to newAvgReaction   // rzeczywista średnia
                 )
 
                 currentData.value = updatedStats
@@ -324,9 +312,7 @@ open class BaseActivity : AppCompatActivity() {
             }
 
             override fun onComplete(
-                error: DatabaseError?,
-                committed: Boolean,
-                currentData: DataSnapshot?
+                error: DatabaseError?, committed: Boolean, currentData: DataSnapshot?
             ) {
                 if (error != null) {
                     Log.e("STATS_DEBUG", "Błąd aktualizacji statystyk: ${error.message}")
@@ -343,30 +329,40 @@ open class BaseActivity : AppCompatActivity() {
             val currentStars = snapshot.child("starsEarned").getValue(Int::class.java) ?: 0
             val currentGamesPlayed = snapshot.child("gamesPlayed").getValue(Int::class.java) ?: 0
             val currentBestStars = snapshot.child("bestStars").getValue(Int::class.java) ?: 0
-            val currentAvgAccuracy = snapshot.child("accuracy").getValue(Double::class.java) ?: 0.0
-            val currentAvgReaction =
-                snapshot.child("avgReactionTime").getValue(Double::class.java) ?: 0.0
+            val currentSumAccuracy =
+                snapshot.child("sumAccuracy").getValue(Double::class.java) ?: 0.0
+            val currentSumReaction =
+                snapshot.child("sumReactionTime").getValue(Double::class.java) ?: 0.0
 
             val newGamesPlayed = currentGamesPlayed + 1
+            val newSumAccuracy = currentSumAccuracy + accuracy
+            val newSumReaction = currentSumReaction + reactionTime
 
-            // średnia ważona: uwzględniamy wszystkie wcześniejsze gry
-            // newAvg = (oldAvg * liczbaStarychGier + nowaWartość) / (gamesPlayed + 1)
-            val newAvgAccuracy =
-                if (accuracy > 0) ((currentAvgAccuracy * currentGamesPlayed + accuracy) / newGamesPlayed)
-                else currentAvgAccuracy
-            val newAvgReaction =
-                if (reactionTime > 0) ((currentAvgReaction * currentGamesPlayed + reactionTime) / newGamesPlayed)
-                else currentAvgReaction
+            val newAvgAccuracy = if (newGamesPlayed > 0) newSumAccuracy / newGamesPlayed else 0.0
+            val newAvgReaction = if (newGamesPlayed > 0) newSumReaction / newGamesPlayed else 0.0
+
 
             val updatedGameData = mapOf(
                 "starsEarned" to (currentStars + starsEarned),
                 "bestStars" to maxOf(currentBestStars, starsEarned),
+                "sumAccuracy" to newSumAccuracy,       // sumy używana do średniej
+                "sumReactionTime" to newSumReaction,
                 "accuracy" to newAvgAccuracy,
                 "avgReactionTime" to newAvgReaction,
                 "gamesPlayed" to newGamesPlayed,
                 "lastPlayed" to System.currentTimeMillis()
             )
 
+            Log.d(
+                "STATS_DEBUG", """
+                Statystyki przed aktualizacją dla gry $gameKey:
+                starsEarned: $currentStars
+                bestStars: $currentBestStars
+                gamesPlayed: $currentGamesPlayed
+                sumAccuracy: $currentSumAccuracy
+                sumReactionTime: $currentSumReaction
+                """.trimIndent()
+            )
             gameRef.updateChildren(updatedGameData).addOnSuccessListener {
                 Log.d("STATS_DEBUG", "Zaktualizowane statystyki dla gry $gameKey: $updatedGameData")
             }.addOnFailureListener {
@@ -389,14 +385,12 @@ open class BaseActivity : AppCompatActivity() {
     private var gameStartTime: Long = 0L
     private var totalActiveTime: Long = 0L
     private var pauseStartTime: Long = 0L
-    private var gameClicks: Long = 0L
     private var isPaused: Boolean = false
 
     //śledzenie gry
     //wywoływana na początku gry
     protected fun startReactionTracking() {
         totalActiveTime = 0L
-        gameClicks = 0L
         isPaused = false
         pauseStartTime = 0L
 
@@ -405,7 +399,7 @@ open class BaseActivity : AppCompatActivity() {
 
         Handler(Looper.getMainLooper()).postDelayed({
             gameStartTime = System.currentTimeMillis()
-            Toast.makeText(this, "Rozpoczęcie gry", Toast.LENGTH_SHORT).show()
+            //Toast.makeText(this, "Rozpoczęcie gry", Toast.LENGTH_SHORT).show()
         }, 4000)
     }
 
@@ -429,14 +423,7 @@ open class BaseActivity : AppCompatActivity() {
         }
     }
 
-    //kliknięcia gracza
-    protected fun registerPlayerAction() {
-        gameClicks++
-        //Toast.makeText(this, "Kliknięcia: ${gameClicks}", Toast.LENGTH_SHORT).show()
-    }
 
-    //TODO: trzeba zrobic tak żeby to był rzeczywisty średni czas a nie ostatniej gry
-    //zmiana żeby wyswietlaly sie 2 miejsca po przecinku
     /**obliczanie średniego czasu reakcji = czas gry / liczba gwiazdek
      * gdy gra się zaczyna = startReactionTracking(),
 
@@ -451,7 +438,7 @@ open class BaseActivity : AppCompatActivity() {
         val duration = (currentTime - gameStartTime).coerceAtLeast(1L)
 
         //jezeli przekazemy w argumatrze gwiazdki to wykorzytsa gwiazdki, jeżeli nie - użyje kliknięć
-        val starsEarned = if (stars > 0) stars else gameClicks.coerceAtLeast(1)
+        val starsEarned = stars.coerceAtLeast(1)
 
         val avgReactionSec = duration.toDouble() / starsEarned.toDouble() / 1000.0 //w sekundach
 
@@ -462,23 +449,22 @@ open class BaseActivity : AppCompatActivity() {
         //pożniej usuń Toasty
         if (isUserLoggedIn()) {
             val userId = auth.currentUser!!.uid
-            val statsRef = db.getReference("users").child(userId).child("statistics").child("avgReactionTime")
+            val statsRef =
+                db.getReference("users").child(userId).child("statistics").child("avgReactionTime")
 
             statsRef.get().addOnSuccessListener { snapshot ->
-                val globalAvg = snapshot.getValue(Double::class.java) ?: 0.0
-                Toast.makeText(
-                    this,
-                    "Średni czas reakcji (tej gry): %.2f s\nŚredni czas reakcji (globalny): %.2f s".format(avgReactionSec, globalAvg),
-                    Toast.LENGTH_SHORT
-                ).show()
+                //val globalAvg = snapshot.getValue(Double::class.java) ?: 0.0
+//                Toast.makeText(
+//                    this,
+//                    "Czas trwania gry: %.2f s\nŚredni czas reakcji (tej gry): %.2f s\nŚredni czas reakcji (globalny): %.2f s".format(durationSec, avgReactionSec, globalAvg),
+//                    Toast.LENGTH_SHORT
+//                ).show()
             }
         } else {
             // Dla niezalogowanego użytkownika pokazujemy tylko średni czas tej gry
-            Toast.makeText(
-                this,
-                "Średni czas reakcji (tej gry): %.2f s".format(avgReactionSec),
-                Toast.LENGTH_SHORT
-            ).show()
+//            Toast.makeText(
+//                this, "Średni czas reakcji (tej gry): %.2f s".format(avgReactionSec), Toast.LENGTH_SHORT
+//            ).show()
         }
 
         return avgReactionSec
@@ -489,20 +475,20 @@ open class BaseActivity : AppCompatActivity() {
      *
      */
 
-    protected var totalAttempts: Int = 0 //liczba prób
-    protected var successfulAttempts: Int = 0 //liczba poprawnych prób
+    private var totalAttempts: Int = 0 //liczba prób
+    private var successfulAttempts: Int = 0 //liczba poprawnych prób
 
     //resetuje licznik na start
-    protected fun resetAccuracyCounters(){
+    private fun resetAccuracyCounters() {
         totalAttempts = 0
         successfulAttempts = 0
     }
 
     /**
      * Rejestruje próbę gracza
-     * @param isSuccessful - true jeśli była poprawna np trafienie pary
+     * @param isSuccessful - true jeśli była poprawna np. trafienie pary
      */
-    protected fun registerAttempt(isSuccessful: Boolean){
+    protected fun registerAttempt(isSuccessful: Boolean) {
         totalAttempts++
         if (isSuccessful) successfulAttempts++
     }
@@ -511,9 +497,8 @@ open class BaseActivity : AppCompatActivity() {
      * Oblicza procent poprawnych prób
      * Zwraca wartość od 0.0 do 100.0
      */
-    protected fun calculateAccuracy(): Double{
-        return if (totalAttempts > 0)
-            (successfulAttempts.toDouble() / totalAttempts.toDouble()) * 100.0
+    protected fun calculateAccuracy(): Double {
+        return if (totalAttempts > 0) (successfulAttempts.toDouble() / totalAttempts.toDouble()) * 100.0
         else 0.0
     }
 

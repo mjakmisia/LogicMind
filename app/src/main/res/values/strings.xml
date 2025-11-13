@@ -88,6 +88,14 @@
     <string name="tempo_display">%1$s  %2$.1f s</string>
     <string name="blue_container">Niebieska strefa dotyku</string>
     <string name="red_container">Czerwona strefa dotyku</string>
+    <string name="last_played_game">Ostatnio zagrana gra: %1$s (%2$s)</string>
+    <string name="last_played_game_none">Ostatnio zagrana gra: brak</string>
+    <string name="current_streak_text">%1$d dni</string>
+    <string name="best_streak_text">%1$d dni</string>
+    <string name="error_fetching_user_data">Błąd pobierania danych użytkownika</string>
+    <string name="zero_days">0 dni</string>
+    <string name="reset_progress_message">Czy na pewno chcesz zresetować wszystkie postępy? Tej operacji nie można cofnąć.</string>
+    <string name="reset_progress_title">Reset postępów</string>
 
 
     <!-- OPISY GIER DO INTRO -->

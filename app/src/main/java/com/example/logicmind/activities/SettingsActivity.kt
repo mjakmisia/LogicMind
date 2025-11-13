@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
 import com.example.logicmind.R
 import com.example.logicmind.databinding.ActivitySettingsBinding
+import androidx.core.content.edit
 
 class SettingsActivity : BaseActivity() {
 
@@ -58,7 +59,7 @@ class SettingsActivity : BaseActivity() {
 
         // Tryb nocny
         binding.switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
-            sharedPrefs.edit().putBoolean("DarkMode_Enabled", isChecked).apply()
+            sharedPrefs.edit { putBoolean("DarkMode_Enabled", isChecked) }
             AppCompatDelegate.setDefaultNightMode(
                 if (isChecked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
             )

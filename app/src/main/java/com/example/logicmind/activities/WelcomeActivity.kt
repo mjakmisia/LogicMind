@@ -2,7 +2,6 @@ package com.example.logicmind.activities
 
 import android.app.AlertDialog
 import android.content.Intent
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -15,11 +14,10 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toDrawable
 import com.example.logicmind.R
 import com.example.logicmind.databinding.ActivityWelcomeBinding
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
-import com.google.firebase.database.FirebaseDatabase
 
 class WelcomeActivity : BaseActivity() {
 
@@ -130,7 +128,7 @@ class WelcomeActivity : BaseActivity() {
 
         dialog.show()
         //przezroczyste tło
-        dialog.window?.setBackgroundDrawable(ColorDrawable(android.graphics.Color.TRANSPARENT))
+        dialog.window?.setBackgroundDrawable(android.graphics.Color.TRANSPARENT.toDrawable())
         dialog.window?.decorView?.setPadding(0, 0, 0, 0)
 
         //parametry okna dialogu - ? chroni przed błędem jeżeli dialog.window jest null
@@ -169,7 +167,9 @@ class WelcomeActivity : BaseActivity() {
                             "avgReactionTime" to 0.0,
                             "avgAccuracy" to 0.0,
                             "totalStars" to 0,
-                            "gamesPlayed" to 0
+                            "gamesPlayed" to 0,
+                            "sumAccuracy" to 0.0,
+                            "sumReactionTime" to 0.0
                         )
                     )
 
@@ -230,7 +230,9 @@ class WelcomeActivity : BaseActivity() {
                     "accuracy" to 0.0,
                     "starsEarned" to 0,
                     "lastPlayed" to null,
-                    "gamesPlayed" to 0
+                    "gamesPlayed" to 0,
+                    "sumAccuracy" to 0.0,
+                    "sumReactionTime" to 0.0,
                 )
                 catRef.child("games").child(game).setValue(gameData)
             }
