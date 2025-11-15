@@ -90,7 +90,9 @@ object GameIntroProvider {
                 titleRes = R.string.left_or_right,
                 imageRes = R.drawable.ic_close, //obrazek do zmiany
                 sections = listOf(
-                    //do uzupełnienia
+                    IntroSection(R.string.lor_section_visual_recognition, R.string.lor_desc_visual_recognition),
+                    IntroSection(R.string.lor_section_attention, R.string.lor_desc_attention),
+                    IntroSection(R.string.lor_section_reaction_time, R.string.lor_desc_reaction_time)
                 ),
                 gameActivity = LeftOrRightActivity::class.java,
                 instructionRes = R.string.left_or_right_instruction

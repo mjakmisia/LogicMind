@@ -137,6 +137,14 @@
     <string name="ws_desc_mind_speed">Skróć czas potrzebny na wykonanie zadań umysłowych</string>
 
     <!-- Left or Right -->
+    <string name="lor_section_visual_recognition">Rozpoznawanie wzorców</string>
+    <string name="lor_desc_visual_recognition">Zwiększ szybkość identyfikacji obiektów</string>
+
+    <string name="lor_section_attention">Skupienie</string>
+    <string name="lor_desc_attention">Utrzymuj uwagę na celu, mimo obecności rozpraszaczy</string>
+
+    <string name="lor_section_reaction_time">Czas reakcji</string>
+    <string name="lor_desc_reaction_time">Skróć czas potrzebny na podjęcie decyzji i wykonanie akcji</string>
 
     <!-- Symbol Race -->
     <string name="sr_section_visual_motor">Koordynacja wzrokowo-ruchowa</string>

@@ -137,6 +137,14 @@
     <string name="ws_desc_mind_speed">Reduce the time needed to complete mental tasks</string>
 
     <!-- Left or Right -->
+    <string name="lor_section_visual_recognition">Visual Recognition</string>
+    <string name="lor_desc_visual_recognition">Increase the speed of identifying objects</string>
+
+    <string name="lor_section_attention">Focus</string>
+    <string name="lor_desc_attention">Maintain concentration on your goal despite distractions</string>
+
+    <string name="lor_section_reaction_time">Reaction Time</string>
+    <string name="lor_desc_reaction_time">Reduce the time needed to make decisions and perform actions</string>
 
     <!-- Symbol Race -->
     <string name="sr_section_visual_motor">Visual-Motor Coordination</string>
