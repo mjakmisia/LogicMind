@@ -145,6 +145,14 @@
     <string name="ws_desc_mind_speed">Skróć czas potrzebny na wykonanie zadań umysłowych</string>
 
     <!-- Left or Right -->
+    <string name="lor_section_visual_recognition">Rozpoznawanie wzorców</string>
+    <string name="lor_desc_visual_recognition">Zwiększ szybkość identyfikacji obiektów</string>
+
+    <string name="lor_section_attention">Skupienie</string>
+    <string name="lor_desc_attention">Utrzymuj uwagę na celu, mimo obecności rozpraszaczy</string>
+
+    <string name="lor_section_reaction_time">Czas reakcji</string>
+    <string name="lor_desc_reaction_time">Skróć czas potrzebny na podjęcie decyzji i wykonanie akcji</string>
 
     <!-- Symbol Race -->
     <string name="sr_section_visual_motor">Koordynacja wzrokowo-ruchowa</string>
@@ -157,19 +165,27 @@
     <string name="sr_desc_selective_attention">Utrzymuj koncentrację na kluczowym zadaniu, ignorując pozostałe bodźce</string>
 
     <!-- Road Dash -->
+    <string name="rd_section_divided_attention">Podzielność uwagi</string>
+    <string name="rd_desc_divided_attention">Trenuj zdolność jednoczesnego skupienia na kilku zadaniach</string>
+
+    <string name="rd_section_visual_motor">Koordynacja wzrokowo-ruchowa</string>
+    <string name="rd_desc_visual_motor">Zsynchronizuj pracę oczu i rąk, by błyskawicznie reagować na zmiany</string>
+
+    <string name="rd_section_processing_speed">Szybkość przetwarzania</string>
+    <string name="rd_desc_processing_speed">Skróć czas potrzebny na ocenę sytuacji i podjęcie właściwej decyzji</string>
 
 
     <!-- OKNO POMOCY -->
     <string name="card_match_instruction"><![CDATA[Znajduj pary identycznych owoców, unikając bomb. Masz 90 sekund, aby uzbierać jak najwięcej gwiazdek!\n\n<b>Jak grać:</b>\n• Na początku każdego poziomu karty pokazane są przez <b>2 sekundy</b> – zapamiętaj jak najwięcej, zanim się odwrócą.\n• Klikaj karty, aby je odkrywać – musisz wybrać dwie, aby sprawdzić dopasowanie.\n• Pasujące pary zostają odkryte na stałe, niepasujące odwracają się po chwili.\n• Uważaj na bomby: trafienie na bombę zabiera <b>10 sekund</b>!\n\n<b>Bonusy:</b>\n• Zdobądź gwiazdkę za każdą prawidłowo dopasowaną parę.\n• Otrzymaj dodatkowe <b>30 sekund</b> za ukończenie poziomu.]]></string>
-    <string name="color_sequence_instruction"><![CDATA[Odtwarzaj pokazane sekwencje kolorowych przycisków. Masz 90 sekund, aby uzbierać jak najwięcej gwiazdek!\n\n<b>Jak grać:</b>\n• Na początku każdej rundy zostaje pokazana sekwencja przycisków – każdy przycisk ma przypisany unikalny kolor i dźwięk.\n• Po pokazie odtwarzaj sekwencję, klikając przyciski <b>w tej samej kolejności</b>.\n• Popełnienie błędu natychmiast uruchamia <b>ponowny pokaz sekwencji</b>.\n• Czas zatrzymuje się w trakcie pokazu i płynie tylko podczas twojego ruchu.\n\n<b>Bonusy:</b>\n• Zdobądź gwiazdkę za każde poprawne powtórzenie sekwencji.\n• Otrzymaj dodatkowe <b>15 sekund</b> za ukończenie poziomu.]]></string>
+    <string name="color_sequence_instruction"><![CDATA[Odtwarzaj pokazane sekwencje kolorowych przycisków. Masz 90 sekund, aby uzbierać jak najwięcej gwiazdek!\n\n<b>Jak grać:</b>\n• Na początku każdej rundy zostaje pokazana sekwencja przycisków – każdy przycisk ma przypisany unikalny kolor i dźwięk.\n• Po pokazie odtwarzaj sekwencję, klikając przyciski <b>w tej samej kolejności</b>.\n• Popełnienie błędu natychmiast uruchamia <b>ponowny pokaz sekwencji</b>.\n• Czas zatrzymuje się w trakcie pokazu i płynie tylko podczas Twojego ruchu.\n\n<b>Bonusy:</b>\n• Zdobądź gwiazdkę za każde poprawne powtórzenie sekwencji.\n• Otrzymaj dodatkowe <b>15 sekund</b> za ukończenie poziomu.]]></string>
 
     <string name="number_addition_instruction"><![CDATA[Dobieraj liczby tak, aby ich suma dała wyświetlony wynik. Masz 90 sekund, aby uzbierać jak najwięcej gwiazdek!\n\n<b>Jak grać:</b>\n• Klikaj przyciski z liczbami, aby je zaznaczyć – fioletowy kolor oznacza wybór.\n• Wybierz <b>wymaganą liczbę przycisków</b>, aby sprawdzić dopasowanie – pasująca kombinacja staje się szara na stałe, błędna podświetla się na czerwono i resetuje po chwili.\n• Niektóre poziomy mają <b>dodatkowe karty</b>, które nie są potrzebne do utworzenia sumy.\n\n<b>Bonusy:</b>\n• Zdobądź gwiazdkę za każdą prawidłowo znalezioną sumę.\n• Otrzymaj dodatkowe <b>20 sekund</b> za ukończenie poziomu.]]></string>
-    <string name="path_change_instruction">Tu będzie instrukcja.</string>
+    <string name="path_change_instruction"><![CDATA[Doprowadź kulki do celu, dostosowując bieg toru! Masz 90 sekund, aby uzbierać jak najwięcej gwiazdek!\n\n<b>Jak grać:</b>\n• Z punktu w prawym, dolnym rogu wytaczają się kulki – Twoim zadaniem jest doprowadzić każdą do dziurki <b>w jej kolorze</b>.\n• Aby zmienić bieg trasy, <b>dotykaj niebieskich przełączników</b>.\n• Musisz planować z wyprzedzeniem! Tempo gry stopniowo rośnie – kulki pojawiają się i poruszają <b>coraz szybciej</b>.\n• Wpadnięcie kulki do złej dziurki kosztuje <b>5 sekund</b> i przerywa Twoje combo.\n\n<b>Bonusy:</b>\n• Zdobądź gwiazdkę za każdą kulkę, która trafi do właściwej dziurki.\n• Otrzymaj dodatkowy czas za serię poprawnych trafień – <b>im większe combo, tym większy bonus!</b>]]></string>
 
-    <string name="word_search_instruction">Tu będzie instrukcja.</string>
+    <string name="word_search_instruction"><![CDATA[Wyszukuj słowa ukryte w rozsypance liter! Masz 90 sekund, aby uzbierać jak najwięcej gwiazdek!\n\n<b>Jak grać:</b>\n• Na górze ekranu znajduje się lista słów do znalezienia na planszy.\n• Aby zaznaczyć słowo, <b>przesuń palcem po literach</b>, tworząc linię prostą.\n• Słowa mogą być ułożone poziomo, pionowo lub na skos.\n• Poprawnie znalezione słowo zostaje przekreślone na liście i na stałe zaznaczone kolorem na planszy.\n• Pamiętaj, że zaznaczenie musi być <b>linią prostą</b> – próba zakrzywienia linii zresetuje Twój wybór.\n\n<b>Bonusy:</b>\n• Zdobądź gwiazdkę za każde znalezione słowo.\n• Otrzymaj dodatkowe <b>20 sekund</b> za ukończenie poziomu.]]></string>
     <string name="left_or_right_instruction">Tu będzie instrukcja.</string>
 
-    <string name="symbol_race_instruction"><![CDATA[Reaguj odpowiednim gestem na pojawiające się symbole! Masz 90 sekund, aby zdobyć jak najwięcej gwiazdek!\n\n<b>Jak grać:</b>\n• Obserwuj tor – znajduje się na nim kolejka kół, musisz reagować na <b>dolny symbol</b>.\n• Każdy symbol wymaga innego gestu (dotknięcia konkretnej strony, obu stron, samego symbolu lub braku reakcji).\n• Wykonaj gest, zanim symbol zniknie. Czas na reakcję jest ograniczony i stopniowo się skraca!\n• Błędna reakcja (lub jej brak) odejmuje <b>6 sekund</b> z licznika i resetuje Twoje combo.\n\n<b>Symbole i gesty:</b>\n<img src="ic_empty_circle" /> – dotknij strony o tym samym kolorze\n<img src="ic_arrow_left" /> – dotknij lewej strony\n<img src="ic_arrow_right" /> – dotknij prawej strony\n<img src="ic_close" /> – nie dotykaj\n<img src="ic_target" /> – dotknij tutaj\n<img src="ic_swap" /> – dotknij przeciwnego koloru\n<img src="ic_double_left" /> – dotknij lewej strony dwa razy\n<img src="ic_double_right" /> – dotknij prawej strony dwa razy\n<img src="ic_both_sides" /> – dotknij obu stron naraz\n\n<b>Bonusy:</b>\n• Zdobądź gwiazdkę za każdy poprawnie wykonany symbol.\n• Otrzymaj dodatkowy czas za serie poprawnych reakcji – <b>im większe combo, tym większy bonus!</b>]]></string>
+    <string name="symbol_race_instruction"><![CDATA[Reaguj odpowiednim gestem na pojawiające się symbole! Masz 90 sekund, aby zdobyć jak najwięcej gwiazdek!\n\n<b>Jak grać:</b>\n• Obserwuj tor – znajduje się na nim kolejka kół, musisz reagować na <b>dolny symbol</b>.\n• Każdy symbol wymaga innego gestu (dotknięcia konkretnej strony, obu stron, samego symbolu lub braku reakcji).\n• Wykonaj gest, zanim symbol zniknie. Czas na reakcję jest ograniczony i <b>stopniowo się skraca</b>!\n• Błędna reakcja (lub jej brak) odejmuje <b>6 sekund</b> i przerywa Twoje combo.\n\n<b>Symbole i gesty:</b>\n<img src="ic_empty_circle" /> – dotknij strony o tym samym kolorze\n<img src="ic_arrow_left" /> – dotknij lewej strony\n<img src="ic_arrow_right" /> – dotknij prawej strony\n<img src="ic_close" /> – nie dotykaj\n<img src="ic_target" /> – dotknij tutaj\n<img src="ic_swap" /> – dotknij przeciwnego koloru\n<img src="ic_double_left" /> – dotknij lewej strony dwa razy\n<img src="ic_double_right" /> – dotknij prawej strony dwa razy\n<img src="ic_both_sides" /> – dotknij obu stron naraz\n\n<b>Bonusy:</b>\n• Zdobądź gwiazdkę za każdy poprawnie wykonany symbol.\n• Otrzymaj dodatkowy czas za serię poprawnych reakcji – <b>im większe combo, tym większy bonus!</b>]]></string>
     <string name="road_dash_instruction">Tu będzie instrukcja.</string>
 
 </resources>
