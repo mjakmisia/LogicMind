@@ -157,6 +157,14 @@
     <string name="sr_desc_selective_attention">Maintain concentration on the key task while ignoring other stimuli</string>
 
     <!-- Road Dash -->
+    <string name="rd_section_divided_attention">Divided Attention</string>
+    <string name="rd_desc_divided_attention">Train your ability to focus on multiple tasks simultaneously</string>
+
+    <string name="rd_section_visual_motor">Visual-Motor Coordination</string>
+    <string name="rd_desc_visual_motor">Synchronize your eyes and hands to react instantly to changes</string>
+
+    <string name="rd_section_processing_speed">Processing Speed</string>
+    <string name="rd_desc_processing_speed">Reduce the time needed to assess a situation and make the right decision</string>
 
 
     <!-- HELP DIALOG -->

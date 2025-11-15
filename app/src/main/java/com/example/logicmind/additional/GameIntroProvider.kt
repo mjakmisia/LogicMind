@@ -114,7 +114,9 @@ object GameIntroProvider {
                 titleRes = R.string.road_dash,
                 imageRes = R.drawable.ic_close, //obrazek do zmiany
                 sections = listOf(
-                    //do uzupełnienia
+                    IntroSection(R.string.rd_section_divided_attention, R.string.rd_desc_divided_attention),
+                    IntroSection(R.string.rd_section_visual_motor, R.string.rd_desc_visual_motor),
+                    IntroSection(R.string.rd_section_processing_speed, R.string.rd_desc_processing_speed)
                 ),
                 gameActivity = RoadDashActivity::class.java,
                 instructionRes = R.string.road_dash_instruction

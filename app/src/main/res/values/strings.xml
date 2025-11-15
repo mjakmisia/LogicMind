@@ -157,6 +157,14 @@
     <string name="sr_desc_selective_attention">Utrzymuj koncentrację na kluczowym zadaniu, ignorując pozostałe bodźce</string>
 
     <!-- Road Dash -->
+    <string name="rd_section_divided_attention">Podzielność uwagi</string>
+    <string name="rd_desc_divided_attention">Trenuj zdolność jednoczesnego skupienia na kilku zadaniach</string>
+
+    <string name="rd_section_visual_motor">Koordynacja wzrokowo-ruchowa</string>
+    <string name="rd_desc_visual_motor">Zsynchronizuj pracę oczu i rąk, by błyskawicznie reagować na zmiany</string>
+
+    <string name="rd_section_processing_speed">Szybkość przetwarzania</string>
+    <string name="rd_desc_processing_speed">Skróć czas potrzebny na ocenę sytuacji i podjęcie właściwej decyzji</string>
 
 
     <!-- OKNO POMOCY -->
