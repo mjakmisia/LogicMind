@@ -67,6 +67,8 @@ dependencies {
     testImplementation("androidx.test:rules:1.7.0")
 
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test:rules:1.6.1")
     implementation(libs.androidx.gridlayout)
 
     // Firebase BOM – zarządza wersjami
