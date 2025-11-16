@@ -231,7 +231,7 @@ open class BaseActivity : AppCompatActivity() {
      */
     object GameKeys {
         const val CATEGORY_MEMORY = "Pamiec"
-        const val CATEGORY_FOCUS = "Skupienie"
+        const val CATEGORY_ATTENTION = "Skupienie"
         const val CATEGORY_COORDINATION = "Koordynacja"
         const val CATEGORY_REASONING = "Rozwiazywanie_problemow"
 
@@ -239,7 +239,7 @@ open class BaseActivity : AppCompatActivity() {
         const val GAME_COLOR_SEQUENCE = "color_sequence"
         const val GAME_WORD_SEARCH = "word_search"
         const val GAME_SYMBOL_RACE = "symbol_race"
-        const val GAME_FRUIT_SORT = "fruit_sort"
+        const val GAME_LEFT_OR_RIGHT = "left_or_right"
         const val GAME_NUMBER_ADDITION = "number_addition"
         const val GAME_PATH_CHANGE = "path_change"
         const val GAME_ROAD_DASH = "road_dash"
