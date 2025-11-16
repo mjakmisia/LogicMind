@@ -38,7 +38,7 @@ object GameConfigProvider {
                 nameRes = R.string.category_attention,
                 games = listOf(
                     GameOption(gameId = "word_search", R.string.word_search, R.drawable.image_word_search),
-                    GameOption(gameId = "left_or_right", R.string.left_or_right, R.drawable.image_fruit_sort) //obrazek do zmiany
+                    GameOption(gameId = "left_or_right", R.string.left_or_right, R.drawable.image_left_or_right)
                 )
             )
             "coordination" -> GameCategoryConfig(
