@@ -1,6 +1,8 @@
 package com.example.logicmind.activities
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.PointF
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
@@ -8,15 +10,13 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import android.graphics.PointF
-import android.content.res.Configuration
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.gridlayout.widget.GridLayout
 import androidx.core.graphics.toColorInt
+import androidx.gridlayout.widget.GridLayout
 import com.example.logicmind.R
-import com.example.logicmind.additional.WordBank
 import com.example.logicmind.additional.SelectionOverlayView
+import com.example.logicmind.additional.WordBank
 import com.example.logicmind.additional.WordSearchGenerator
 import com.example.logicmind.common.GameCountdownManager
 import com.example.logicmind.common.GameTimerProgressBar
@@ -152,8 +152,14 @@ class WordSearchActivity : BaseActivity() {
 
                 countdownManager.startCountdown()
             },
-            onResume = { timerProgressBar.start() },
-            onPause = { timerProgressBar.pause() },
+            onResume = {
+                gameStatsManager.onGameResumed()
+                timerProgressBar.start()
+            },
+            onPause = {
+                gameStatsManager.onGamePaused()
+                timerProgressBar.pause()
+            },
             onExit = { finish() },
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.word_search_instruction),
@@ -338,6 +344,7 @@ class WordSearchActivity : BaseActivity() {
     }
 
     private fun startNewGame() {
+        gameStatsManager.startReactionTracking()
         // Wyczyść stany
         currentBoard = null
         wordsToFind = emptyList()
