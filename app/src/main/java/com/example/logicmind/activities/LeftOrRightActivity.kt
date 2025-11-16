@@ -12,6 +12,8 @@ import com.example.logicmind.common.GameCountdownManager
 import com.example.logicmind.common.GameTimerProgressBar
 import com.example.logicmind.common.PauseMenu
 import com.example.logicmind.common.StarManager
+import androidx.core.view.children
+import androidx.core.view.isEmpty
 
 class LeftOrRightActivity : BaseActivity() {
     private lateinit var countdownText: TextView // Pole tekstowe dla odliczania
@@ -22,6 +24,7 @@ class LeftOrRightActivity : BaseActivity() {
     private lateinit var pauseMenu: PauseMenu // Menu pauzy gry
     private lateinit var countdownManager: GameCountdownManager // Manager odliczania
     private var isGameEnding = false // Flaga końca gry
+    private var isProcessingMove = false // Flaga blokująca szybkie kliknięcia
     private var currentLevel = 1 // Aktualny poziom gry
     private lateinit var gameContainer: ConstraintLayout // Główny kontener gry
     private lateinit var fruitQueueContainer: LinearLayout // Kontener na owoce w kolejce
@@ -59,6 +62,10 @@ class LeftOrRightActivity : BaseActivity() {
     private lateinit var leftBasketTargetContainer: LinearLayout
     private lateinit var rightBasketTargetContainer: LinearLayout
 
+    // Wymiary dla owoców w kolejce
+    private var fruitSizePx: Int = 0
+    private var overlapMarginPx: Int = 0
+
     companion object {
         private const val BASE_TIME_SECONDS = 90 // Czas trwania jednej rundy (w sekundach)
     }
@@ -67,6 +74,10 @@ class LeftOrRightActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_left_or_right)
         supportActionBar?.hide()
+
+        // Ustawienie bazowego rozmiaru owoców i ich nachodzenia
+        fruitSizePx = (120 * resources.displayMetrics.density).toInt()
+        overlapMarginPx = -(60 * resources.displayMetrics.density).toInt()
 
         // Inicjalizacja widoków
         countdownText = findViewById(R.id.countdownText)
@@ -81,6 +92,15 @@ class LeftOrRightActivity : BaseActivity() {
         rightBasket = findViewById(R.id.rightBasket)
         leftBasketTargetContainer = findViewById(R.id.leftBasketTargetContainer)
         rightBasketTargetContainer = findViewById(R.id.rightBasketTargetContainer)
+
+        // Ustawienie nasłuchiwania na kliknięcia koszyków
+        leftBasket.setOnClickListener {
+            handleBasketClick(isLeftBasket = true)
+        }
+
+        rightBasket.setOnClickListener {
+            handleBasketClick(isLeftBasket = false)
+        }
 
         // Inicjalizacja paska czasu
         timerProgressBar.setTotalTime(BASE_TIME_SECONDS)
@@ -213,28 +233,12 @@ class LeftOrRightActivity : BaseActivity() {
     private fun displayFruitQueue() {
         fruitQueueContainer.removeAllViews()
 
-        val fruitSizePx = (100 * resources.displayMetrics.density).toInt() // Rozmiar owoców
-        val overlapMarginPx = -(55 * resources.displayMetrics.density).toInt() // Nachodzenie na siebie ikon
-
-        // Przejdź przez kolejkę owoców aby dodać je na ekran
-        fruitQueue.reversed().forEachIndexed { index, fruitId ->
-            val fruitView = ImageView(this).apply {
-                layoutParams = LinearLayout.LayoutParams(
-                    fruitSizePx,
-                    fruitSizePx
-                ).also {
-                    if (index > 0) {
-                        it.topMargin = overlapMarginPx
-                    }
-                }
-
-                setImageResource(fruitId)
-
-                elevation = (index + 1).toFloat()
-            }
-
-            fruitQueueContainer.addView(fruitView)
+        // Przejdź przez kolejkę (odwrotnie), stwórz widoki i dodaj je
+        fruitQueue.reversed().forEach { fruitId ->
+            fruitQueueContainer.addView(createFruitView(fruitId))
         }
+
+        updateQueueVisuals()
     }
 
     // Losuje i ustawia cele dla koszyków oraz tworzy listę aktywnych owoców
@@ -258,7 +262,7 @@ class LeftOrRightActivity : BaseActivity() {
         activeGameFruits.distinct()
     }
 
-     // Dynamicznie tworzy i wyświetla ikony celów w koszykach
+    // Dynamicznie tworzy i wyświetla ikony celów w koszykach
     private fun displayBasketTargets() {
         leftBasketTargetContainer.removeAllViews()
         rightBasketTargetContainer.removeAllViews()
@@ -289,6 +293,122 @@ class LeftOrRightActivity : BaseActivity() {
             setPadding(paddingPx, paddingPx, paddingPx, paddingPx)
             setImageResource(fruitId)
             elevation = 2f
+        }
+    }
+
+    // Obsługuje kliknięcie w koszyk
+    private fun handleBasketClick(isLeftBasket: Boolean) {
+        if (fruitQueue.isEmpty() || isProcessingMove) return
+        isProcessingMove = true
+
+        val currentFruit = fruitQueue.first()
+
+        val targetList = if (isLeftBasket) leftBasketTargets else rightBasketTargets
+
+        val isCorrect = targetList.contains(currentFruit)
+
+        // Przejdź do następnego owocu przekazując wynik
+        advanceToNextFruit(isCorrect)
+    }
+
+    // Przesuwa kolejkę do następnego owocu po ruchu gracza
+    private fun advanceToNextFruit(isCorrect: Boolean) {
+
+        gameContainer.post {
+            if (isCorrect) {
+                starManager.increment()
+            } else {
+                timerProgressBar.subtractTime(3)
+            }
+        }
+
+        // Znajdź widok owocu na wierzchu
+        if (fruitQueueContainer.isEmpty()) {
+            isProcessingMove = false
+            return
+        }
+        val viewToRemove = fruitQueueContainer.getChildAt(fruitQueueContainer.childCount - 1)
+
+        // Rozpocznij animację usuwania
+        viewToRemove.animate()
+            .alpha(0f) // Zniknij
+            .setDuration(200) // Czas trwania (0.2 sekundy)
+            .withEndAction {
+
+                // Usuń stary owoc
+                if (fruitQueue.isNotEmpty()) {
+                    fruitQueue.removeAt(0) // Usuń z góry kolejki logicznej
+                }
+                fruitQueueContainer.removeView(viewToRemove) // Usuń widok
+
+                // Wygeneruj nowy owoc i dodaj go
+                if (activeGameFruits.isNotEmpty()) {
+                    val newFruitId = activeGameFruits.random()
+                    fruitQueue.add(newFruitId) // Dodaj na koniec kolejki logicznej
+
+                    // Stwórz nowy widok dla owocu
+                    val newFruitView = createFruitView(newFruitId)
+                    newFruitView.alpha = 0f
+
+                    // Dodaj nowy widok na początek kontenera (wizualnie na tył)
+                    fruitQueueContainer.addView(newFruitView, 0)
+
+                    updateQueueVisuals()
+
+                    // Rozpocznij animację pojawiania się nowego owocu
+                    newFruitView.animate()
+                        .alpha(1f) // Pojaw się
+                        .setDuration(200)
+                        .start()
+                }
+
+                isProcessingMove = false
+            }
+            .start()
+    }
+
+    // Tworzy pojedynczy widok dla owocu
+    private fun createFruitView(fruitId: Int): ImageView {
+        return ImageView(this).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                fruitSizePx,
+                fruitSizePx
+            )
+            setImageResource(fruitId)
+        }
+    }
+
+    // Aktualizuje marginesy, elewację i rozmiar dla wszystkich owoców w kolejce
+    private fun updateQueueVisuals() {
+        // Ustawiamy rozmiar owocu na końcu kolejki
+        val minScale = 0.6f // 60%
+        val maxScale = 1.0f // 100%
+        val scaleRange = maxScale - minScale
+        val totalItems = fruitQueueContainer.childCount
+
+        // Zabezpieczenie przed dzieleniem przez zero
+        val totalIndices = if (totalItems > 1) totalItems - 1 else 1
+
+        // Pętla po wszystkich widokach owoców w kontenerze
+        fruitQueueContainer.children.forEachIndexed { index, view ->
+
+            // Obliczanie skali
+            val percentage = index.toFloat() / totalIndices.toFloat()
+            val scale = minScale + (percentage * scaleRange)
+
+            // Obliczanie nowego rozmiaru na podstawie skali
+            val newSize = (fruitSizePx * scale).toInt()
+
+            view.elevation = (index + 1).toFloat()
+
+            // Pobierz parametry layoutu i zaktualizuj
+            (view.layoutParams as LinearLayout.LayoutParams).also {
+
+                it.topMargin = if (index > 0) overlapMarginPx else 0
+
+                it.width = newSize
+                it.height = newSize
+            }
         }
     }
 
