@@ -198,7 +198,12 @@ class WelcomeActivity : BaseActivity() {
 
     private fun createDefaultCategoriesAndGames(userId: String) {
         val userRef = db.getReference("users").child(userId)
-        val categories = listOf(GameKeys.CATEGORY_COORDINATION, GameKeys.CATEGORY_REASONING, GameKeys.CATEGORY_FOCUS, GameKeys.CATEGORY_MEMORY)
+        val categories = listOf(
+            GameKeys.CATEGORY_COORDINATION,
+            GameKeys.CATEGORY_REASONING,
+            GameKeys.CATEGORY_ATTENTION,
+            GameKeys.CATEGORY_MEMORY
+        )
         val defaultGames = mapOf(
             GameKeys.CATEGORY_COORDINATION to listOf(
                 GameKeys.GAME_ROAD_DASH,
@@ -208,9 +213,9 @@ class WelcomeActivity : BaseActivity() {
                 GameKeys.GAME_NUMBER_ADDITION,
                 GameKeys.GAME_PATH_CHANGE
             ),
-            GameKeys.CATEGORY_FOCUS to listOf(
+            GameKeys.CATEGORY_ATTENTION to listOf(
                 GameKeys.GAME_WORD_SEARCH,
-                GameKeys.GAME_FRUIT_SORT
+                GameKeys.GAME_LEFT_OR_RIGHT
             ),
             GameKeys.CATEGORY_MEMORY to listOf(
                 GameKeys.GAME_COLOR_SEQUENCE,

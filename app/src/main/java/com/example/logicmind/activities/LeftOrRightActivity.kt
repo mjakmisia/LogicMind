@@ -52,6 +52,18 @@ class LeftOrRightActivity : BaseActivity() {
                 Toast.makeText(this, "Czas minął! Koniec gry!", Toast.LENGTH_LONG).show()
                 gridLayout.isEnabled = false
                 pauseOverlay.visibility = View.GONE
+                updateUserStatistics(
+                    categoryKey = GameKeys.CATEGORY_ATTENTION,
+                    gameKey = GameKeys.GAME_LEFT_OR_RIGHT,
+                    starsEarned = starManager.starCount,
+                    accuracy = calculateAccuracy(),
+                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
+                )
+                lastPlayedGame(
+                    GameKeys.CATEGORY_ATTENTION,
+                    GameKeys.GAME_LEFT_OR_RIGHT,
+                    getString(R.string.left_or_right)
+                )
                 finish()
             }
         }
@@ -71,6 +83,7 @@ class LeftOrRightActivity : BaseActivity() {
                 timerProgressBar.stop()
                 timerProgressBar.reset()
                 timerProgressBar.start()
+                startReactionTracking()
                 startNewGame()
             }
         )
