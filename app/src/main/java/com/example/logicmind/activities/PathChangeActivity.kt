@@ -150,7 +150,7 @@ class PathChangeActivity : BaseActivity() {
                     categoryKey = GameKeys.CATEGORY_REASONING,
                     gameKey = GameKeys.GAME_PATH_CHANGE,
                     starsEarned = starManager.starCount,
-                    accuracy = calculateAccuracy(),
+                    accuracy = gameStatsManager.calculateAccuracy(),
                     reactionTime = getAverageReactionTime(stars = starManager.starCount),
                 )
 
@@ -223,7 +223,7 @@ class PathChangeActivity : BaseActivity() {
                     categoryKey = GameKeys.CATEGORY_REASONING,
                     gameKey = GameKeys.GAME_PATH_CHANGE,
                     starsEarned = starManager.starCount,
-                    accuracy = calculateAccuracy(),
+                    accuracy = gameStatsManager.calculateAccuracy(),
                     reactionTime = getAverageReactionTime(stars = starManager.starCount),
                 )
 
@@ -243,7 +243,6 @@ class PathChangeActivity : BaseActivity() {
         if (savedInstanceState == null) {
             countdownManager.startCountdown()
 
-            startReactionTracking()
         } else {
             restoreGameState(savedInstanceState)
         }
@@ -365,6 +364,7 @@ class PathChangeActivity : BaseActivity() {
 
     // Funkcja wywoływana po odliczaniu, rozpoczyna nową grę
     private fun startNewGame() {
+        gameStatsManager.startReactionTracking()
         if (pauseMenu.isPaused) pauseMenu.resume()
 
         isGameRunning = true
@@ -681,14 +681,14 @@ class PathChangeActivity : BaseActivity() {
             successfulStreak++
             checkComboBonus() // Sprawdź, czy należy się bonus
 
-            registerAttempt(true)
+            gameStatsManager.registerAttempt(true)
         } else {
             // BŁĄD
             successfulStreak = 0 // Zeruj serię
             timerProgressBar.subtractTime(PENALTY_TIME_SECONDS)
             Toast.makeText(this, String.format(Locale.US, "-%ds!", PENALTY_TIME_SECONDS), Toast.LENGTH_SHORT).show()
 
-            registerAttempt(false)
+            gameStatsManager.registerAttempt(false)
         }
 
         // Zawsze aktualizuj wyświetlacz serii

@@ -1,4 +1,5 @@
 package com.example.logicmind.activities
+
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -34,8 +35,10 @@ class CardMatchActivity : BaseActivity() {
     private lateinit var starManager: StarManager // Manager gwiazdek
     private lateinit var pauseMenu: PauseMenu // Menu pauzy gry
     private var previewRemaining: Long = 0L // Pozostały czas do ukrycia kart w fazie preview (ms)
-    private var isPreviewPhase: Boolean = false // Flaga aktywnej fazy preview (karty przodem na starcie rundy)
+    private var isPreviewPhase: Boolean =
+        false // Flaga aktywnej fazy preview (karty przodem na starcie rundy)
     private var pendingFlipCardIndex: Int = -1  // Indeks karty do odwrócenia po bombie
+
     companion object {
         const val BOMB_VALUE = -1 // Specjalna wartość dla bomby
     }
@@ -95,11 +98,15 @@ class CardMatchActivity : BaseActivity() {
                     categoryKey = GameKeys.CATEGORY_MEMORY,
                     gameKey = GameKeys.GAME_CARD_MATCH,
                     starsEarned = starManager.starCount,
-                    accuracy = calculateAccuracy(),
+                    accuracy = gameStatsManager.calculateAccuracy(),
                     reactionTime = getAverageReactionTime(stars = starManager.starCount),
                 )
 
-                lastPlayedGame(GameKeys.CATEGORY_MEMORY, GameKeys.GAME_CARD_MATCH, getString(R.string.card_match))
+                lastPlayedGame(
+                    GameKeys.CATEGORY_MEMORY,
+                    GameKeys.GAME_CARD_MATCH,
+                    getString(R.string.card_match)
+                )
                 finish()
             }
         }
@@ -112,7 +119,8 @@ class CardMatchActivity : BaseActivity() {
                 pauseButton,
                 findViewById<TextView>(R.id.starCountText),
                 findViewById<ImageView>(R.id.starIcon),
-                timerProgressBar),
+                timerProgressBar
+            ),
             onCountdownFinished = {
                 currentLevel = 1
                 starManager.reset()
@@ -145,19 +153,24 @@ class CardMatchActivity : BaseActivity() {
                 if (!isPreviewPhase) {
                     timerProgressBar.pause()
                 }
-                onGamePaused()
+                gameStatsManager.onGamePaused()
             }, // Zatrzymuje timer podczas pauzy pod warunkiem że nie jesteśmy w preview
             onExit = {
                 updateUserStatistics(
                     categoryKey = GameKeys.CATEGORY_MEMORY,
                     gameKey = GameKeys.GAME_CARD_MATCH,
                     starsEarned = starManager.starCount,
-                    accuracy = calculateAccuracy(),
+                    accuracy = gameStatsManager.calculateAccuracy(),
                     reactionTime = getAverageReactionTime(stars = starManager.starCount),
                 )
 
-                lastPlayedGame(GameKeys.CATEGORY_MEMORY, GameKeys.GAME_CARD_MATCH, getString(R.string.card_match))
-                finish() }, // Kończy aktywność
+                lastPlayedGame(
+                    GameKeys.CATEGORY_MEMORY,
+                    GameKeys.GAME_CARD_MATCH,
+                    getString(R.string.card_match)
+                )
+                finish()
+            }, // Kończy aktywność
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.card_match_instruction),
         )
@@ -166,8 +179,6 @@ class CardMatchActivity : BaseActivity() {
         // Sprawdzenie, czy gra jest uruchamiana po raz pierwszy
         if (savedInstanceState == null) {
             countdownManager.startCountdown() // Rozpoczyna odliczanie początkowe
-
-            startReactionTracking()
         } else {
             restoreGameState(savedInstanceState) // Przywraca stan gry
         }
@@ -230,26 +241,31 @@ class CardMatchActivity : BaseActivity() {
                 boardCols = 4
                 bombCount = 0
             }
+
             2 -> {
                 boardRows = 4
                 boardCols = 4
                 bombCount = 2
             }
+
             3 -> {
                 boardRows = 4
                 boardCols = 4
                 bombCount = 4
             }
+
             4 -> {
                 boardRows = 5
                 boardCols = 5
                 bombCount = 1
             }
+
             5 -> {
                 boardRows = 5
                 boardCols = 5
                 bombCount = 3
             }
+
             else -> {
                 boardRows = 5
                 boardCols = 5
@@ -262,7 +278,8 @@ class CardMatchActivity : BaseActivity() {
 
         val pairCount = (cardCount - bombCount) / 2
         val selectedImages = cardImages.shuffled().take(pairCount)
-        cardValues = (selectedImages + selectedImages + List(bombCount) { BOMB_VALUE }).shuffled() // Dodaj bomby i wymieszaj
+        cardValues =
+            (selectedImages + selectedImages + List(bombCount) { BOMB_VALUE }).shuffled() // Dodaj bomby i wymieszaj
 
         cards = createBoard(cardValues) // Tworzy, ustawia wymiary i czyści siatkę
 
@@ -271,7 +288,11 @@ class CardMatchActivity : BaseActivity() {
     }
 
     // Tworzy planszę z kartami; w trybie restore ustawia stany flipped/matched
-    private fun createBoard(cardValues: List<Int>, flippedStates: BooleanArray? = null, matchedStates: BooleanArray? = null): MutableList<Card> {
+    private fun createBoard(
+        cardValues: List<Int>,
+        flippedStates: BooleanArray? = null,
+        matchedStates: BooleanArray? = null
+    ): MutableList<Card> {
         val cards = mutableListOf<Card>()
         gridLayout.removeAllViews() // Wyczyść siatkę (jeśli nie zrobione wcześniej)
         gridLayout.rowCount = boardRows
@@ -350,8 +371,10 @@ class CardMatchActivity : BaseActivity() {
         // Odtwarzanie planszy gry
         if (boardRows != 0 && boardCols != 0 && cardValues.isNotEmpty()) {
             val cardCount = boardRows * boardCols
-            val flippedArray = savedInstanceState.getBooleanArray("cardsFlipped") ?: BooleanArray(cardCount)
-            val matchedArray = savedInstanceState.getBooleanArray("cardsMatched") ?: BooleanArray(cardCount)
+            val flippedArray =
+                savedInstanceState.getBooleanArray("cardsFlipped") ?: BooleanArray(cardCount)
+            val matchedArray =
+                savedInstanceState.getBooleanArray("cardsMatched") ?: BooleanArray(cardCount)
 
             cards = createBoard(cardValues, flippedArray, matchedArray)
 
@@ -366,8 +389,7 @@ class CardMatchActivity : BaseActivity() {
                 Handler(Looper.getMainLooper()).postDelayed({
                     checkMatch()
                 }, 500)
-            }
-            else if (firstCard != null && !isFlipping) {
+            } else if (firstCard != null && !isFlipping) {
                 flipCard(firstCard!!, true)
             }
 
@@ -487,7 +509,7 @@ class CardMatchActivity : BaseActivity() {
         val isMatch = firstCard!!.value == secondCard!!.value
 
         //rejestruj probe i sukces
-        registerAttempt(isMatch)
+        gameStatsManager.registerAttempt(isMatch)
 
         if (isMatch) {
             // Karty pasują
@@ -529,12 +551,14 @@ class CardMatchActivity : BaseActivity() {
             }
             card.view.background = null
             card.isFlipped = true
-            card.view.animate().scaleX(1.1f).scaleY(1.1f).setDuration(150).start() // Animacja powiększenia
+            card.view.animate().scaleX(1.1f).scaleY(1.1f).setDuration(150)
+                .start() // Animacja powiększenia
         } else {
             card.view.setImageResource(0) // Ukryj obraz
             card.view.setBackgroundResource(R.drawable.bg_rounded_card) // Pokaż tło
             card.isFlipped = false
-            card.view.animate().scaleX(1f).scaleY(1f).setDuration(150).start() // Animacja powrotu do normalnego rozmiaru
+            card.view.animate().scaleX(1f).scaleY(1f).setDuration(150)
+                .start() // Animacja powrotu do normalnego rozmiaru
         }
     }
 

@@ -107,7 +107,7 @@ class ColorSequenceActivity : BaseActivity() {
                     categoryKey = GameKeys.CATEGORY_MEMORY,
                     gameKey = GameKeys.GAME_COLOR_SEQUENCE,
                     starsEarned = starManager.starCount,
-                    accuracy = calculateAccuracy(),
+                    accuracy = gameStatsManager.calculateAccuracy(),
                     reactionTime = getAverageReactionTime(stars = starManager.starCount),
                 )
                 lastPlayedGame(GameKeys.CATEGORY_MEMORY, GameKeys.GAME_COLOR_SEQUENCE, getString(R.string.color_sequence))
@@ -169,7 +169,7 @@ class ColorSequenceActivity : BaseActivity() {
                     categoryKey = GameKeys.CATEGORY_MEMORY,
                     gameKey = GameKeys.GAME_COLOR_SEQUENCE,
                     starsEarned = starManager.starCount,
-                    accuracy = calculateAccuracy(),
+                    accuracy = gameStatsManager.calculateAccuracy(),
                     reactionTime = getAverageReactionTime(stars = starManager.starCount),
                 )
                 lastPlayedGame(GameKeys.CATEGORY_MEMORY, GameKeys.GAME_COLOR_SEQUENCE, getString(R.string.color_sequence))
@@ -181,7 +181,6 @@ class ColorSequenceActivity : BaseActivity() {
         // Sprawdzenie, czy gra jest uruchamiana po raz pierwszy
         if (savedInstanceState == null) {
             countdownManager.startCountdown() // Rozpoczyna odliczanie początkowe
-            startReactionTracking()
         } else {
             restoreGameState(savedInstanceState) // Przywraca stan gry
         }
@@ -294,6 +293,7 @@ class ColorSequenceActivity : BaseActivity() {
 
     // Inicjalizuje nową grę na podanym poziomie
     private fun startNewGame() {
+        gameStatsManager.startReactionTracking()
         // Upewnij się że menu pauzy jest schowane
         if (pauseMenu.isPaused) {
             pauseMenu.resume()
@@ -504,14 +504,14 @@ class ColorSequenceActivity : BaseActivity() {
         highlightKey(keyIndex, true)
         runDelayed(200L) { highlightKey(keyIndex, false) }
 
-        registerAttempt(true)
+        gameStatsManager.registerAttempt(true)
 
         userSequence.add(keyIndex)
 
         // Sprawdź błąd (po każdym kliknięciu)
         if (userSequence.size > currentSequence.size ||
             userSequence[userSequence.size - 1] != currentSequence[userSequence.size - 1]) {
-            registerAttempt(false)
+            gameStatsManager.registerAttempt(false)
             checkUserSequence()
             return
         }

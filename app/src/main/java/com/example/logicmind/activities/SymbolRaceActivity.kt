@@ -144,7 +144,7 @@ class SymbolRaceActivity : BaseActivity() {
                     categoryKey = GameKeys.CATEGORY_COORDINATION,
                     gameKey = GameKeys.GAME_SYMBOL_RACE,
                     starsEarned = starManager.starCount,
-                    accuracy = calculateAccuracy(),
+                    accuracy = gameStatsManager.calculateAccuracy(),
                     reactionTime = getAverageReactionTime(stars = starManager.starCount),
                 )
 
@@ -220,7 +220,7 @@ class SymbolRaceActivity : BaseActivity() {
                     categoryKey = GameKeys.CATEGORY_COORDINATION,
                     gameKey = GameKeys.GAME_SYMBOL_RACE,
                     starsEarned = starManager.starCount,
-                    accuracy = calculateAccuracy(),
+                    accuracy = gameStatsManager.calculateAccuracy(),
                     reactionTime = getAverageReactionTime(stars = starManager.starCount),
                 )
 
@@ -254,7 +254,6 @@ class SymbolRaceActivity : BaseActivity() {
             redContainer.visibility = View.INVISIBLE
             tempoInfoText.visibility = View.GONE
             countdownManager.startCountdown()
-            startReactionTracking()
         } else {
             // Jeśli gra była już aktywna – przywracamy stan
             restoreGameState(savedInstanceState)
@@ -460,6 +459,7 @@ class SymbolRaceActivity : BaseActivity() {
 
     // Rozpoczyna nową grę
     private fun startNewGame() {
+        gameStatsManager.startReactionTracking()
         cancelAllDelayedActions() // Czyści wszystkie zaplanowane zadania
 
         if (pauseMenu.isPaused) pauseMenu.resume() // Wznawia, jeśli gra była zapauzowana
@@ -744,7 +744,7 @@ class SymbolRaceActivity : BaseActivity() {
         accelerateIfNeeded() // Przyspiesza tempo
         updateTempoDisplay()
 
-        registerAttempt(true)
+        gameStatsManager.registerAttempt(true)
     }
 
     // Obsługuje błąd gracza
@@ -755,7 +755,7 @@ class SymbolRaceActivity : BaseActivity() {
         accelerateIfNeeded()
         updateTempoDisplay()
 
-        registerAttempt(false)
+        gameStatsManager.registerAttempt(false)
     }
 
     // Sprawdza, czy osiągnięto próg combo i przyznaje bonus
