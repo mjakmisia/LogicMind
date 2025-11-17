@@ -67,7 +67,7 @@ class NumberAdditionActivity : BaseActivity() {
                     categoryKey = GameKeys.CATEGORY_REASONING,
                     gameKey = GameKeys.GAME_NUMBER_ADDITION,
                     starsEarned = starManager.starCount,
-                    accuracy = calculateAccuracy(),
+                    accuracy = gameStatsManager.calculateAccuracy(),
                     reactionTime = getAverageReactionTime(stars = starManager.starCount),
                 )
                 lastPlayedGame(GameKeys.CATEGORY_REASONING, GameKeys.GAME_NUMBER_ADDITION, getString(R.string.number_addition))
@@ -94,7 +94,7 @@ class NumberAdditionActivity : BaseActivity() {
                 numberGrid.visibility = View.VISIBLE
                 isGameActive = true
 
-                startReactionTracking()
+
                 startLevel()
             }
         )
@@ -138,7 +138,7 @@ class NumberAdditionActivity : BaseActivity() {
                     categoryKey = GameKeys.CATEGORY_REASONING,
                     gameKey = GameKeys.GAME_NUMBER_ADDITION,
                     starsEarned = starManager.starCount,
-                    accuracy = calculateAccuracy(),
+                    accuracy = gameStatsManager.calculateAccuracy(),
                     reactionTime = getAverageReactionTime(stars = starManager.starCount),
                 )
                 lastPlayedGame(GameKeys.CATEGORY_REASONING, GameKeys.GAME_NUMBER_ADDITION, getString(R.string.number_addition))
@@ -239,6 +239,7 @@ class NumberAdditionActivity : BaseActivity() {
 
     // Rozpoczyna nowy poziom gry
     private fun startLevel() {
+        gameStatsManager.startReactionTracking()
         isGameActive = true
         targetNumberText.background = AppCompatResources.getDrawable(this, R.drawable.circle_bg)
         numberGrid.isEnabled = true
@@ -398,7 +399,7 @@ class NumberAdditionActivity : BaseActivity() {
                     btn.setOnClickListener(null)
                 }
                 //poprawna próba
-                registerAttempt(true)
+                gameStatsManager.registerAttempt(true)
                 starManager.increment()
                 selectedButtons.clear()
 
@@ -407,7 +408,7 @@ class NumberAdditionActivity : BaseActivity() {
                     return
                 }
             } else {
-                registerAttempt(false)
+                gameStatsManager.registerAttempt(false)
                 selectedButtons.forEach { btn -> btn.setBackgroundColor(Color.RED) }
                 isShowingError = true
                 runDelayed {
@@ -466,7 +467,7 @@ class NumberAdditionActivity : BaseActivity() {
             categoryKey = GameKeys.CATEGORY_REASONING,
             gameKey = GameKeys.GAME_NUMBER_ADDITION,
             starsEarned = starManager.starCount,
-            accuracy = calculateAccuracy(),
+            accuracy = gameStatsManager.calculateAccuracy(),
             reactionTime = getAverageReactionTime(stars = starManager.starCount),
         )
         lastPlayedGame(GameKeys.CATEGORY_REASONING, GameKeys.GAME_NUMBER_ADDITION, getString(R.string.number_addition))

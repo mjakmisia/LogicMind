@@ -103,28 +103,14 @@ class LeftOrRightActivity : BaseActivity() {
                 countdownManager.startCountdown()
             },
             onResume = {
-                onGameResumed()
+                gameStatsManager.onGameResumed()
                 timerProgressBar.start()
             }, // Wznawia timer po pauzie
             onPause = {
-                onGamePaused()
+                gameStatsManager.onGamePaused()
                 timerProgressBar.pause()
             },  // Zatrzymuje timer podczas pauzy
-            onExit = {
-                updateUserStatistics(
-                    categoryKey = GameKeys.CATEGORY_ATTENTION,
-                    gameKey = GameKeys.GAME_LEFT_OR_RIGHT,
-                    starsEarned = starManager.starCount,
-                    accuracy = calculateAccuracy(),
-                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
-                )
-                lastPlayedGame(
-                    GameKeys.CATEGORY_ATTENTION,
-                    GameKeys.GAME_LEFT_OR_RIGHT,
-                    getString(R.string.left_or_right)
-                )
-                finish()
-            }, // Kończy aktywność
+            onExit = { finish() }, // Kończy aktywność
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.left_or_right_instruction),
         )
@@ -182,6 +168,7 @@ class LeftOrRightActivity : BaseActivity() {
     }
 
     private fun startNewGame() {
+        gameStatsManager.startReactionTracking()
 
     }
 

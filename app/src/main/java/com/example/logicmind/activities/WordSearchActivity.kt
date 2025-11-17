@@ -1,5 +1,4 @@
 package com.example.logicmind.activities
-
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Paint
@@ -168,28 +167,14 @@ class WordSearchActivity : BaseActivity() {
                 countdownManager.startCountdown()
             },
             onResume = {
+                gameStatsManager.onGameResumed()
                 timerProgressBar.start()
-                onGameResumed()
             },
             onPause = {
+                gameStatsManager.onGamePaused()
                 timerProgressBar.pause()
-                onGamePaused()
             },
-            onExit = {
-                updateUserStatistics(
-                    categoryKey = GameKeys.CATEGORY_ATTENTION,
-                    gameKey = GameKeys.GAME_WORD_SEARCH,
-                    starsEarned = starManager.starCount,
-                    accuracy = calculateAccuracy(),
-                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
-                )
-                lastPlayedGame(
-                    GameKeys.CATEGORY_ATTENTION,
-                    GameKeys.GAME_WORD_SEARCH,
-                    getString(R.string.word_search)
-                )
-                finish()
-            },
+            onExit = { finish() },
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.word_search_instruction),
         )
@@ -377,6 +362,7 @@ class WordSearchActivity : BaseActivity() {
     }
 
     private fun startNewGame() {
+        gameStatsManager.startReactionTracking()
         // Wyczyść stany
         currentBoard = null
         wordsToFind = emptyList()
