@@ -53,14 +53,15 @@ class LeftOrRightActivity : BaseActivity() {
                 gridLayout.isEnabled = false
                 pauseOverlay.visibility = View.GONE
                 updateUserStatistics(
-                    categoryKey = GameKeys.CATEGORY_ATTENTION,
+                    categoryKey = GameKeys.CATEGORY_FOCUS,
                     gameKey = GameKeys.GAME_LEFT_OR_RIGHT,
                     starsEarned = starManager.starCount,
-                    accuracy = calculateAccuracy(),
+                    accuracy = gameStatsManager.calculateAccuracy(),
                     reactionTime = getAverageReactionTime(stars = starManager.starCount),
                 )
+
                 lastPlayedGame(
-                    GameKeys.CATEGORY_ATTENTION,
+                    GameKeys.CATEGORY_FOCUS,
                     GameKeys.GAME_LEFT_OR_RIGHT,
                     getString(R.string.left_or_right)
                 )
@@ -83,7 +84,8 @@ class LeftOrRightActivity : BaseActivity() {
                 timerProgressBar.stop()
                 timerProgressBar.reset()
                 timerProgressBar.start()
-                startReactionTracking()
+                gameStatsManager.startReactionTracking()
+                gameStatsManager.setGameStartTime(this@LeftOrRightActivity)
                 startNewGame()
             }
         )
@@ -112,14 +114,15 @@ class LeftOrRightActivity : BaseActivity() {
             },  // Zatrzymuje timer podczas pauzy
             onExit = {
                 updateUserStatistics(
-                    categoryKey = GameKeys.CATEGORY_ATTENTION,
+                    categoryKey = GameKeys.CATEGORY_FOCUS,
                     gameKey = GameKeys.GAME_LEFT_OR_RIGHT,
                     starsEarned = starManager.starCount,
-                    accuracy = calculateAccuracy(),
+                    accuracy = gameStatsManager.calculateAccuracy(),
                     reactionTime = getAverageReactionTime(stars = starManager.starCount),
                 )
+
                 lastPlayedGame(
-                    GameKeys.CATEGORY_ATTENTION,
+                    GameKeys.CATEGORY_FOCUS,
                     GameKeys.GAME_LEFT_OR_RIGHT,
                     getString(R.string.left_or_right)
                 )
@@ -182,6 +185,7 @@ class LeftOrRightActivity : BaseActivity() {
     }
 
     private fun startNewGame() {
+        gameStatsManager.startReactionTracking()
 
     }
 

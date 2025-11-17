@@ -166,6 +166,8 @@ class SymbolRaceActivity : BaseActivity() {
             ),
             onCountdownFinished = {
                 // Po odliczaniu startujemy grę
+                gameStatsManager.startReactionTracking()
+                gameStatsManager.setGameStartTime(this@SymbolRaceActivity)
                 starManager.reset()
                 startNewGame()
                 timerProgressBar.start()

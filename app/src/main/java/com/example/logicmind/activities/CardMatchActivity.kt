@@ -116,6 +116,9 @@ class CardMatchActivity : BaseActivity() {
             onCountdownFinished = {
                 currentLevel = 1
                 starManager.reset()
+
+                gameStatsManager.startReactionTracking()
+                gameStatsManager.setGameStartTime(this@CardMatchActivity)
                 startNewGame()
             }
         )

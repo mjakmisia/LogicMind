@@ -127,6 +127,9 @@ class ColorSequenceActivity : BaseActivity() {
             onCountdownFinished = {
                 currentLevel = 1
                 starManager.reset()
+
+                gameStatsManager.startReactionTracking()
+                gameStatsManager.setGameStartTime(this@ColorSequenceActivity)
                 startNewGame()
             }
         )

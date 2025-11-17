@@ -334,7 +334,7 @@ class StatisticsActivity : BaseActivity() {
     ) {
         //2 miejsca po przecinku
         val formattedReaction = if (reactionValue is Double && reactionValue >= 0) {
-            String.format("%.2f s", reactionValue)
+            String.format("%.2f s", reactionValue / 1000.0)
         } else {
             "0"
         }

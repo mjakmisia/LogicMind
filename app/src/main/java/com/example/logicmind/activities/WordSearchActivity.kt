@@ -1,5 +1,4 @@
 package com.example.logicmind.activities
-
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Paint
@@ -43,8 +42,7 @@ class WordSearchActivity : BaseActivity() {
     private var currentBoard: WordSearchGenerator.Board? = null // Logika planszy
     private var wordsToFind: List<String> = emptyList() // Słowa do znalezienia w danej rundzie
     private val foundWords = mutableSetOf<String>() // Słowa już znalezione
-    private val letterViews =
-        mutableMapOf<Pair<Int, Int>, TextView>() // Mapa przechowująca widoki liter (Row, Col) -> TextView
+    private val letterViews = mutableMapOf<Pair<Int, Int>, TextView>() // Mapa przechowująca widoki liter (Row, Col) -> TextView
 
     // Przechowuje dane linii na potrzeby rotacji
     data class PermanentLineData(
@@ -115,14 +113,15 @@ class WordSearchActivity : BaseActivity() {
                 gridLayout.isEnabled = false
                 pauseOverlay.visibility = View.GONE
                 updateUserStatistics(
-                    categoryKey = GameKeys.CATEGORY_ATTENTION,
+                    categoryKey = GameKeys.CATEGORY_FOCUS,
                     gameKey = GameKeys.GAME_WORD_SEARCH,
                     starsEarned = starManager.starCount,
-                    accuracy = calculateAccuracy(),
+                    accuracy = gameStatsManager.calculateAccuracy(),
                     reactionTime = getAverageReactionTime(stars = starManager.starCount),
                 )
+
                 lastPlayedGame(
-                    GameKeys.CATEGORY_ATTENTION,
+                    GameKeys.CATEGORY_FOCUS,
                     GameKeys.GAME_WORD_SEARCH,
                     getString(R.string.word_search)
                 )
@@ -148,7 +147,8 @@ class WordSearchActivity : BaseActivity() {
                 timerProgressBar.stop()
                 timerProgressBar.reset()
                 timerProgressBar.start()
-                startReactionTracking()
+                gameStatsManager.startReactionTracking()
+                gameStatsManager.setGameStartTime(this@WordSearchActivity)
                 startNewGame()
             }
         )
@@ -168,23 +168,24 @@ class WordSearchActivity : BaseActivity() {
                 countdownManager.startCountdown()
             },
             onResume = {
-                timerProgressBar.start()
                 onGameResumed()
+                timerProgressBar.start()
             },
             onPause = {
-                timerProgressBar.pause()
                 onGamePaused()
+                timerProgressBar.pause()
             },
             onExit = {
                 updateUserStatistics(
-                    categoryKey = GameKeys.CATEGORY_ATTENTION,
+                    categoryKey = GameKeys.CATEGORY_FOCUS,
                     gameKey = GameKeys.GAME_WORD_SEARCH,
                     starsEarned = starManager.starCount,
-                    accuracy = calculateAccuracy(),
+                    accuracy = gameStatsManager.calculateAccuracy(),
                     reactionTime = getAverageReactionTime(stars = starManager.starCount),
                 )
+
                 lastPlayedGame(
-                    GameKeys.CATEGORY_ATTENTION,
+                    GameKeys.CATEGORY_FOCUS,
                     GameKeys.GAME_WORD_SEARCH,
                     getString(R.string.word_search)
                 )
@@ -220,8 +221,7 @@ class WordSearchActivity : BaseActivity() {
         outState.putStringArrayList("foundWords", ArrayList(foundWords))
         currentBoard?.let { board ->
             outState.putInt("boardSize", board.size)
-            val flatGrid =
-                board.grid.flatten().toCharArray() // Zapisujemy siatkę jako płaską tablicę znaków
+            val flatGrid = board.grid.flatten().toCharArray() // Zapisujemy siatkę jako płaską tablicę znaków
             outState.putCharArray("flatGrid", flatGrid)
         }
 
@@ -249,8 +249,7 @@ class WordSearchActivity : BaseActivity() {
         starManager.restoreState(savedInstanceState)
 
         // Przywróć stan timera
-        val timerRemainingTimeMs =
-            savedInstanceState.getLong("timerRemainingTimeMs", BASE_TIME_SECONDS * 1000L)
+        val timerRemainingTimeMs = savedInstanceState.getLong("timerRemainingTimeMs", BASE_TIME_SECONDS * 1000L)
         val timerIsRunning = savedInstanceState.getBoolean("timerIsRunning", false)
         timerProgressBar.setRemainingTimeMs(timerRemainingTimeMs.coerceAtLeast(1L))
 
@@ -282,15 +281,13 @@ class WordSearchActivity : BaseActivity() {
         val lineCount = savedInstanceState.getInt("permanentLinesCount", 0)
         permanentLinesList.clear()
         for (i in 0 until lineCount) {
-            permanentLinesList.add(
-                PermanentLineData(
-                    savedInstanceState.getInt("line_${i}_sr"),
-                    savedInstanceState.getInt("line_${i}_sc"),
-                    savedInstanceState.getInt("line_${i}_er"),
-                    savedInstanceState.getInt("line_${i}_ec"),
-                    savedInstanceState.getInt("line_${i}_color")
-                )
-            )
+            permanentLinesList.add(PermanentLineData(
+                savedInstanceState.getInt("line_${i}_sr"),
+                savedInstanceState.getInt("line_${i}_sc"),
+                savedInstanceState.getInt("line_${i}_er"),
+                savedInstanceState.getInt("line_${i}_ec"),
+                savedInstanceState.getInt("line_${i}_color")
+            ))
         }
 
         // Przywróc stan planszy
@@ -377,6 +374,7 @@ class WordSearchActivity : BaseActivity() {
     }
 
     private fun startNewGame() {
+        gameStatsManager.startReactionTracking()
         // Wyczyść stany
         currentBoard = null
         wordsToFind = emptyList()
@@ -531,12 +529,10 @@ class WordSearchActivity : BaseActivity() {
                     startCell = findCellAt(x, y)
                     if (startCell == null) return@setOnTouchListener false
 
-                    val startPixels = getCellCenter(startCell!!.first, startCell!!.second)
-                        ?: return@setOnTouchListener false
+                    val startPixels = getCellCenter(startCell!!.first, startCell!!.second) ?: return@setOnTouchListener false
 
                     // Wybierz nowy tymczasowy kolor dla tego przeciągnięcia
-                    currentTempColor =
-                        availableColors.firstOrNull() ?: pastelColors.random() // awaryjnie - losowy
+                    currentTempColor = availableColors.firstOrNull() ?: pastelColors.random() // awaryjnie - losowy
 
                     currentSelectionCoords.clear()
                     currentSelectionCoords.add(startCell!!)
@@ -549,10 +545,8 @@ class WordSearchActivity : BaseActivity() {
                 android.view.MotionEvent.ACTION_MOVE -> {
                     if (startCell == null) return@setOnTouchListener false
 
-                    val startPixels = getCellCenter(startCell!!.first, startCell!!.second)
-                        ?: return@setOnTouchListener false
-                    val endCell =
-                        findCellAt(x, y) ?: startCell!! // Jeśli wyjedziemy, użyj ostatniej znanej
+                    val startPixels = getCellCenter(startCell!!.first, startCell!!.second) ?: return@setOnTouchListener false
+                    val endCell = findCellAt(x, y) ?: startCell!! // Jeśli wyjedziemy, użyj ostatniej znanej
 
                     // Oblicz prawidłową linię (H, V, D)
                     val lineCoords = calculateLine(startCell!!, endCell)
@@ -560,8 +554,7 @@ class WordSearchActivity : BaseActivity() {
 
                     // Znajdź środek ostatniej komórki w prawidłowej linii
                     val lastValidCell = currentSelectionCoords.last()
-                    val endPixels =
-                        getCellCenter(lastValidCell.first, lastValidCell.second) ?: startPixels
+                    val endPixels = getCellCenter(lastValidCell.first, lastValidCell.second) ?: startPixels
 
                     // Zaktualizuj linię tymczasową
                     overlayView.setTemporaryLine(startPixels, endPixels, currentTempColor)
@@ -581,7 +574,6 @@ class WordSearchActivity : BaseActivity() {
                     currentSelectionCoords.clear()
                     true
                 }
-
                 else -> false
             }
         }
@@ -609,8 +601,6 @@ class WordSearchActivity : BaseActivity() {
             // Znaleziono słowo
             foundWords.add(wordToFind)
 
-            registerAttempt(true) //poprawna próba
-
             starManager.increment()
 
             val startCoords = currentSelectionCoords.first()
@@ -626,13 +616,11 @@ class WordSearchActivity : BaseActivity() {
                 overlayView.addPermanentLine(startPixels, endPixels, finalColor)
 
                 // Zapisz dane linii na potrzeby rotacji
-                permanentLinesList.add(
-                    PermanentLineData(
-                        startCoords.first, startCoords.second,
-                        endCoords.first, endCoords.second,
-                        finalColor
-                    )
-                )
+                permanentLinesList.add(PermanentLineData(
+                    startCoords.first, startCoords.second,
+                    endCoords.first, endCoords.second,
+                    finalColor
+                ))
 
                 // Zarządzaj pulą kolorów
                 availableColors.remove(finalColor)
@@ -653,8 +641,6 @@ class WordSearchActivity : BaseActivity() {
 
                 startNewGame()
             }
-        } else {
-            registerAttempt(false) //niepoprawna próba
         }
     }
 

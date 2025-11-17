@@ -181,6 +181,8 @@ class PathChangeActivity : BaseActivity() {
                 timerProgressBar.stop()
                 timerProgressBar.reset()
                 timerProgressBar.start()
+                gameStatsManager.startReactionTracking()
+                gameStatsManager.setGameStartTime(this@PathChangeActivity)
                 startNewGame()
             }
         )
@@ -382,6 +384,7 @@ class PathChangeActivity : BaseActivity() {
 
         remainingSpawnDelayMs = 500L  // Ustaw timer dla pierwszej kulki
         startSpawningBalls()
+
     }
 
     // Konfiguruje siatkę, mapuje komórki i ustawia listenery przełączników
