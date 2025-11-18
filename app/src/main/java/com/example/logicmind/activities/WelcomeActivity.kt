@@ -201,7 +201,7 @@ class WelcomeActivity : BaseActivity() {
         val categories = listOf(
             GameKeys.CATEGORY_COORDINATION,
             GameKeys.CATEGORY_REASONING,
-            GameKeys.CATEGORY_ATTENTION,
+            GameKeys.CATEGORY_FOCUS,
             GameKeys.CATEGORY_MEMORY
         )
         val defaultGames = mapOf(
@@ -213,7 +213,7 @@ class WelcomeActivity : BaseActivity() {
                 GameKeys.GAME_NUMBER_ADDITION,
                 GameKeys.GAME_PATH_CHANGE
             ),
-            GameKeys.CATEGORY_ATTENTION to listOf(
+            GameKeys.CATEGORY_FOCUS to listOf(
                 GameKeys.GAME_WORD_SEARCH,
                 GameKeys.GAME_LEFT_OR_RIGHT
             ),

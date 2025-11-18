@@ -13,6 +13,9 @@ object SoundManager {
     private var soundPool: SoundPool? = null
     private val soundMap = mutableMapOf<Int, Int>() // R.raw.id → soundId
 
+    //kontrolowanie dźwięków z ustawien
+    var isSoundEnabled: Boolean = true
+
     /** Inicjalizuje SoundPool (tylko raz) */
     private fun ensureInitialized(context: Context) {
         if (soundPool != null) return
@@ -49,6 +52,10 @@ object SoundManager {
 
     /** Odtwarza dźwięk */
     fun play(context: Context, resId: Int, volume: Float = 1f) {
+        //weryfikacja czy dźwięk jest wyłączony
+        if (!isSoundEnabled) {
+            return
+        }
         ensureInitialized(context)
         val soundId = loadSound(context.applicationContext, resId)
         if (soundId != 0) {
