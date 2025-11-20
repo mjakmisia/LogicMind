@@ -4,6 +4,7 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
 import androidx.test.espresso.action.ViewActions.typeText
+import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
@@ -69,5 +70,42 @@ class WelcomeActivityIntegrationTest {
         //bez błędu logowania
         onView(withId(R.id.tvErrorMessage))
             .check(matches(not(isDisplayed())))
+    }
+
+//    @Before
+//    fun setupIntents() {
+//        Intents.init()
+//    }
+//
+//    @After
+//    fun cleanupIntents() {
+//        Intents.release()
+//    }
+
+    @Test
+    fun test_registration_invalidEmail() {
+        val INVALID_EMAIL = "zlyemail"
+        val PASSWORD = "Haslo1234" //poprawne haslo
+
+        // dobre haslo
+        onView(withId(R.id.etPassword))
+            .perform(typeText(PASSWORD), closeSoftKeyboard())
+
+        //zły email
+        onView(withId(R.id.etEmail))
+            .perform(typeText(INVALID_EMAIL), closeSoftKeyboard())
+
+        // klikanie rejestracji
+        onView(withId(R.id.btnRegister))
+            .perform(click())
+
+        //sprawdza czy sie pokazuje username dialog
+        onView(withId(R.id.etUsername))
+            .check(doesNotExist())
+
+
+        // sprawdza, czy WelcomeActivity nadal jest na ekranie
+        onView(withId(R.id.btnRegister))
+            .check(matches(isDisplayed()))
     }
 }
