@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -59,14 +58,22 @@ open class BaseActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         super.onCreate(savedInstanceState)
 
+        //przywracamy zapisany motyw jeśli był
+        val sharedPrefs = getSharedPreferences("Settings", MODE_PRIVATE)
+        val isDarkMode = sharedPrefs.getBoolean("DarkMode_Enabled", false)
+        androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(
+            if (isDarkMode) androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
+            else androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
+        )
+
         // Ustawiamy pełny ekran i pozwalamy layoutowi wchodzić w wycięcia (notch)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.attributes.layoutInDisplayCutoutMode =
-            android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES //pod kamerą na górze
 
         // Ukrywamy paski systemowe
         val insetsController = WindowInsetsControllerCompat(window, window.decorView)
-        insetsController.hide(
+        insetsController.hide( //ukrywa dolny i górny pasek systemowy
             androidx.core.view.WindowInsetsCompat.Type.statusBars() or androidx.core.view.WindowInsetsCompat.Type.navigationBars()
         )
         insetsController.systemBarsBehavior =
@@ -389,11 +396,11 @@ open class BaseActivity : AppCompatActivity() {
     protected fun onGameResumed() = gameStatsManager.onGameResumed()
 
     protected fun getAverageReactionTime(stars: Int = 0): Double {
-        Toast.makeText(
-            this,
-            "AVG: ${gameStatsManager.calculateAvgReactionTime()}",
-            Toast.LENGTH_SHORT
-        ).show()
+//        Toast.makeText(
+//            this,
+//            "AVG: ${gameStatsManager.calculateAvgReactionTime()}",
+//            Toast.LENGTH_SHORT
+//        ).show()
 
         val avgReactionSec = gameStatsManager.calculateAvgReactionTime(stars)
 

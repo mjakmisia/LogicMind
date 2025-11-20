@@ -32,6 +32,7 @@
         <attr name="langTextColor" format="color"/>
         <attr name="langTextColorSelected" format="color"/>
         <attr name="cardview" format="color"/>
+        <attr name="pageBackground" format="color" />
 
         <attr name="pause_background" format="color"/>
     </declare-styleable>

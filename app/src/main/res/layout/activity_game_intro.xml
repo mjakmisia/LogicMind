@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorOnBackground"
+    android:background="?attr/pageBackground"
     android:padding="16dp">
 
     <!-- Guideline dla przesunięcia góry -->
@@ -94,7 +94,7 @@
         android:textAllCaps="false"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:textColor="?attr/colorOnBackground"
+        android:textColor="?attr/pageBackground"
         app:layout_constraintBottom_toTopOf="@id/bottomButtonGuideline"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>

@@ -2,5 +2,7 @@
     <!-- Plik do zmiany kolorów jak język nie jest wybrany -->
     <solid android:color="?attr/colorOnBackground_transparent"/>
     <corners android:radius="12dp"/>
-    <stroke android:width="2dp" android:color="?attr/colorOnBackground"/>
+    <stroke
+        android:width="2dp"
+        android:color="?attr/pageBackground" />
 </shape>

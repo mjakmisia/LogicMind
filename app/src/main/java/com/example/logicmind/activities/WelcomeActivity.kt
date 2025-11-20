@@ -176,18 +176,16 @@ class WelcomeActivity : BaseActivity() {
                     userRef.setValue(userData)
                         .addOnSuccessListener {
                             createDefaultCategoriesAndGames(userId)
-                            Toast.makeText(this, "Rejestracja powiodła się!", Toast.LENGTH_SHORT)
-                                .show()
+                            showToast("Rejestracja przebiegła pomyślnie!")
                             goToMain()
                         }
                         .addOnFailureListener { e ->
                             Log.e("REGISTER", "Błąd zapisu użytkownika: ${e.message}")
-                            Toast.makeText(this, "Błąd przy zapisie użytkownika", Toast.LENGTH_SHORT)
-                                .show()
+                            showToast("Błąd zapisu użytkownika")
                         }
                 } else {
                     if (task.exception is FirebaseAuthUserCollisionException) {
-                        Toast.makeText(this, "Ten e-mail jest już zarejestrowany", Toast.LENGTH_SHORT).show()
+                        showToast("Użytkownik o podanym adresie e-mail już istnieje")
                     } else {
                         Toast.makeText(this, "Błąd rejestracji: ${task.exception?.message}", Toast.LENGTH_SHORT)
                             .show()

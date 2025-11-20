@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorOnBackground">
+    android:background="?attr/pageBackground">
 
     <!-- Guideline dla przesunięcia góry -->
     <androidx.constraintlayout.widget.Guideline
