@@ -303,16 +303,19 @@ class LeftOrRightActivity : BaseActivity() {
 
         val currentFruit = fruitQueue.first()
 
+        // Sprawdź czy owoc pasuje do wybranego koszyka
         val targetList = if (isLeftBasket) leftBasketTargets else rightBasketTargets
-
         val isCorrect = targetList.contains(currentFruit)
 
-        // Przejdź do następnego owocu przekazując wynik
-        advanceToNextFruit(isCorrect)
+        // Wybór wizualnego celu (koszyka)
+        val targetBasketView = if (isLeftBasket) leftBasket else rightBasket
+
+        // Przejdź do następnego owocu z animacją
+        advanceToNextFruit(isCorrect, targetBasketView)
     }
 
-    // Przesuwa kolejkę do następnego owocu po ruchu gracza
-    private fun advanceToNextFruit(isCorrect: Boolean) {
+    // Przesuwa kolejkę do następnego owocu z animacją lotu
+    private fun advanceToNextFruit(isCorrect: Boolean, targetBasket: View) {
 
         gameContainer.post {
             if (isCorrect) {
@@ -322,49 +325,49 @@ class LeftOrRightActivity : BaseActivity() {
             }
         }
 
-        // Znajdź widok owocu na wierzchu
         if (fruitQueueContainer.isEmpty()) {
             isProcessingMove = false
             return
         }
-        val viewToRemove = fruitQueueContainer.getChildAt(fruitQueueContainer.childCount - 1)
 
-        // Rozpocznij animację usuwania
-        viewToRemove.animate()
-            .alpha(0f) // Zniknij
-            .setDuration(200) // Czas trwania (0.2 sekundy)
-            .withEndAction {
+        // Pobrierz widok aktualnego owocu
+        val viewToAnimate = fruitQueueContainer.getChildAt(fruitQueueContainer.childCount - 1)
 
-                // Usuń stary owoc
-                if (fruitQueue.isNotEmpty()) {
-                    fruitQueue.removeAt(0) // Usuń z góry kolejki logicznej
-                }
-                fruitQueueContainer.removeView(viewToRemove) // Usuń widok
+        // Wywołaj animację lotu do koszyka
+        animateFruitToBasket(viewToAnimate, targetBasket) {
+
+            // Usuń stary owoc z listy logicznej
+            if (fruitQueue.isNotEmpty()) {
+                fruitQueue.removeAt(0)
+            }
+            // Usuń widok starego owocu
+            fruitQueueContainer.removeView(viewToAnimate)
 
                 // Wygeneruj nowy owoc i dodaj go
                 if (activeGameFruits.isNotEmpty()) {
                     val newFruitId = activeGameFruits.random()
                     fruitQueue.add(newFruitId) // Dodaj na koniec kolejki logicznej
 
-                    // Stwórz nowy widok dla owocu
-                    val newFruitView = createFruitView(newFruitId)
-                    newFruitView.alpha = 0f
+                // Stwórz nowy widok dla owocu
+                val newFruitView = createFruitView(newFruitId)
+                newFruitView.alpha = 0f
 
-                    // Dodaj nowy widok na początek kontenera (wizualnie na tył)
-                    fruitQueueContainer.addView(newFruitView, 0)
+                // Dodaj nowy widok na początek kontenera (wizualnie na tył)
+                fruitQueueContainer.addView(newFruitView, 0)
 
-                    updateQueueVisuals()
+                updateQueueVisuals()
 
-                    // Rozpocznij animację pojawiania się nowego owocu
-                    newFruitView.animate()
-                        .alpha(1f) // Pojaw się
-                        .setDuration(200)
-                        .start()
-                }
-
-                isProcessingMove = false
+                // Rozpocznij animację pojawiania się nowego owocu
+                newFruitView.animate()
+                    .alpha(1f) // Pojaw się
+                    .setDuration(200)
+                    .start()
+            } else {
+                updateQueueVisuals()
             }
-            .start()
+
+            isProcessingMove = false
+        }
     }
 
     // Tworzy pojedynczy widok dla owocu
@@ -410,6 +413,60 @@ class LeftOrRightActivity : BaseActivity() {
                 it.height = newSize
             }
         }
+    }
+
+    // Animacja owocu wpadającego do koszyka
+    private fun animateFruitToBasket(fruitView: View, targetBasket: View, onAnimationEnd: () -> Unit) {
+
+        // Pobierz pozycję owocu i koszyka na ekranie
+        val startLoc = IntArray(2)
+        fruitView.getLocationOnScreen(startLoc)
+
+        val endLoc = IntArray(2)
+        targetBasket.getLocationOnScreen(endLoc)
+
+        // Pobierz pozycję kontenera gry
+        val parentLoc = IntArray(2)
+        gameContainer.getLocationOnScreen(parentLoc)
+
+        // Oblicz pozycję startową względem kontenera
+        val startX = startLoc[0] - parentLoc[0]
+        val startY = startLoc[1] - parentLoc[1]
+
+        // Utwórz tymczasowy obraz owocu do animacji
+        val flyingFruit = ImageView(this).apply {
+            setImageDrawable((fruitView as ImageView).drawable)
+            layoutParams = ConstraintLayout.LayoutParams(fruitView.width, fruitView.height)
+            x = startX.toFloat()
+            y = startY.toFloat()
+            elevation = 20f // Ustawienie wyżej niż inne elementy
+        }
+
+        // Dodaj tymczasowy owoc do kontenera gry
+        gameContainer.addView(flyingFruit)
+
+        // Ukryj oryginalny owoc
+        fruitView.visibility = View.INVISIBLE
+
+        // Oblicz pozycję docelową (środek koszyka)
+        val targetX = (endLoc[0] - parentLoc[0]) + (targetBasket.width / 2) - (fruitView.width / 2)
+        val targetY = (endLoc[1] - parentLoc[1]) + (targetBasket.height / 2) - (fruitView.height / 2)
+
+        // Rozpocznij animację lotu
+        flyingFruit.animate()
+            .x(targetX.toFloat())
+            .y(targetY.toFloat())
+            .rotation(360f) // Pojedynczy obrót
+            .scaleX(0.5f)   // Delikatne zmniejszenie
+            .scaleY(0.5f)
+            .alpha(0f)      // Zanikanie
+            .setDuration(400)
+            .withEndAction {
+                // Usuń tymczasowy owoc i wywołaj callback
+                gameContainer.removeView(flyingFruit)
+                onAnimationEnd()
+            }
+            .start()
     }
 
     override fun onPause() {
