@@ -66,6 +66,19 @@ class LeftOrRightActivity : BaseActivity() {
     private var fruitSizePx: Int = 0
     private var overlapMarginPx: Int = 0
 
+    // Konfiguracja poziomu
+    private data class LevelConfig(
+        val leftTargets: Int,
+        val rightTargets: Int,
+        val totalQueue: Int,
+        val timeBonus: Int
+    )
+
+    // Zmienne do śledzenia postępu w poziomie
+    private var fruitsSpawnedTotal = 0
+    private var fruitsToSpawnLimit = 0
+    private val maxVisibleFruits = 6
+
     companion object {
         private const val BASE_TIME_SECONDS = 90 // Czas trwania jednej rundy (w sekundach)
     }
@@ -206,16 +219,39 @@ class LeftOrRightActivity : BaseActivity() {
         pauseMenu.syncWithOverlay()
     }
 
+    private fun getLevelConfig(level: Int): LevelConfig {
+        return when (level) {
+            1 -> LevelConfig(1, 1, 8, 0)
+            2 -> LevelConfig(2, 1, 12, 5)
+            3 -> LevelConfig(2, 2, 16, 8)
+            4 -> LevelConfig(3, 2, 20, 10)
+            5 -> LevelConfig(3, 3, 25, 12)
+            else -> LevelConfig(3, 3, 25 + (level - 5) * 5, 15)
+        }
+    }
+
     private fun startNewGame() {
         fruitQueue.clear()
         fruitQueueContainer.removeAllViews()
 
-        // Ustaw cele dla koszyków
-        setupBaskets(leftCount = 2, rightCount = 1)
+        val config = getLevelConfig(currentLevel)
 
+        // Ustaw limity
+        fruitsToSpawnLimit = config.totalQueue
+        fruitsSpawnedTotal = 0
+
+        // Ustaw cele dla koszyków
+        setupBaskets(config.leftTargets, config.rightTargets)
         displayBasketTargets()
 
-        generateFruitQueue(5)
+        Toast.makeText(this, "Poziom $currentLevel", Toast.LENGTH_SHORT).show()
+
+        // Wygeneruj początkową kolejkę
+        val initialFruits = minOf(maxVisibleFruits, fruitsToSpawnLimit)
+        generateFruitQueue(initialFruits)
+
+        // Zaktualizuj licznik stworzonych owoców
+        fruitsSpawnedTotal = initialFruits
 
         displayFruitQueue()
     }
@@ -330,44 +366,49 @@ class LeftOrRightActivity : BaseActivity() {
             return
         }
 
-        // Pobrierz widok aktualnego owocu
+        // Pobierz widok owocu do animacji
         val viewToAnimate = fruitQueueContainer.getChildAt(fruitQueueContainer.childCount - 1)
 
-        // Wywołaj animację lotu do koszyka
-        animateFruitToBasket(viewToAnimate, targetBasket) {
+        // Uruchom animację
+        animateFruitToBasket(viewToAnimate, targetBasket) {}
 
-            // Usuń stary owoc z listy logicznej
-            if (fruitQueue.isNotEmpty()) {
-                fruitQueue.removeAt(0)
-            }
-            // Usuń widok starego owocu
-            fruitQueueContainer.removeView(viewToAnimate)
+        // Usuń stary owoc z kolejki
+        if (fruitQueue.isNotEmpty()) fruitQueue.removeAt(0)
+        fruitQueueContainer.removeView(viewToAnimate)
 
-                // Wygeneruj nowy owoc i dodaj go
-                if (activeGameFruits.isNotEmpty()) {
-                    val newFruitId = activeGameFruits.random()
-                    fruitQueue.add(newFruitId) // Dodaj na koniec kolejki logicznej
+        // Sprawdź limit i dodaj nowy owoc
+        if (activeGameFruits.isNotEmpty() && fruitsSpawnedTotal < fruitsToSpawnLimit) {
+            val newFruitId = activeGameFruits.random()
+            fruitQueue.add(newFruitId)
+            fruitsSpawnedTotal++
 
-                // Stwórz nowy widok dla owocu
-                val newFruitView = createFruitView(newFruitId)
-                newFruitView.alpha = 0f
+            val newFruitView = createFruitView(newFruitId)
+            newFruitView.alpha = 0f
+            fruitQueueContainer.addView(newFruitView, 0) // Dodaj na spód
 
-                // Dodaj nowy widok na początek kontenera (wizualnie na tył)
-                fruitQueueContainer.addView(newFruitView, 0)
-
-                updateQueueVisuals()
-
-                // Rozpocznij animację pojawiania się nowego owocu
-                newFruitView.animate()
-                    .alpha(1f) // Pojaw się
-                    .setDuration(200)
-                    .start()
-            } else {
-                updateQueueVisuals()
-            }
-
-            isProcessingMove = false
+            newFruitView.animate().alpha(1f).setDuration(200).start()
         }
+
+        // Płynna animacja zmiany rozmiarów
+        android.transition.TransitionManager.beginDelayedTransition(fruitQueueContainer)
+        updateQueueVisuals()
+
+        // Sprawdź koniec poziomu
+        if (fruitQueueContainer.childCount == 0) {
+            val config = getLevelConfig(currentLevel)
+            if (config.timeBonus > 0) {
+                timerProgressBar.addTime(config.timeBonus)
+            }
+
+            currentLevel++
+
+            // Zrestartuj grę po krótkiej pauzie
+            gameContainer.postDelayed({
+                startNewGame()
+            }, 1000)
+        }
+
+        isProcessingMove = false
     }
 
     // Tworzy pojedynczy widok dla owocu
@@ -390,13 +431,13 @@ class LeftOrRightActivity : BaseActivity() {
         val totalItems = fruitQueueContainer.childCount
 
         // Zabezpieczenie przed dzieleniem przez zero
-        val totalIndices = if (totalItems > 1) totalItems - 1 else 1
+        val maxIndex = if (totalItems > 1) totalItems - 1 else 1
 
         // Pętla po wszystkich widokach owoców w kontenerze
         fruitQueueContainer.children.forEachIndexed { index, view ->
 
             // Obliczanie skali
-            val percentage = index.toFloat() / totalIndices.toFloat()
+            val percentage = if (totalItems == 1) 1.0f else index.toFloat() / maxIndex.toFloat()
             val scale = minScale + (percentage * scaleRange)
 
             // Obliczanie nowego rozmiaru na podstawie skali
