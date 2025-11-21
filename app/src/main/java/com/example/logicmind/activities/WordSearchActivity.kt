@@ -607,6 +607,8 @@ class WordSearchActivity : BaseActivity() {
 
             starManager.increment()
 
+            gameStatsManager.registerAttempt(true)
+
             val startCoords = currentSelectionCoords.first()
             val endCoords = currentSelectionCoords.last()
             val startPixels = getCellCenter(startCoords.first, startCoords.second)
@@ -645,6 +647,8 @@ class WordSearchActivity : BaseActivity() {
 
                 startNewGame()
             }
+        } else {
+            gameStatsManager.registerAttempt(false)
         }
     }
 

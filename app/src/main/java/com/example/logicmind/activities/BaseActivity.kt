@@ -56,7 +56,7 @@ open class BaseActivity : AppCompatActivity() {
         super.attachBaseContext(context)
     }
 
-    override fun onCreate(savedInstanceState: android.os.Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         //przywracamy zapisany motyw jeśli był
