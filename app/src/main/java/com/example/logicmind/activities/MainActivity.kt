@@ -68,13 +68,8 @@ class MainActivity : BaseActivity() {
     private fun loadUserStreak() {
         val user = auth.currentUser
 
-        if (user == null) {
-            binding.streakText.text = getString(R.string.zero_days)
-            return
-        }
-
-        // czy jest gościem
-        if (!isUserLoggedIn()) {
+        //sprawdzamy czy jest gościem
+        if (user == null || !isUserLoggedIn()) {
             binding.streakText.text = getString(R.string.zero_days)
             return
         }
@@ -84,10 +79,9 @@ class MainActivity : BaseActivity() {
         val userRef = db.getReference("users").child(user.uid)
 
         //get - pobiera jednorazowo dane z bazy
-        userRef.child("streak").get()
+        userRef.get() //pobranie całego węzła żeby mieć datę
             .addOnSuccessListener { snapshot ->
-                //próbujemy rzutować na Longa jeśli nie zadziała to użyj 0 i konwertujemy na int
-                val streak = (snapshot.value as? Long ?: 0L).toInt()
+                val streak = calculateDisplayStreak(snapshot)
                 binding.streakText.text = getString(R.string.current_streak_text, streak)
             }
             .addOnFailureListener {

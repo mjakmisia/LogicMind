@@ -181,7 +181,6 @@ open class BaseActivity : AppCompatActivity() {
     private fun updateStreak() {
         if (!isUserLoggedIn()) return
 
-
         val uid = auth.currentUser!!.uid
         val userRef = db.getReference("users").child(uid)
 
@@ -192,52 +191,95 @@ open class BaseActivity : AppCompatActivity() {
             val lastPlayTimestamp = snapshot.child("lastPlayDate").getValue(Long::class.java)
 
             val today = Calendar.getInstance()
+            //zerujemy tu czas z today zeby porownac tylko daty
+            stripTime(today)
 
             val newStreak = if (lastPlayTimestamp == null) {
                 // pierwsza gra użytkownika
                 1
             } else {
                 val lastPlayDay = Calendar.getInstance().apply { timeInMillis = lastPlayTimestamp }
+                stripTime(lastPlayDay)
 
                 //obliczenie różnicy dni między dzisiejszym dniem a ostatnią grą
-                val daysBetween =
-                    ((today.timeInMillis - lastPlayDay.timeInMillis) / (1000 * 60 * 60 * 24)).toInt()
+                val diffMillis = today.timeInMillis - lastPlayDay.timeInMillis
+                val daysBetween = (diffMillis / (1000 * 60 * 60 * 24)).toInt()
 
                 when (daysBetween) {
                     0 -> streak // gra w tym samym dniu - pozostaje bez zmian
                     1 -> streak + 1 // gra dzień po dniu — streak zwiększa się o 1
-                    else -> 0 // opuścił jeden dzień — streak resetuje się do 0
+                    else -> 1 // opuścił jeden dzień — streak resetuje się do 1 bo właśnie zagrał
                 }
             }
 
-            //zapisanie do bazy
-            userRef.child("streak").setValue(newStreak).addOnSuccessListener {
-                    Log.d("STREAK_DEBUG", "Zaktualizowano streak dla $uid")
-            }.addOnFailureListener {
-                    Log.e("STREAK_DEBUG", "Błąd aktualizacji streak dla $uid", it)
+            // Zapis tylko jeśli streak się zmienił lub to pierwsza gra dzisiaj
+            if (newStreak != streak || lastPlayTimestamp == null) {
+                val updates = hashMapOf<String, Any>(
+                    "streak" to newStreak,
+                    "lastPlayDate" to System.currentTimeMillis() // Zapisujemy dokładny czas gry
+                )
+
+                if (newStreak > bestStreak) {
+                    updates["bestStreak"] = newStreak
                 }
 
-            if (newStreak > bestStreak) {
-                userRef.child("bestStreak").setValue(newStreak).addOnSuccessListener {
-                        Log.d("STREAK_DEBUG", "Zaktualizowano bestStreak dla $uid")
-                }.addOnFailureListener {
-                        Log.e("STREAK_DEBUG", "Błąd aktualizacji bestStreak dla $uid", it)
+                userRef.updateChildren(updates)
+                    .addOnSuccessListener {
+                        Log.d(
+                            "STREAK_DEBUG",
+                            "Streak zaktualizowany: $newStreak"
+                        )
                     }
+                    .addOnFailureListener { e -> Log.e("STREAK_DEBUG", "Błąd zapisu streaka", e) }
             }
-
-            //aktualizacja lastPlayDate
-            userRef.child("lastPlayDate").setValue(today.timeInMillis)
-            Log.d("STREAK_DEBUG", "Nowy streak:  $newStreak, BestStreak: $bestStreak")
 
         }.addOnFailureListener { e ->
             Log.e("STREAK_DEBUG", "Błąd pobierania danych użytkownika", e)
         }
     }
 
+    /** Metoda pomocnicza do zerowania godzin, minut, sekund
+     * Cofa zegarek zawsze do północy  */
+    private fun stripTime(calendar: Calendar) {
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+    }
 
-    /*
-    Stałe używane do dostępu do kategorii i gier w bazie danych Firebase.
-    Nazwy muszą zgadzać się z tym co jest w bazie
+    /**
+     * Oblicza streak do wyświetlenia.
+     * Jeśli minął więcej niż 1 dzień od ostatniej gry, zwraca 0 nawet jeśli w bazie jest stara liczba.
+     */
+    protected fun calculateDisplayStreak(snapshot: DataSnapshot): Int {
+        val savedStreak = (snapshot.child("streak").value as? Long ?: 0L).toInt()
+        //jeśli nigdy nie gra zwraca 0
+        val lastPlayTimestamp =
+            snapshot.child("lastPlayDate").getValue(Long::class.java) ?: return 0
+
+        val today = Calendar.getInstance()
+        stripTime(today) // resetujemy do północy
+
+        val lastPlayDay = Calendar.getInstance().apply { timeInMillis = lastPlayTimestamp }
+        stripTime(lastPlayDay)
+
+        val diffMillis = today.timeInMillis - lastPlayDay.timeInMillis
+        val daysBetween = (diffMillis / (1000 * 60 * 60 * 24)).toInt()
+
+        // 0 dni różnicy czyli grał dzisiaj -> pokazujemy zapisany streak
+        // 1 dzień różnicy czyli grał wczoraj -> pokazujemy zapisany streak
+        // >1 dzień przerwy -> pokazujemy 0 (ale w bazie zresetuje się dopiero jak zagra)
+        return if (daysBetween <= 1) {
+            savedStreak
+        } else {
+            0
+        }
+    }
+
+
+    /**
+     * Stałe używane do dostępu do kategorii i gier w bazie danych Firebase.
+     * Nazwy muszą zgadzać się z tym co jest w bazie
      */
     object GameKeys {
         const val CATEGORY_MEMORY = "Pamiec"

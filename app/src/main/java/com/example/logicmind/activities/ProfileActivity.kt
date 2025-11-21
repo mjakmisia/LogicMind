@@ -166,7 +166,7 @@ class ProfileActivity : BaseActivity() {
 
                 if (snapshot.exists()) {
                     val username = snapshot.child("username").value as? String ?: "Brak nazwy"
-                    val currentStreak = snapshot.child("streak").value as? Long ?: 0
+                    val currentStreak = calculateDisplayStreak(snapshot)
                     val bestStreak = snapshot.child("bestStreak").value as? Long ?: 0
 
                     findViewById<TextView>(R.id.textUsername).text = username
