@@ -3,6 +3,8 @@ package com.example.logicmind.activities
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -31,6 +33,7 @@ import java.util.Locale
  */
 open class BaseActivity : AppCompatActivity() {
 
+
     // Inicjalizacja Firebase dla wszystkich aktywności dziedziczących
     protected lateinit var auth: FirebaseAuth
     protected lateinit var db: FirebaseDatabase
@@ -54,6 +57,15 @@ open class BaseActivity : AppCompatActivity() {
         //nowy kontekst z konfiguracją i przekazuje go do AppCompatActivity
         val context = newBase.createConfigurationContext(config)
         super.attachBaseContext(context)
+    }
+
+    companion object {
+        private var isPersistenceEnabled = false
+
+        //stałe do zapisywania i odczytywania danych z bundle
+        private const val KEY_STATS_START_TIME = "STATS_START_TIME"
+        private const val KEY_STATS_IS_PAUSED = "STATS_IS_PAUSED"
+        private const val KEY_STATS_PAUSE_TIME = "STATS_PAUSE_TIME"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -80,11 +92,27 @@ open class BaseActivity : AppCompatActivity() {
         insetsController.systemBarsBehavior =
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
+        // ustawienie persystencji tylko raz
+        //używamy do zapisu danych jeżeli rozłączy się internet
+        if (!isPersistenceEnabled) {
+            try {
+                // Pobierz instancję
+                val database =
+                    FirebaseDatabase.getInstance("https://logicmind-default-rtdb.europe-west1.firebasedatabase.app")
+                database.setPersistenceEnabled(true) // Włącz tryb offline
+                isPersistenceEnabled = true // Zablokuj ponowne wywołanie
+            } catch (e: Exception) {
+                Log.w("FIREBASE_INIT", "${e.message}")
+            }
+        }
 
         // Inicjalizacja Firebase w każdej aktywności
         auth = FirebaseAuth.getInstance()
         db =
             FirebaseDatabase.getInstance("https://logicmind-default-rtdb.europe-west1.firebasedatabase.app")
+
+        //synchronizacja danych po powrocie online
+        db.getReference("users").keepSynced(true)
     }
 
     /**
@@ -472,13 +500,6 @@ open class BaseActivity : AppCompatActivity() {
         return avgReactionSec
     }
 
-    //stałe do zapisywania i odczytywania danych z bundle
-    companion object {
-        private const val KEY_STATS_START_TIME = "STATS_START_TIME"
-        private const val KEY_STATS_IS_PAUSED = "STATS_IS_PAUSED"
-        private const val KEY_STATS_PAUSE_TIME = "STATS_PAUSE_TIME"
-    }
-
     /**
      * Zapisuje aktualny stan licznika czasu gry (czas startu, stan pauzy) do obiektu Bundle.
      * Używany, aby przy obrocie ekranu czas sie nie resetował
@@ -514,6 +535,22 @@ open class BaseActivity : AppCompatActivity() {
         val wasPaused = savedInstanceState.getBoolean(KEY_STATS_IS_PAUSED, false)
         val savedPauseTime = savedInstanceState.getLong(KEY_STATS_PAUSE_TIME, 0L)
         gameStatsManager.restorePauseData(wasPaused, savedPauseTime)
+    }
+
+    /** Funkcja do sprawdzania połączenia z internetem */
+    protected fun isNetworkAvailable(): Boolean {
+        //poproszenie o dostęp do servisu sieciowego
+        val connectivityManager =
+            getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        //sprawdzenie aktualnie używanej sieci, jeśli nie ma zwraca false
+        val network = connectivityManager.activeNetwork ?: return false
+
+        //jakie parametry ma ta sieć
+        val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
+
+        // czy sieć ma zdolność (Capability) łączenia z internetem
+        return activeNetwork.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 }
 
