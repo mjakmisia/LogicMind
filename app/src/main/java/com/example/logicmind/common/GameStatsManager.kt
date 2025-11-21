@@ -9,7 +9,7 @@ package com.example.logicmind.common
  */
 open class GameStatsManager {
 
-    /** Uruchamia licznik czasu po opóźnieniu (wywoływana przez Activity). */
+    /** Uruchamia licznik czasu po opóźnieniu (wywoływana przez Activity) */
     fun setGameStartTime(context: android.content.Context) {
         gameStartTime = System.currentTimeMillis()
         //pozniej usun
@@ -35,6 +35,27 @@ open class GameStatsManager {
     protected var totalActiveTime: Long = 0L
     protected var pauseStartTime: Long = 0L
     protected var isPaused: Boolean = false
+
+    //pobranie stanu czasu
+    fun getStartTime(): Long {
+        return gameStartTime
+    }
+
+    //przywrócenie stanu czasu
+    fun restoreStartTime(time: Long) {
+        this.gameStartTime = time
+    }
+
+    //pobranie danych o pauzie
+    fun getPauseData(): Pair<Boolean, Long> {
+        return Pair(isPaused, pauseStartTime)
+    }
+
+    //przywrócenie danych o pauzie
+    fun restorePauseData(paused: Boolean, pauseTime: Long) {
+        this.isPaused = paused
+        this.pauseStartTime = pauseTime
+    }
 
     //śledzenie gry
     //wywoływana na początku gry

@@ -3,6 +3,7 @@ package com.example.logicmind.activities
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
+import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
@@ -429,7 +430,48 @@ open class BaseActivity : AppCompatActivity() {
         return avgReactionSec
     }
 
+    //stałe do zapisywania i odczytywania danych z bundle
+    companion object {
+        private const val KEY_STATS_START_TIME = "STATS_START_TIME"
+        private const val KEY_STATS_IS_PAUSED = "STATS_IS_PAUSED"
+        private const val KEY_STATS_PAUSE_TIME = "STATS_PAUSE_TIME"
+    }
 
+    /**
+     * Zapisuje aktualny stan licznika czasu gry (czas startu, stan pauzy) do obiektu Bundle.
+     * Używany, aby przy obrocie ekranu czas sie nie resetował
+     *
+     * @param outState Bundle, do którego zostaną zapisane dane.
+     */
+    protected fun saveGameStats(outState: Bundle) {
+        //zapisz oryginalny czas rozpoczecia gry
+        outState.putLong(KEY_STATS_START_TIME, gameStatsManager.getStartTime())
 
+        //pobiera info o pauzie
+        val (isPaused, pauseTime) = gameStatsManager.getPauseData()
+        //zapisuje stan pauzy
+        outState.putBoolean(KEY_STATS_IS_PAUSED, isPaused)
+        outState.putLong(KEY_STATS_PAUSE_TIME, pauseTime)
+    }
+
+    /**
+     * Odczytuje zapisane dane licznika czasu z Bundle i przywraca je w GameStatsManagerze.
+     * Przywracamy czas startu na ten przed obrotem ekranu
+     *
+     * @param savedInstanceState Bundle zawierający zapisany stan gry
+     */
+    protected fun restoreGameStats(savedInstanceState: Bundle) {
+        //odczytaj oryginalny czas rozpoczecia gry jesli nie mozesz ustaw 0
+        val savedStartTime = savedInstanceState.getLong(KEY_STATS_START_TIME, 0L)
+        //jesli go znaleziono to przywroc
+        if (savedStartTime != 0L) {
+            gameStatsManager.restoreStartTime(savedStartTime)
+        }
+
+        //odczytuje stan pauzy
+        val wasPaused = savedInstanceState.getBoolean(KEY_STATS_IS_PAUSED, false)
+        val savedPauseTime = savedInstanceState.getLong(KEY_STATS_PAUSE_TIME, 0L)
+        gameStatsManager.restorePauseData(wasPaused, savedPauseTime)
+    }
 }
 

@@ -285,6 +285,8 @@ class SymbolRaceActivity : BaseActivity() {
             CircleState(it.id, it.color, it.symbol)
         })
         outState.putSerializable("circleQueueState", queueToSave)
+
+        saveGameStats(outState)
     }
 
     // Przywrócenie stanu gry po zmianie konfiguracji
@@ -390,6 +392,7 @@ class SymbolRaceActivity : BaseActivity() {
                 if (circleQueue.isNotEmpty()) startActiveTimer()
             }
         }
+        restoreGameStats(savedInstanceState)
     }
 
     // Dynamicznie dostosowuje layout do orientacji

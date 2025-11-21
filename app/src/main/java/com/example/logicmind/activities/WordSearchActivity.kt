@@ -237,6 +237,8 @@ class WordSearchActivity : BaseActivity() {
         // Zapisz przypisane kolory
         outState.putStringArrayList("assignedWordKeys", ArrayList(assignedWordColors.keys))
         outState.putIntegerArrayList("assignedWordValues", ArrayList(assignedWordColors.values))
+
+        saveGameStats(outState)
     }
 
     // Przywraca stan aktywności
@@ -317,6 +319,8 @@ class WordSearchActivity : BaseActivity() {
         }
 
         pauseMenu.syncWithOverlay()
+
+        restoreGameStats(savedInstanceState)
     }
 
     // Odbudowa UI (po rotacji)
