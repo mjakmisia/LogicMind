@@ -449,6 +449,25 @@
                     app:tint="@color/textGray" />
             </LinearLayout>
 
+            <Button
+                android:id="@+id/buttonChangePassword"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="24dp"
+                android:background="@drawable/bg_rounded_light_gray"
+                android:text="@string/change_password_title"
+                android:textAllCaps="true"
+                android:textColor="?attr/colorOnPrimary"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:visibility="visible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/policyLayout" />
+
             <!-- Przycisk Wyloguj się -->
             <Button
                 android:id="@+id/buttonLogout"
@@ -467,7 +486,7 @@
                 android:visibility="visible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/policyLayout" />
+                app:layout_constraintTop_toBottomOf="@id/buttonChangePassword" />
 
             <!-- Przycisk Usuń konto -->
             <!-- W motywach opartych o Material Components (Theme.MaterialComponents.*)

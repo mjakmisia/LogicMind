@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat
 import com.example.logicmind.R
 import com.example.logicmind.databinding.ActivityProfileBinding
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import java.util.Calendar.DAY_OF_WEEK
 import java.util.Calendar.FRIDAY
 import java.util.Calendar.MONDAY
@@ -87,6 +88,13 @@ class ProfileActivity : BaseActivity() {
             resetUserProgress()
         }
 
+        // Obsługa przycisku zmiany hasła
+        val btnChangePassword = findViewById<Button>(R.id.buttonChangePassword)
+
+        btnChangePassword.setOnClickListener {
+            showChangePasswordDialog()
+        }
+
 
         // Ustawienie koloru przycisku programowo
         val btnDeleteAccount = binding.buttonDeleteAccount
@@ -125,6 +133,92 @@ class ProfileActivity : BaseActivity() {
                 .setNegativeButton("Nie", null)
                 .show()
         }
+    }
+
+    /**
+     * Metoda obsługująca zmianę hasła
+     */
+
+    private fun showChangePasswordDialog() {
+        val user = auth.currentUser
+        if (user == null || !isUserLoggedIn()) return
+
+        // pole tekstowe do wpisania hasła
+        val input = android.widget.EditText(this).apply {
+            hint = "Nowe hasło (min. 8 znaków, wielka litera i cyfra)"
+            inputType =
+                android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+            setPadding(50, 30, 50, 30)
+            background = ContextCompat.getDrawable(context, R.drawable.bg_edittext_rounded)
+        }
+
+        // Kontener dla marginesów
+        val container = android.widget.FrameLayout(this).apply {
+            setPadding(40, 20, 40, 20)
+            addView(input)
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("Zmiana hasła")
+            .setView(container)
+            .setPositiveButton("Zmień") { dialog, _ ->
+                val newPassword = input.text.toString().trim()
+
+                if (newPassword.length < 8) {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.password_error_length),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@setPositiveButton
+                }
+                if (!newPassword.any { it.isUpperCase() }) {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.password_error_uppercase),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@setPositiveButton
+                }
+
+                if (!newPassword.any { it.isDigit() }) {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.password_error_digit),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@setPositiveButton
+                }
+
+                // Firebase: Zmiana hasła
+                user.updatePassword(newPassword)
+                    .addOnSuccessListener {
+                        Toast.makeText(
+                            this,
+                            getString(R.string.password_changed_success),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        dialog.dismiss()
+                    }
+                    .addOnFailureListener { e ->
+                        // Firebase wymaga "świeżego" logowania do zmiany hasła.
+                        if (e is FirebaseAuthRecentLoginRequiredException) {
+                            Toast.makeText(
+                                this,
+                                getString(R.string.password_change_reauth_error),
+                                Toast.LENGTH_LONG
+                            ).show()
+                        } else {
+                            Toast.makeText(
+                                this,
+                                getString(R.string.error_prefix, e.message),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
     }
 
     /**
