@@ -109,6 +109,11 @@
     <string name="password_change_reauth_error">Ze względów bezpieczeństwa wyloguj się i zaloguj ponownie, aby zmienić hasło.</string>
     <string name="error_prefix">Błąd: %1$s</string>
 
+    <string name="change_username_title">Zmień nazwę</string>
+    <string name="new_username_hint">Nowa nazwa użytkownika</string>
+    <string name="username_empty_error">Nazwa nie może być pusta</string>
+    <string name="username_changed_success">Nazwa użytkownika została zmieniona!</string>
+
 
     <!-- OPISY GIER DO INTRO -->
 

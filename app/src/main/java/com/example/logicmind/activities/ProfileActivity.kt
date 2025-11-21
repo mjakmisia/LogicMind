@@ -88,6 +88,11 @@ class ProfileActivity : BaseActivity() {
             resetUserProgress()
         }
 
+        val btnEditUsernameSmall = findViewById<View>(R.id.btnEditUsernameSmall)
+        btnEditUsernameSmall.setOnClickListener {
+            showChangeUsernameDialog()
+        }
+
         // Obsługa przycisku zmiany hasła
         val btnChangePassword = findViewById<Button>(R.id.buttonChangePassword)
 
@@ -215,6 +220,68 @@ class ProfileActivity : BaseActivity() {
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
+                    }
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    /**
+     * Wyświetla dialog do zmiany nazwy użytkownika i aktualizuje ją w bazie
+     */
+    private fun showChangeUsernameDialog() {
+        val user = auth.currentUser
+        if (user == null || !isUserLoggedIn()) return
+
+        // Pole tekstowe do wpisania nowej nazwy
+        val input = android.widget.EditText(this).apply {
+            hint = getString(R.string.new_username_hint)
+            // Pobieramy obecną nazwę żeby user mógł ją edytować
+            setText(binding.textUsername.text.toString())
+            inputType =
+                android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PERSON_NAME
+            setPadding(50, 30, 50, 30)
+            background = ContextCompat.getDrawable(context, R.drawable.bg_edittext_rounded)
+        }
+
+        val container = android.widget.FrameLayout(this).apply {
+            setPadding(40, 20, 40, 20)
+            addView(input)
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.change_username_title))
+            .setView(container)
+            .setPositiveButton(getString(R.string.change_btn)) { dialog, _ ->
+                val newUsername = input.text.toString().trim()
+
+                if (newUsername.isEmpty()) {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.username_empty_error),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@setPositiveButton
+                }
+
+                // Aktualizacja w Firebase Realtime Database
+                val uid = user.uid
+                db.getReference("users").child(uid).child("username").setValue(newUsername)
+                    .addOnSuccessListener {
+                        binding.textUsername.text = newUsername
+                        Toast.makeText(
+                            this,
+                            getString(R.string.username_changed_success),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        dialog.dismiss()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(
+                            this,
+                            getString(R.string.error_prefix, e.message),
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
             }
             .setNegativeButton(R.string.cancel, null)
