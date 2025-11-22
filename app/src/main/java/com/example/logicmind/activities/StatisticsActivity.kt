@@ -61,6 +61,7 @@ class StatisticsActivity : BaseActivity() {
             auth.currentUser?.let {
                 loadUserStats(it.uid)
                 loadLastPlayedGame(it.uid)
+                loadTotalStars(it.uid)
             }
         }
     }
@@ -318,7 +319,7 @@ class StatisticsActivity : BaseActivity() {
         } else {
             gameKey
         }
-        val dateFormat = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
         val lastPlayedDate = dateFormat.format(Date(timestamp))
         binding.tvLastPlayedGame.text = getString(R.string.last_played_game, displayName, lastPlayedDate)
     }
@@ -353,5 +354,22 @@ class StatisticsActivity : BaseActivity() {
             getString(R.string.total_points_value, totalValue ?: "0")
         binding.root.findViewById<TextView>(bestId).text =
             getString(R.string.highest_score_value, bestValue ?: "0")
+    }
+
+    /**
+     * Pobiera łączną liczbę gwiazdek użytkownika z: users/[uid]/statistics/totalStars
+     */
+    private fun loadTotalStars(uid: String) {
+        db.getReference("users").child(uid).child("statistics").child("totalStars")
+            .get()
+            .addOnSuccessListener { snapshot ->
+                // Pobieramy wartość, jeśli null to 0
+                val stars = snapshot.value as? Long ?: 0
+                binding.tvTotalStars.text = stars.toString()
+            }
+            .addOnFailureListener { e ->
+                Log.e("StatisticsActivity", "Błąd pobierania gwiazdek: ${e.message}")
+                binding.tvTotalStars.text = "-"
+            }
     }
 }

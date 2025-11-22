@@ -51,7 +51,7 @@
     <string name="game_2">Gra 2</string>
     <string name="instructions">Instrukcja</string>
     <string name="user_account">Profil użytkownika</string>
-    <string name="last_played">Ostatnio zagrane</string>
+    <string name="last_played">Ostatnio zagrana gra</string>
     <string name="app_policy">Polityka aplikacji</string>
     <string name="continuee">Kontynuuj</string>
     <string name="restart">Zagraj ponownie</string>
@@ -88,7 +88,7 @@
     <string name="tempo_display">%1$s  %2$.1f s</string>
     <string name="blue_container">Niebieska strefa dotyku</string>
     <string name="red_container">Czerwona strefa dotyku</string>
-    <string name="last_played_game">Ostatnio zagrana gra: %1$s (%2$s)</string>
+    <string name="last_played_game">%1$s (%2$s)</string>
     <string name="last_played_game_none">Ostatnio zagrana gra: brak</string>
     <string name="current_streak_text">%1$d dni</string>
     <string name="best_streak_text">%1$d dni</string>
