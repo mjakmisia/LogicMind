@@ -3,7 +3,6 @@
     <string name="hello">Witaj!</string>
     <string name="welcome_message">Wybierz kategorię, aby rozpocząć trening.</string>
     <string name="category_coordination">Koordynacja</string>
-    <string name="category_reasoning_enter">Rozwiązywanie\nproblemów</string>
     <string name="category_reasoning">Rozwiązywanie problemów</string>
     <string name="category_attention">Skupienie</string>
     <string name="category_memory">Pamięć</string>

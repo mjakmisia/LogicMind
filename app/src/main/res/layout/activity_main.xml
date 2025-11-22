@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/pageBackground">
+    android:background="?attr/pageBackground"
+    tools:context=".activities.MainActivity">
 
     <!-- Guideline dla przesunięcia góry -->
     <androidx.constraintlayout.widget.Guideline
@@ -74,72 +76,121 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- KOORDYNACJA -->
-    <Button
-        android:id="@+id/btnKoordynacja"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardKoordynacja"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:clickable="true"
+        android:focusable="true"
         android:layout_marginStart="16dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="50dp"
-        android:backgroundTint="?attr/categoryKoordynacja"
-        android:text="@string/category_coordination"
-        android:textColor="?attr/colorOnPrimary"
-        android:textSize="18sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/btnRozwiazywanieProblemow"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp"
+        app:cardBackgroundColor="?attr/categoryKoordynacja"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="4dp"
         app:layout_constraintTop_toBottomOf="@id/welcomeMessage"
-        app:layout_constraintHeight_percent="0.20" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/cardRozwiazywanieProblemow"
+        app:layout_constraintVertical_chainStyle="spread_inside">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/category_coordination"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+    </com.google.android.material.card.MaterialCardView>
 
     <!-- ROZWIĄZYWANIE PROBLEMÓW-->
-    <Button
-        android:id="@+id/btnRozwiazywanieProblemow"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardRozwiazywanieProblemow"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="8dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginTop="50dp"
-        android:backgroundTint="?attr/categoryProblemSolving"
-        android:text="@string/category_reasoning_enter"
-        android:textColor="?attr/colorOnPrimary"
-        android:textSize="16sp"
-        app:layout_constraintStart_toEndOf="@id/btnKoordynacja"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        app:cardBackgroundColor="?attr/categoryProblemSolving"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="4dp"
+        app:layout_constraintTop_toBottomOf="@id/cardKoordynacja"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/welcomeMessage"
-        app:layout_constraintHeight_percent="0.20" />
+        app:layout_constraintBottom_toTopOf="@id/cardSkupienie">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/category_reasoning"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+    </com.google.android.material.card.MaterialCardView>
 
     <!-- SKUPIENIE -->
-    <Button
-        android:id="@+id/btnSkupienie"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardSkupienie"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:clickable="true"
+        android:focusable="true"
         android:layout_marginStart="16dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="16dp"
-        android:backgroundTint="?attr/categorySkupienie"
-        android:text="@string/category_attention"
-        android:textColor="?attr/colorOnPrimary"
-        android:textSize="18sp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        app:cardBackgroundColor="?attr/categorySkupienie"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="4dp"
+        app:layout_constraintTop_toBottomOf="@id/cardRozwiazywanieProblemow"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/btnPamiec"
-        app:layout_constraintTop_toBottomOf="@id/btnKoordynacja"
-        app:layout_constraintHeight_percent="0.20" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/cardPamiec">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/category_attention"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+    </com.google.android.material.card.MaterialCardView>
 
     <!-- PAMIĘĆ -->
-    <Button
-        android:id="@+id/btnPamiec"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardPamiec"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="8dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginTop="16dp"
-        android:backgroundTint="?attr/categoryMemory"
-        android:text="@string/category_memory"
-        android:textColor="?attr/colorOnPrimary"
-        android:textSize="18sp"
-        app:layout_constraintStart_toEndOf="@id/btnSkupienie"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp"
+        app:cardBackgroundColor="?attr/categoryMemory"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="4dp"
+        app:layout_constraintTop_toBottomOf="@id/cardSkupienie"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnRozwiazywanieProblemow"
-        app:layout_constraintHeight_percent="0.20" />
+        app:layout_constraintBottom_toTopOf="@id/includeBottomNav">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/category_memory"
+            android:textColor="?attr/colorOnPrimary"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+    </com.google.android.material.card.MaterialCardView>
 
     <!-- Dolny pasek nawigacji -->
     <include
@@ -150,6 +201,5 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

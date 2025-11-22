@@ -32,7 +32,7 @@ class MainActivity : BaseActivity() {
 
         // Kategorie gier
 
-        binding.btnKoordynacja.setOnClickListener {
+        binding.cardKoordynacja.setOnClickListener {
             it.playSoundEffect(android.view.SoundEffectConstants.CLICK)
             val intent = Intent(this, GameSelectionActivity::class.java)
             //putExtra - przekazywanie danych miedzy aktywnosciami
@@ -40,21 +40,21 @@ class MainActivity : BaseActivity() {
             startActivity(intent)
         }
 
-        binding.btnRozwiazywanieProblemow.setOnClickListener {
+        binding.cardRozwiazywanieProblemow.setOnClickListener {
             it.playSoundEffect(android.view.SoundEffectConstants.CLICK)
             val intent = Intent(this, GameSelectionActivity::class.java)
             intent.putExtra("CATEGORY_ID", "reasoning")
             startActivity(intent)
         }
 
-        binding.btnSkupienie.setOnClickListener {
+        binding.cardSkupienie.setOnClickListener {
             it.playSoundEffect(android.view.SoundEffectConstants.CLICK)
             val intent = Intent(this, GameSelectionActivity::class.java)
             intent.putExtra("CATEGORY_ID", "attention")
             startActivity(intent)
         }
 
-        binding.btnPamiec.setOnClickListener {
+        binding.cardPamiec.setOnClickListener {
             it.playSoundEffect(android.view.SoundEffectConstants.CLICK)
             val intent = Intent(this, GameSelectionActivity::class.java)
             intent.putExtra("CATEGORY_ID", "memory")

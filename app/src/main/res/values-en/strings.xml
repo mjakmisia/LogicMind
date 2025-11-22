@@ -3,7 +3,6 @@
     <string name="hello">Hello!</string>
     <string name="welcome_message">Choose a category to start training.</string>
     <string name="category_coordination">Coordination</string>
-    <string name="category_reasoning_enter">Reasoning</string>
     <string name="category_reasoning">Reasoning</string>
     <string name="category_attention">Attention</string>
     <string name="category_memory">Memory</string>
