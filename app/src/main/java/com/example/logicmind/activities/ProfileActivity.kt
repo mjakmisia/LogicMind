@@ -4,9 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
@@ -45,13 +42,14 @@ class ProfileActivity : BaseActivity() {
         val dayOfWeek = calendar.get(DAY_OF_WEEK) // 1=Sunday, 2=Monday, ... 7=Saturday
 
         val arrows = mapOf(
-            MONDAY to findViewById(R.id.arrowMon),
-            TUESDAY to findViewById(R.id.arrowTue),
-            WEDNESDAY to findViewById(R.id.arrowWed),
-            THURSDAY to findViewById(R.id.arrowThu),
-            FRIDAY to findViewById(R.id.arrowFri),
-            SATURDAY to findViewById(R.id.arrowSat),
-            SUNDAY to findViewById<ImageView>(R.id.arrowSun))
+            MONDAY to binding.arrowMon,
+            TUESDAY to binding.arrowTue,
+            WEDNESDAY to binding.arrowWed,
+            THURSDAY to binding.arrowThu,
+            FRIDAY to binding.arrowFri,
+            SATURDAY to binding.arrowSat,
+            SUNDAY to binding.arrowSun
+        )
 
         arrows[dayOfWeek]?.visibility = View.VISIBLE
 
@@ -60,15 +58,10 @@ class ProfileActivity : BaseActivity() {
             "Aktualny użytkownik: ${FirebaseAuth.getInstance().currentUser?.uid ?: "brak"}"
         )
 
-        // Odwołania do widoków
-        val scrollView = findViewById<View>(R.id.scrollView)
-        val textLoginPrompt = findViewById<TextView>(R.id.textLoginPrompt)
-        val buttonLogin = findViewById<Button>(R.id.buttonLogin)
-
         // Na start ukryj wszystkie widoki
-        scrollView.visibility = View.GONE
-        textLoginPrompt.visibility = View.GONE
-        buttonLogin.visibility = View.GONE
+        binding.scrollView.visibility = View.GONE
+        binding.textLoginPrompt.visibility = View.GONE
+        binding.buttonLogin.visibility = View.GONE
         binding.progressBar.visibility = View.VISIBLE
 
         // Pobranie danych użytkownika
@@ -82,24 +75,20 @@ class ProfileActivity : BaseActivity() {
         } else {
             binding.scrollView.visibility = View.VISIBLE
             loadUserData((user!!.uid))
-
         }
         binding.buttonResetProgress.setOnClickListener {
             resetUserProgress()
         }
 
-        val btnEditUsernameSmall = findViewById<View>(R.id.btnEditUsernameSmall)
-        btnEditUsernameSmall.setOnClickListener {
+        // Edycja nazwy
+        binding.btnEditUsernameSmall.setOnClickListener {
             showChangeUsernameDialog()
         }
 
-        // Obsługa przycisku zmiany hasła
-        val btnChangePassword = findViewById<Button>(R.id.buttonChangePassword)
-
-        btnChangePassword.setOnClickListener {
+        //zmiana hasła
+        binding.buttonChangePassword.setOnClickListener {
             showChangePasswordDialog()
         }
-
 
         // Ustawienie koloru przycisku programowo
         val btnDeleteAccount = binding.buttonDeleteAccount
@@ -292,19 +281,14 @@ class ProfileActivity : BaseActivity() {
      * Pokazuje komunikat i przycisk, gdy użytkownik nie jest zalogowany
      */
     private fun showLoginPrompt() {
-        val scrollView = findViewById<View>(R.id.scrollView)
-        val textLoginPrompt = findViewById<TextView>(R.id.textLoginPrompt)
-        val buttonLogin = findViewById<Button>(R.id.buttonLogin)
+        // Ukryj główną zawartość
+        binding.scrollView.visibility = View.GONE
 
-        // Ukryj główną zawartość profilu
-        scrollView.visibility = View.GONE
+        // Pokaż komunikaty
+        binding.textLoginPrompt.visibility = View.VISIBLE
+        binding.buttonLogin.visibility = View.VISIBLE
 
-        // Pokaż komunikat i przycisk logowania
-        textLoginPrompt.visibility = View.VISIBLE
-        buttonLogin.visibility = View.VISIBLE
-
-        // Po kliknięciu — przekieruj do WelcomeActivity
-        buttonLogin.setOnClickListener {
+        binding.buttonLogin.setOnClickListener {
             startActivity(Intent(this, WelcomeActivity::class.java))
             finish()
         }
@@ -330,9 +314,17 @@ class ProfileActivity : BaseActivity() {
                     val currentStreak = calculateDisplayStreak(snapshot)
                     val bestStreak = snapshot.child("bestStreak").value as? Long ?: 0
 
-                    findViewById<TextView>(R.id.textUsername).text = username
-                    findViewById<TextView>(R.id.textCurrentStreak).text = getString(R.string.current_streak_text, currentStreak)
-                    findViewById<TextView>(R.id.textBestStreak).text = getString(R.string.best_streak_text, bestStreak)
+                    // Pobieranie gwiazdek
+                    val totalStars = snapshot.child("statistics")
+                        .child("totalStars")
+                        .value as? Long ?: 0
+
+                    binding.textUsername.text = username
+                    binding.textCurrentStreak.text =
+                        getString(R.string.current_streak_text, currentStreak)
+                    binding.textBestStreak.text = getString(R.string.best_streak_text, bestStreak)
+
+                    binding.tvProfileTotalStars.text = totalStars.toString()
                 } else {
                     Log.e("PROFILE", "Brak danych użytkownika w bazie dla UID: $uid")
                     // Wyloguj użytkownika i pokaż widok logowania
@@ -349,9 +341,10 @@ class ProfileActivity : BaseActivity() {
                 Toast.makeText(this, "Błąd pobierania danych: ${e.message}", Toast.LENGTH_SHORT)
                     .show()
                 // Ustaw domyślne wartości w razie błędu
-                findViewById<TextView>(R.id.textUsername).text = getString(R.string.error_fetching_user_data)
-                findViewById<TextView>(R.id.textCurrentStreak).text = getString(R.string.zero_days)
-                findViewById<TextView>(R.id.textBestStreak).text = getString(R.string.zero_days)
+                binding.textUsername.text = getString(R.string.error_fetching_user_data)
+                binding.textCurrentStreak.text = getString(R.string.zero_days)
+                binding.textBestStreak.text = getString(R.string.zero_days)
+                binding.tvProfileTotalStars.text = "-"
             }
     }
 

@@ -61,7 +61,6 @@ class StatisticsActivity : BaseActivity() {
             auth.currentUser?.let {
                 loadUserStats(it.uid)
                 loadLastPlayedGame(it.uid)
-                loadTotalStars(it.uid)
             }
         }
     }
@@ -356,20 +355,5 @@ class StatisticsActivity : BaseActivity() {
             getString(R.string.highest_score_value, bestValue ?: "0")
     }
 
-    /**
-     * Pobiera łączną liczbę gwiazdek użytkownika z: users/[uid]/statistics/totalStars
-     */
-    private fun loadTotalStars(uid: String) {
-        db.getReference("users").child(uid).child("statistics").child("totalStars")
-            .get()
-            .addOnSuccessListener { snapshot ->
-                // Pobieramy wartość, jeśli null to 0
-                val stars = snapshot.value as? Long ?: 0
-                binding.tvTotalStars.text = stars.toString()
-            }
-            .addOnFailureListener { e ->
-                Log.e("StatisticsActivity", "Błąd pobierania gwiazdek: ${e.message}")
-                binding.tvTotalStars.text = "-"
-            }
-    }
+
 }
