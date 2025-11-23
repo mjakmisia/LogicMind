@@ -113,6 +113,13 @@
     <string name="username_empty_error">Username cannot be empty</string>
     <string name="username_changed_success">Username changed successfully!</string>
 
+    <string name="game_over_title">Game over!</string>
+    <string name="score_label">Your score:</string>
+    <string name="time_label">Time:</string>
+    <string name="best_score_label">Your record:</string>
+    <string name="play_again">Play again</string>
+    <string name="exit_menu">Exit menu</string>
+
 
     <!-- GAME INTRO DESCRIPTIONS -->
 

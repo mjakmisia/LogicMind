@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.example.logicmind.R
+import com.example.logicmind.common.GameOverDialogFragment
 import com.example.logicmind.common.GameStatsManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -498,6 +499,93 @@ open class BaseActivity : AppCompatActivity() {
         }
 
         return avgReactionSec
+    }
+
+    /**
+     * Uniwersalna metoda wyświetlająca dialog końca gry.
+     * Zajmuje się zatrzymaniem czasu, zapisem do bazy i obsługą przycisków dialogu.
+     *
+     * @param categoryKey - Kategoria gry (np. GameKeys.CATEGORY_MEMORY)
+     * @param gameKey - Klucz gry (np. GameKeys.GAME_CARD_MATCH)
+     * @param gameName - Wyświetlana nazwa gry (do lastPlayedGame)
+     * @param starManager - Menedżer gwiazdek danej gry
+     * @param timerProgressBar - Pasek czasu danej gry
+     * @param countdownManager - Menedżer odliczania (potrzebny do restartu)
+     * @param currentBestScore - Rekord pobrany na początku gry
+     * @param onRestartAction - Kod specyficzny dla danej gry, który musi się wykonać przy restarcie (np. tasowanie kart)
+     */
+    protected fun showGameOverDialog(
+        categoryKey: String,
+        gameKey: String,
+        gameName: String,
+        starManager: com.example.logicmind.common.StarManager,
+        timerProgressBar: com.example.logicmind.common.GameTimerProgressBar,
+        countdownManager: com.example.logicmind.common.GameCountdownManager,
+        currentBestScore: Int,
+        onRestartAction: () -> Unit
+    ) {
+        // zatrzymanie liczników
+        timerProgressBar.stop()
+        gameStatsManager.onGamePaused()
+
+        // obliczenie danych
+        val currentScore = starManager.starCount
+        val durationSec = gameStatsManager.getPlayedTimeSec() // Używamy Twojej nowej metody
+
+        // formatowanie czasu
+        val timeDisplay = if (durationSec >= 60) {
+            val mins = (durationSec / 60).toInt()
+            val secs = (durationSec % 60).toInt()
+            "${mins}m ${secs}s"
+        } else {
+            "${durationSec.toInt()}s"
+        }
+
+        val displayBestScore = maxOf(currentBestScore, currentScore)
+
+        // zapis do bazy
+        updateUserStatistics(
+            categoryKey = categoryKey,
+            gameKey = gameKey,
+            starsEarned = currentScore,
+            accuracy = gameStatsManager.calculateAccuracy(),
+            reactionTime = getAverageReactionTime(stars = currentScore)
+        )
+
+        lastPlayedGame(categoryKey, gameKey, gameName)
+
+        //Wyświetlenie dialogu
+        val dialog = GameOverDialogFragment.newInstance(
+            score = currentScore,
+            timeFormatted = timeDisplay,
+            bestScore = displayBestScore
+        )
+
+        starManager.reset()
+        gameStatsManager.startReactionTracking()
+        gameStatsManager.setGameStartTime(this)
+        timerProgressBar.reset()
+
+        // Specyficzny reset dla danej gry
+        onRestartAction()
+
+        // Start odliczania
+        countdownManager.startCountdown()
+
+
+        dialog.onExitListener = {
+            val intent = Intent(this, MainActivity::class.java)
+
+            // FLAG_ACTIVITY_CLEAR_TOP: MainActivity już jest w pamięci,
+            // więc zamknij wszystko co jest po nim
+            // i wróć do tej istniejącej instancji.
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+
+            startActivity(intent)
+            finish()
+        }
+
+        dialog.show(supportFragmentManager, "GameOverDialog")
     }
 
     /**

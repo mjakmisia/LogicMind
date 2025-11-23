@@ -113,6 +113,13 @@
     <string name="username_empty_error">Nazwa nie może być pusta</string>
     <string name="username_changed_success">Nazwa użytkownika została zmieniona!</string>
 
+    <string name="game_over_title">Koniec gry!</string>
+    <string name="score_label">Twój wynik:</string>
+    <string name="time_label">Czas:</string>
+    <string name="best_score_label">Twój rekord:</string>
+    <string name="play_again">Zagraj ponownie</string>
+    <string name="exit_menu">Wyjdź do menu</string>
+
 
     <!-- OPISY GIER DO INTRO -->
 

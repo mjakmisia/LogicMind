@@ -38,6 +38,7 @@ class CardMatchActivity : BaseActivity() {
     private var isPreviewPhase: Boolean =
         false // Flaga aktywnej fazy preview (karty przodem na starcie rundy)
     private var pendingFlipCardIndex: Int = -1  // Indeks karty do odwrócenia po bombie
+    private var currentBestScore = 0
 
     companion object {
         const val BOMB_VALUE = -1 // Specjalna wartość dla bomby
@@ -84,30 +85,28 @@ class CardMatchActivity : BaseActivity() {
         starManager = StarManager()
         starManager.init(findViewById(R.id.starCountText))
 
+        // Pobranie rekordu punktów na starcie
+        if (isUserLoggedIn()) {
+            val uid = auth.currentUser!!.uid
+            db.getReference("users")
+                .child(uid)
+                .child("categories")
+                .child(GameKeys.CATEGORY_MEMORY)
+                .child(GameKeys.GAME_CARD_MATCH)
+                .child("bestStars")
+                .get()
+                .addOnSuccessListener { snapshot ->
+                    // zapisanie rekordu lokalnie
+                    currentBestScore = snapshot.getValue(Int::class.java) ?: 0
+                }
+        }
+
 
         // Inicjalizacja paska czasu
         timerProgressBar.setTotalTime(90) // Ustaw czas na 1,5 minuty
         timerProgressBar.setOnFinishCallback {
             runOnUiThread {
-                isGameEnding = true
-                Toast.makeText(this, "Czas minął! Koniec gry!", Toast.LENGTH_LONG).show()
-                gridLayout.isEnabled = false
-                cards.forEach { it.view.isEnabled = false }
-                pauseOverlay.visibility = View.GONE
-                updateUserStatistics(
-                    categoryKey = GameKeys.CATEGORY_MEMORY,
-                    gameKey = GameKeys.GAME_CARD_MATCH,
-                    starsEarned = starManager.starCount,
-                    accuracy = gameStatsManager.calculateAccuracy(),
-                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
-                )
-
-                lastPlayedGame(
-                    GameKeys.CATEGORY_MEMORY,
-                    GameKeys.GAME_CARD_MATCH,
-                    getString(R.string.card_match)
-                )
-                finish()
+                handleGameOver()
             }
         }
 
@@ -156,20 +155,7 @@ class CardMatchActivity : BaseActivity() {
                 gameStatsManager.onGamePaused()
             }, // Zatrzymuje timer podczas pauzy pod warunkiem że nie jesteśmy w preview
             onExit = {
-                updateUserStatistics(
-                    categoryKey = GameKeys.CATEGORY_MEMORY,
-                    gameKey = GameKeys.GAME_CARD_MATCH,
-                    starsEarned = starManager.starCount,
-                    accuracy = gameStatsManager.calculateAccuracy(),
-                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
-                )
-
-                lastPlayedGame(
-                    GameKeys.CATEGORY_MEMORY,
-                    GameKeys.GAME_CARD_MATCH,
-                    getString(R.string.card_match)
-                )
-                finish()
+                handleGameOver()
             }, // Kończy aktywność
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.card_match_instruction),
@@ -578,6 +564,7 @@ class CardMatchActivity : BaseActivity() {
         val runnable = object : Runnable {
             override fun run() {
                 if (pauseMenu.isPaused) {
+                    if (isGameEnding) return // Jeśli gra się skończyła, przerywamy natychmiast
                     // Gra w pauzie – nie zmniejszamy remaining, czekamy do wznowienia
                     handler.postDelayed(this, interval)
                     return
@@ -608,5 +595,40 @@ class CardMatchActivity : BaseActivity() {
         if (!isGameEnding && !pauseMenu.isPaused && !isChangingConfigurations) {
             pauseMenu.pause()
         }
+    }
+
+    /**
+     * Obsługuje koniec gry: blokuje planszę i wyświetla dialog z BaseActivity.
+     */
+    private fun handleGameOver() {
+        isGameEnding = true
+
+        //zablokuj interakcję z kartami
+        gridLayout.isEnabled = false
+        cards.forEach { it.view.isEnabled = false }
+        pauseOverlay.visibility = View.GONE
+
+        // Wywołaj dialog z BaseActivity
+        showGameOverDialog(
+            categoryKey = GameKeys.CATEGORY_MEMORY,
+            gameKey = GameKeys.GAME_CARD_MATCH,
+            gameName = getString(R.string.card_match),
+            starManager = starManager,
+            timerProgressBar = timerProgressBar,
+            countdownManager = countdownManager,
+            currentBestScore = currentBestScore,
+            onRestartAction = {
+
+                // Aktualizujemy lokalny rekord, jeśli został właśnie pobity
+                if (starManager.starCount > currentBestScore) {
+                    currentBestScore = starManager.starCount
+                }
+
+                currentLevel = 1
+                pendingFlipCardIndex = -1
+
+                startNewGame()
+            }
+        )
     }
 }

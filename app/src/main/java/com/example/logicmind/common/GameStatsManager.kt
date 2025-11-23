@@ -87,6 +87,23 @@ open class GameStatsManager {
         }
     }
 
+    /**
+     * Zwraca całkowity czas gry w sekundach z wyłączeniem pauz
+     */
+    fun getPlayedTimeSec(): Double {
+        val currentTime = System.currentTimeMillis()
+        var duration = (currentTime - gameStartTime).coerceAtLeast(0L)
+
+        // Jeśli gra jest aktualnie zapauzowana,
+        // odejmujemy czas trwania obecnej pauzy, aby wynik był dokładny.
+        if (isPaused) {
+            val currentPauseDuration = currentTime - pauseStartTime
+            duration -= currentPauseDuration
+        }
+
+        return duration.toDouble() / 1000.0
+    }
+
     /** Oblicza średni czas reakcji.
      * Jest testowalna jednostkowo.
      */
