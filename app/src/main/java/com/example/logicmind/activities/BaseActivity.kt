@@ -502,17 +502,17 @@ open class BaseActivity : AppCompatActivity() {
     }
 
     /**
-     * Uniwersalna metoda wyświetlająca dialog końca gry.
+     * Metoda wyświetlająca dialog końca gry.
      * Zajmuje się zatrzymaniem czasu, zapisem do bazy i obsługą przycisków dialogu.
      *
-     * @param categoryKey - Kategoria gry (np. GameKeys.CATEGORY_MEMORY)
-     * @param gameKey - Klucz gry (np. GameKeys.GAME_CARD_MATCH)
+     * @param categoryKey - Kategoria gry
+     * @param gameKey - Klucz gry
      * @param gameName - Wyświetlana nazwa gry (do lastPlayedGame)
      * @param starManager - Menedżer gwiazdek danej gry
      * @param timerProgressBar - Pasek czasu danej gry
      * @param countdownManager - Menedżer odliczania (potrzebny do restartu)
      * @param currentBestScore - Rekord pobrany na początku gry
-     * @param onRestartAction - Kod specyficzny dla danej gry, który musi się wykonać przy restarcie (np. tasowanie kart)
+     * @param onRestartAction - Kod specyficzny dla danej gry, który musi się wykonać przy restarcie
      */
     protected fun showGameOverDialog(
         categoryKey: String,
@@ -561,16 +561,18 @@ open class BaseActivity : AppCompatActivity() {
             bestScore = displayBestScore
         )
 
-        starManager.reset()
-        gameStatsManager.startReactionTracking()
-        gameStatsManager.setGameStartTime(this)
-        timerProgressBar.reset()
+        dialog.onRestartListener = {
+            starManager.reset()
+            gameStatsManager.startReactionTracking()
+            gameStatsManager.setGameStartTime(this)
+            timerProgressBar.reset()
 
-        // Specyficzny reset dla danej gry
-        onRestartAction()
+            // Specyficzny reset dla danej gry
+            onRestartAction()
 
-        // Start odliczania
-        countdownManager.startCountdown()
+            // Start odliczania
+            countdownManager.startCountdown()
+        }
 
 
         dialog.onExitListener = {

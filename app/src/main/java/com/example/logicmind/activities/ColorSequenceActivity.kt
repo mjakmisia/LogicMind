@@ -77,6 +77,8 @@ class ColorSequenceActivity : BaseActivity() {
         const val BASE_TIME_SECONDS = 90 // Czas gry w sekundach
     }
 
+    private var currentBestScore = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_color_sequence)
@@ -94,24 +96,21 @@ class ColorSequenceActivity : BaseActivity() {
         starManager = StarManager()
         starManager.init(findViewById(R.id.starCountText))
 
+        // Pobieranie rekordu
+        if (isUserLoggedIn()) {
+            val uid = auth.currentUser!!.uid
+            db.getReference("users").child(uid).child("categories")
+                .child(GameKeys.CATEGORY_MEMORY).child(GameKeys.GAME_COLOR_SEQUENCE)
+                .child("bestStars").get().addOnSuccessListener { snapshot ->
+                    currentBestScore = snapshot.getValue(Int::class.java) ?: 0
+                }
+        }
+
         // Inicjalizacja paska czasu
         timerProgressBar.setTotalTime(BASE_TIME_SECONDS) // Ustaw czas na 1,5 minuty
         timerProgressBar.setOnFinishCallback {
             runOnUiThread {
-                isGameEnding = true
-                Toast.makeText(this, "Czas minął! Koniec gry!", Toast.LENGTH_LONG).show()
-                gridLayout.isEnabled = false
-                keyButtons.forEach { it.view.isEnabled = false }
-                pauseOverlay.visibility = View.GONE
-                updateUserStatistics(
-                    categoryKey = GameKeys.CATEGORY_MEMORY,
-                    gameKey = GameKeys.GAME_COLOR_SEQUENCE,
-                    starsEarned = starManager.starCount,
-                    accuracy = gameStatsManager.calculateAccuracy(),
-                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
-                )
-                lastPlayedGame(GameKeys.CATEGORY_MEMORY, GameKeys.GAME_COLOR_SEQUENCE, getString(R.string.color_sequence))
-                finish()
+                handleGameOver()
             }
         }
 
@@ -165,15 +164,8 @@ class ColorSequenceActivity : BaseActivity() {
                 keyButtons.forEach { it.view.isEnabled = false }
             }, // Zatrzymuje timer podczas pauzy
             onExit = {
-                updateUserStatistics(
-                    categoryKey = GameKeys.CATEGORY_MEMORY,
-                    gameKey = GameKeys.GAME_COLOR_SEQUENCE,
-                    starsEarned = starManager.starCount,
-                    accuracy = gameStatsManager.calculateAccuracy(),
-                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
-                )
-                lastPlayedGame(GameKeys.CATEGORY_MEMORY, GameKeys.GAME_COLOR_SEQUENCE, getString(R.string.color_sequence))
-                finish() },
+                handleGameOver()
+            },
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.color_sequence_instruction),
         )
@@ -636,6 +628,33 @@ class ColorSequenceActivity : BaseActivity() {
             }
         }
         Handler(Looper.getMainLooper()).postDelayed(runnable, interval)
+    }
+
+    private fun handleGameOver() {
+        isGameEnding = true
+        gridLayout.isEnabled = false
+        keyButtons.forEach { it.view.isEnabled = false }
+        pauseOverlay.visibility = View.GONE
+
+        showGameOverDialog(
+            categoryKey = GameKeys.CATEGORY_MEMORY,
+            gameKey = GameKeys.GAME_COLOR_SEQUENCE,
+            gameName = getString(R.string.color_sequence),
+            starManager = starManager,
+            timerProgressBar = timerProgressBar,
+            countdownManager = countdownManager,
+            currentBestScore = currentBestScore,
+            onRestartAction = {
+                if (starManager.starCount > currentBestScore) {
+                    currentBestScore = starManager.starCount
+                }
+                currentLevel = 1
+                userSequence.clear()
+                currentSequence.clear()
+                // startNewGame() zostanie wywołane po countdownie
+                startNewGame()
+            }
+        )
     }
 
     override fun onPause() {

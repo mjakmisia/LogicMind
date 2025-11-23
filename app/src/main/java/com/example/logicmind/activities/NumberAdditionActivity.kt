@@ -38,6 +38,7 @@ class NumberAdditionActivity : BaseActivity() {
     private var isGameEnding = false // Flaga końca gry
     private var isGameActive = false // Flaga, sprawdzająca czy gra jest w trakcie
     private var isShowingError = false  // Flaga blokująca kliki podczas błędu
+    private var currentBestScore = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,23 +56,20 @@ class NumberAdditionActivity : BaseActivity() {
         starManager = StarManager()
         starManager.init(findViewById(R.id.starCountText))
 
+        if (isUserLoggedIn()) {
+            val uid = auth.currentUser!!.uid
+            db.getReference("users").child(uid).child("categories")
+                .child(GameKeys.CATEGORY_REASONING).child(GameKeys.GAME_NUMBER_ADDITION)
+                .child("bestStars").get().addOnSuccessListener { snapshot ->
+                    currentBestScore = snapshot.getValue(Int::class.java) ?: 0
+                }
+        }
+
         // Inicjalizacja paska czasu
         timerProgressBar.setTotalTime(90) // Ustaw czas na 1,5 minuty
         timerProgressBar.setOnFinishCallback {
             runOnUiThread {
-                isGameEnding = true
-                Toast.makeText(this, "Czas minął! Koniec gry!", Toast.LENGTH_LONG).show()
-                numberGrid.isEnabled = false
-                pauseOverlay.visibility = View.GONE
-                updateUserStatistics(
-                    categoryKey = GameKeys.CATEGORY_REASONING,
-                    gameKey = GameKeys.GAME_NUMBER_ADDITION,
-                    starsEarned = starManager.starCount,
-                    accuracy = gameStatsManager.calculateAccuracy(),
-                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
-                )
-                lastPlayedGame(GameKeys.CATEGORY_REASONING, GameKeys.GAME_NUMBER_ADDITION, getString(R.string.number_addition))
-                finish()
+                handleGameOver()
             }
         }
 
@@ -136,15 +134,8 @@ class NumberAdditionActivity : BaseActivity() {
                 timerProgressBar.pause()
             },
             onExit = {
-                updateUserStatistics(
-                    categoryKey = GameKeys.CATEGORY_REASONING,
-                    gameKey = GameKeys.GAME_NUMBER_ADDITION,
-                    starsEarned = starManager.starCount,
-                    accuracy = gameStatsManager.calculateAccuracy(),
-                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
-                )
-                lastPlayedGame(GameKeys.CATEGORY_REASONING, GameKeys.GAME_NUMBER_ADDITION, getString(R.string.number_addition))
-                finish() },
+                handleGameOver()
+            },
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.number_addition_instruction),
         )
@@ -456,26 +447,38 @@ class NumberAdditionActivity : BaseActivity() {
             setupNumberGrid()
             showLevelInstruction()
         } else {
-            endGame()
+            handleGameOver()
         }
     }
 
-    // Kończy grę
-    private fun endGame() {
+    private fun handleGameOver() {
         isGameActive = false
         isGameEnding = true
-        Toast.makeText(this, "Koniec gry!", Toast.LENGTH_LONG).show()
         numberGrid.isEnabled = false
         pauseOverlay.visibility = View.GONE
-        updateUserStatistics(
+
+        showGameOverDialog(
             categoryKey = GameKeys.CATEGORY_REASONING,
             gameKey = GameKeys.GAME_NUMBER_ADDITION,
-            starsEarned = starManager.starCount,
-            accuracy = gameStatsManager.calculateAccuracy(),
-            reactionTime = getAverageReactionTime(stars = starManager.starCount),
+            gameName = getString(R.string.number_addition),
+            starManager = starManager,
+            timerProgressBar = timerProgressBar,
+            countdownManager = countdownManager,
+            currentBestScore = currentBestScore,
+            onRestartAction = {
+                if (starManager.starCount > currentBestScore) {
+                    currentBestScore = starManager.starCount
+                }
+                level = 1
+                numberGrid.removeAllViews()
+                numbers.clear()
+                selectedButtons.clear()
+                // Ukrywamy elementy, bo countdownManager je odsłoni
+                targetNumberText.visibility = View.GONE
+                numberGrid.visibility = View.GONE
+                updateLayoutForOrientation()
+            }
         )
-        lastPlayedGame(GameKeys.CATEGORY_REASONING, GameKeys.GAME_NUMBER_ADDITION, getString(R.string.number_addition))
-        finish()
     }
 
     // Zwraca wymiary gridu (cols, rows) dla levelu

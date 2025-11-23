@@ -43,6 +43,7 @@ class WordSearchActivity : BaseActivity() {
     private var wordsToFind: List<String> = emptyList() // Słowa do znalezienia w danej rundzie
     private val foundWords = mutableSetOf<String>() // Słowa już znalezione
     private val letterViews = mutableMapOf<Pair<Int, Int>, TextView>() // Mapa przechowująca widoki liter (Row, Col) -> TextView
+    private var currentBestScore = 0
 
     // Przechowuje dane linii na potrzeby rotacji
     data class PermanentLineData(
@@ -104,29 +105,19 @@ class WordSearchActivity : BaseActivity() {
             params.topToBottom = R.id.wordsToFindFlow
         }
 
+        if (isUserLoggedIn()) {
+            val uid = auth.currentUser!!.uid
+            db.getReference("users").child(uid).child("categories")
+                .child(GameKeys.CATEGORY_FOCUS).child(GameKeys.GAME_WORD_SEARCH)
+                .child("bestStars").get().addOnSuccessListener { snapshot ->
+                    currentBestScore = snapshot.getValue(Int::class.java) ?: 0
+                }
+        }
+
         // Inicjalizacja paska czasu
         timerProgressBar.setTotalTime(BASE_TIME_SECONDS)
         timerProgressBar.setOnFinishCallback {
-            runOnUiThread {
-                isGameEnding = true
-                Toast.makeText(this, "Czas minął! Koniec gry!", Toast.LENGTH_LONG).show()
-                gridLayout.isEnabled = false
-                pauseOverlay.visibility = View.GONE
-                updateUserStatistics(
-                    categoryKey = GameKeys.CATEGORY_FOCUS,
-                    gameKey = GameKeys.GAME_WORD_SEARCH,
-                    starsEarned = starManager.starCount,
-                    accuracy = gameStatsManager.calculateAccuracy(),
-                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
-                )
-
-                lastPlayedGame(
-                    GameKeys.CATEGORY_FOCUS,
-                    GameKeys.GAME_WORD_SEARCH,
-                    getString(R.string.word_search)
-                )
-                finish()
-            }
+            handleGameOver()
         }
 
         // Inicjalizacja managera odliczania
@@ -176,20 +167,7 @@ class WordSearchActivity : BaseActivity() {
                 timerProgressBar.pause()
             },
             onExit = {
-                updateUserStatistics(
-                    categoryKey = GameKeys.CATEGORY_FOCUS,
-                    gameKey = GameKeys.GAME_WORD_SEARCH,
-                    starsEarned = starManager.starCount,
-                    accuracy = gameStatsManager.calculateAccuracy(),
-                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
-                )
-
-                lastPlayedGame(
-                    GameKeys.CATEGORY_FOCUS,
-                    GameKeys.GAME_WORD_SEARCH,
-                    getString(R.string.word_search)
-                )
-                finish()
+                handleGameOver()
             },
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.word_search_instruction),
@@ -699,5 +677,30 @@ class WordSearchActivity : BaseActivity() {
         super.onDestroy()
         timerProgressBar.stop()
         countdownManager.cancel()
+    }
+
+    private fun handleGameOver() {
+        isGameEnding = true
+        gridLayout.isEnabled = false
+        overlayView.isEnabled = false // Blokada dotyku
+        pauseOverlay.visibility = View.GONE
+
+        showGameOverDialog(
+            categoryKey = GameKeys.CATEGORY_FOCUS,
+            gameKey = GameKeys.GAME_WORD_SEARCH,
+            gameName = getString(R.string.word_search),
+            starManager = starManager,
+            timerProgressBar = timerProgressBar,
+            countdownManager = countdownManager,
+            currentBestScore = currentBestScore,
+            onRestartAction = {
+                if (starManager.starCount > currentBestScore) {
+                    currentBestScore = starManager.starCount
+                }
+                currentLevel = 1
+                overlayView.isEnabled = true
+                startNewGame()
+            }
+        )
     }
 }
