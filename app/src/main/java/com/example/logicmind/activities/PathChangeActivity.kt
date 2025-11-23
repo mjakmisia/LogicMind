@@ -285,6 +285,8 @@ class PathChangeActivity : BaseActivity() {
         outState.putLong("currentSpawnDelayMs", currentSpawnDelayMs)
         outState.putInt("totalMoves", totalMoves)
         outState.putInt("successfulStreak", successfulStreak)
+
+        saveGameStats(outState)
     }
 
     // Przywraca stan gry
@@ -360,6 +362,7 @@ class PathChangeActivity : BaseActivity() {
         }
 
         pauseMenu.syncWithOverlay()
+        restoreGameStats(savedInstanceState)
     }
 
     // Funkcja wywoływana po odliczaniu, rozpoczyna nową grę

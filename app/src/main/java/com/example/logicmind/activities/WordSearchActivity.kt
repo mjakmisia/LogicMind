@@ -237,6 +237,8 @@ class WordSearchActivity : BaseActivity() {
         // Zapisz przypisane kolory
         outState.putStringArrayList("assignedWordKeys", ArrayList(assignedWordColors.keys))
         outState.putIntegerArrayList("assignedWordValues", ArrayList(assignedWordColors.values))
+
+        saveGameStats(outState)
     }
 
     // Przywraca stan aktywności
@@ -317,6 +319,8 @@ class WordSearchActivity : BaseActivity() {
         }
 
         pauseMenu.syncWithOverlay()
+
+        restoreGameStats(savedInstanceState)
     }
 
     // Odbudowa UI (po rotacji)
@@ -603,6 +607,8 @@ class WordSearchActivity : BaseActivity() {
 
             starManager.increment()
 
+            gameStatsManager.registerAttempt(true)
+
             val startCoords = currentSelectionCoords.first()
             val endCoords = currentSelectionCoords.last()
             val startPixels = getCellCenter(startCoords.first, startCoords.second)
@@ -641,6 +647,8 @@ class WordSearchActivity : BaseActivity() {
 
                 startNewGame()
             }
+        } else {
+            gameStatsManager.registerAttempt(false)
         }
     }
 

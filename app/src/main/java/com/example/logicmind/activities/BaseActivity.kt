@@ -3,6 +3,9 @@ package com.example.logicmind.activities
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
@@ -30,6 +33,7 @@ import java.util.Locale
  */
 open class BaseActivity : AppCompatActivity() {
 
+
     // Inicjalizacja Firebase dla wszystkich aktywności dziedziczących
     protected lateinit var auth: FirebaseAuth
     protected lateinit var db: FirebaseDatabase
@@ -55,7 +59,16 @@ open class BaseActivity : AppCompatActivity() {
         super.attachBaseContext(context)
     }
 
-    override fun onCreate(savedInstanceState: android.os.Bundle?) {
+    companion object {
+        private var isPersistenceEnabled = false
+
+        //stałe do zapisywania i odczytywania danych z bundle
+        private const val KEY_STATS_START_TIME = "STATS_START_TIME"
+        private const val KEY_STATS_IS_PAUSED = "STATS_IS_PAUSED"
+        private const val KEY_STATS_PAUSE_TIME = "STATS_PAUSE_TIME"
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         //przywracamy zapisany motyw jeśli był
@@ -79,11 +92,27 @@ open class BaseActivity : AppCompatActivity() {
         insetsController.systemBarsBehavior =
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
+        // ustawienie persystencji tylko raz
+        //używamy do zapisu danych jeżeli rozłączy się internet
+        if (!isPersistenceEnabled) {
+            try {
+                // Pobierz instancję
+                val database =
+                    FirebaseDatabase.getInstance("https://logicmind-default-rtdb.europe-west1.firebasedatabase.app")
+                database.setPersistenceEnabled(true) // Włącz tryb offline
+                isPersistenceEnabled = true // Zablokuj ponowne wywołanie
+            } catch (e: Exception) {
+                Log.w("FIREBASE_INIT", "${e.message}")
+            }
+        }
 
         // Inicjalizacja Firebase w każdej aktywności
         auth = FirebaseAuth.getInstance()
         db =
             FirebaseDatabase.getInstance("https://logicmind-default-rtdb.europe-west1.firebasedatabase.app")
+
+        //synchronizacja danych po powrocie online
+        db.getReference("users").keepSynced(true)
     }
 
     /**
@@ -180,7 +209,6 @@ open class BaseActivity : AppCompatActivity() {
     private fun updateStreak() {
         if (!isUserLoggedIn()) return
 
-
         val uid = auth.currentUser!!.uid
         val userRef = db.getReference("users").child(uid)
 
@@ -191,52 +219,95 @@ open class BaseActivity : AppCompatActivity() {
             val lastPlayTimestamp = snapshot.child("lastPlayDate").getValue(Long::class.java)
 
             val today = Calendar.getInstance()
+            //zerujemy tu czas z today zeby porownac tylko daty
+            stripTime(today)
 
             val newStreak = if (lastPlayTimestamp == null) {
                 // pierwsza gra użytkownika
                 1
             } else {
                 val lastPlayDay = Calendar.getInstance().apply { timeInMillis = lastPlayTimestamp }
+                stripTime(lastPlayDay)
 
                 //obliczenie różnicy dni między dzisiejszym dniem a ostatnią grą
-                val daysBetween =
-                    ((today.timeInMillis - lastPlayDay.timeInMillis) / (1000 * 60 * 60 * 24)).toInt()
+                val diffMillis = today.timeInMillis - lastPlayDay.timeInMillis
+                val daysBetween = (diffMillis / (1000 * 60 * 60 * 24)).toInt()
 
                 when (daysBetween) {
                     0 -> streak // gra w tym samym dniu - pozostaje bez zmian
                     1 -> streak + 1 // gra dzień po dniu — streak zwiększa się o 1
-                    else -> 0 // opuścił jeden dzień — streak resetuje się do 0
+                    else -> 1 // opuścił jeden dzień — streak resetuje się do 1 bo właśnie zagrał
                 }
             }
 
-            //zapisanie do bazy
-            userRef.child("streak").setValue(newStreak).addOnSuccessListener {
-                    Log.d("STREAK_DEBUG", "Zaktualizowano streak dla $uid")
-            }.addOnFailureListener {
-                    Log.e("STREAK_DEBUG", "Błąd aktualizacji streak dla $uid", it)
+            // Zapis tylko jeśli streak się zmienił lub to pierwsza gra dzisiaj
+            if (newStreak != streak || lastPlayTimestamp == null) {
+                val updates = hashMapOf<String, Any>(
+                    "streak" to newStreak,
+                    "lastPlayDate" to System.currentTimeMillis() // Zapisujemy dokładny czas gry
+                )
+
+                if (newStreak > bestStreak) {
+                    updates["bestStreak"] = newStreak
                 }
 
-            if (newStreak > bestStreak) {
-                userRef.child("bestStreak").setValue(newStreak).addOnSuccessListener {
-                        Log.d("STREAK_DEBUG", "Zaktualizowano bestStreak dla $uid")
-                }.addOnFailureListener {
-                        Log.e("STREAK_DEBUG", "Błąd aktualizacji bestStreak dla $uid", it)
+                userRef.updateChildren(updates)
+                    .addOnSuccessListener {
+                        Log.d(
+                            "STREAK_DEBUG",
+                            "Streak zaktualizowany: $newStreak"
+                        )
                     }
+                    .addOnFailureListener { e -> Log.e("STREAK_DEBUG", "Błąd zapisu streaka", e) }
             }
-
-            //aktualizacja lastPlayDate
-            userRef.child("lastPlayDate").setValue(today.timeInMillis)
-            Log.d("STREAK_DEBUG", "Nowy streak:  $newStreak, BestStreak: $bestStreak")
 
         }.addOnFailureListener { e ->
             Log.e("STREAK_DEBUG", "Błąd pobierania danych użytkownika", e)
         }
     }
 
+    /** Metoda pomocnicza do zerowania godzin, minut, sekund
+     * Cofa zegarek zawsze do północy  */
+    private fun stripTime(calendar: Calendar) {
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+    }
 
-    /*
-    Stałe używane do dostępu do kategorii i gier w bazie danych Firebase.
-    Nazwy muszą zgadzać się z tym co jest w bazie
+    /**
+     * Oblicza streak do wyświetlenia.
+     * Jeśli minął więcej niż 1 dzień od ostatniej gry, zwraca 0 nawet jeśli w bazie jest stara liczba.
+     */
+    protected fun calculateDisplayStreak(snapshot: DataSnapshot): Int {
+        val savedStreak = (snapshot.child("streak").value as? Long ?: 0L).toInt()
+        //jeśli nigdy nie gra zwraca 0
+        val lastPlayTimestamp =
+            snapshot.child("lastPlayDate").getValue(Long::class.java) ?: return 0
+
+        val today = Calendar.getInstance()
+        stripTime(today) // resetujemy do północy
+
+        val lastPlayDay = Calendar.getInstance().apply { timeInMillis = lastPlayTimestamp }
+        stripTime(lastPlayDay)
+
+        val diffMillis = today.timeInMillis - lastPlayDay.timeInMillis
+        val daysBetween = (diffMillis / (1000 * 60 * 60 * 24)).toInt()
+
+        // 0 dni różnicy czyli grał dzisiaj -> pokazujemy zapisany streak
+        // 1 dzień różnicy czyli grał wczoraj -> pokazujemy zapisany streak
+        // >1 dzień przerwy -> pokazujemy 0 (ale w bazie zresetuje się dopiero jak zagra)
+        return if (daysBetween <= 1) {
+            savedStreak
+        } else {
+            0
+        }
+    }
+
+
+    /**
+     * Stałe używane do dostępu do kategorii i gier w bazie danych Firebase.
+     * Nazwy muszą zgadzać się z tym co jest w bazie
      */
     object GameKeys {
         const val CATEGORY_MEMORY = "Pamiec"
@@ -429,7 +500,57 @@ open class BaseActivity : AppCompatActivity() {
         return avgReactionSec
     }
 
+    /**
+     * Zapisuje aktualny stan licznika czasu gry (czas startu, stan pauzy) do obiektu Bundle.
+     * Używany, aby przy obrocie ekranu czas sie nie resetował
+     *
+     * @param outState Bundle, do którego zostaną zapisane dane.
+     */
+    protected fun saveGameStats(outState: Bundle) {
+        //zapisz oryginalny czas rozpoczecia gry
+        outState.putLong(KEY_STATS_START_TIME, gameStatsManager.getStartTime())
 
+        //pobiera info o pauzie
+        val (isPaused, pauseTime) = gameStatsManager.getPauseData()
+        //zapisuje stan pauzy
+        outState.putBoolean(KEY_STATS_IS_PAUSED, isPaused)
+        outState.putLong(KEY_STATS_PAUSE_TIME, pauseTime)
+    }
 
+    /**
+     * Odczytuje zapisane dane licznika czasu z Bundle i przywraca je w GameStatsManagerze.
+     * Przywracamy czas startu na ten przed obrotem ekranu
+     *
+     * @param savedInstanceState Bundle zawierający zapisany stan gry
+     */
+    protected fun restoreGameStats(savedInstanceState: Bundle) {
+        //odczytaj oryginalny czas rozpoczecia gry jesli nie mozesz ustaw 0
+        val savedStartTime = savedInstanceState.getLong(KEY_STATS_START_TIME, 0L)
+        //jesli go znaleziono to przywroc
+        if (savedStartTime != 0L) {
+            gameStatsManager.restoreStartTime(savedStartTime)
+        }
+
+        //odczytuje stan pauzy
+        val wasPaused = savedInstanceState.getBoolean(KEY_STATS_IS_PAUSED, false)
+        val savedPauseTime = savedInstanceState.getLong(KEY_STATS_PAUSE_TIME, 0L)
+        gameStatsManager.restorePauseData(wasPaused, savedPauseTime)
+    }
+
+    /** Funkcja do sprawdzania połączenia z internetem */
+    protected fun isNetworkAvailable(): Boolean {
+        //poproszenie o dostęp do servisu sieciowego
+        val connectivityManager =
+            getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        //sprawdzenie aktualnie używanej sieci, jeśli nie ma zwraca false
+        val network = connectivityManager.activeNetwork ?: return false
+
+        //jakie parametry ma ta sieć
+        val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
+
+        // czy sieć ma zdolność (Capability) łączenia z internetem
+        return activeNetwork.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
 }
 

@@ -84,6 +84,12 @@ class WelcomeActivity : BaseActivity() {
                 showToast("Niepoprawny adres e-mail")
                 return@setOnClickListener
             }
+
+            //sprawdzenie połączenia z internetemm
+            if (!isNetworkAvailable()) {
+                Toast.makeText(this, "Brak internetu.", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
             loginUser(email, password)
         }
 
@@ -98,6 +104,11 @@ class WelcomeActivity : BaseActivity() {
             }
             if (!isEmailValid(email)) {
                 showToast("Niepoprawny adres e-mail")
+                return@setOnClickListener
+            }
+            //sprawdzenie połączenia z internetemm
+            if (!isNetworkAvailable()) {
+                Toast.makeText(this, "Brak internetu.", Toast.LENGTH_LONG).show()
                 return@setOnClickListener
             }
 

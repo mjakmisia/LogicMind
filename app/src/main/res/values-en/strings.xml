@@ -95,6 +95,23 @@
     <string name="zero_days">0 days</string>
     <string name="reset_progress_message">Are you sure you want to reset all your progress? This action cannot be undone.</string>
     <string name="reset_progress_title">Reset Progress</string>
+    <string name="password_change">Change password</string>
+    <string name="change_password_title">Change password</string>
+    <string name="new_password_hint">New password (min. 8 chars)</string>
+    <string name="change_btn">Change</string>
+
+    <string name="password_error_length">Password must be at least 8 characters long</string>
+    <string name="password_error_uppercase">Password must contain at least one uppercase letter</string>
+    <string name="password_error_digit">Password must contain at least one number</string>
+
+    <string name="password_changed_success">Password changed successfully!</string>
+    <string name="password_change_reauth_error">For security reasons, please log out and log in again to change your password.</string>
+    <string name="error_prefix">Error: %1$s</string>
+
+    <string name="change_username_title">Change your username</string>
+    <string name="new_username_hint">New username</string>
+    <string name="username_empty_error">Username cannot be empty</string>
+    <string name="username_changed_success">Username changed successfully!</string>
 
 
     <!-- GAME INTRO DESCRIPTIONS -->

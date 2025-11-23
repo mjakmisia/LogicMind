@@ -209,6 +209,11 @@ class CardMatchActivity : BaseActivity() {
         outState.putInt("currentLevel", currentLevel)
         outState.putInt("pendingFlipCardIndex", pendingFlipCardIndex)
         starManager.saveState(outState)
+
+        outState.putLong("STATS_START_TIME", gameStatsManager.getStartTime())
+
+        //dla pauzy:
+        saveGameStats(outState)
     }
 
     override fun onDestroy() {
@@ -429,6 +434,8 @@ class CardMatchActivity : BaseActivity() {
             isFlipping = false
             gridLayout.isEnabled = true
         }
+
+        restoreGameStats(savedInstanceState)
     }
 
     // Pokazuje wszystkie karty na początku gry przez 2 sekundy

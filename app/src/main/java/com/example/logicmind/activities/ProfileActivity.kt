@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat
 import com.example.logicmind.R
 import com.example.logicmind.databinding.ActivityProfileBinding
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import java.util.Calendar.DAY_OF_WEEK
 import java.util.Calendar.FRIDAY
 import java.util.Calendar.MONDAY
@@ -87,6 +88,18 @@ class ProfileActivity : BaseActivity() {
             resetUserProgress()
         }
 
+        val btnEditUsernameSmall = findViewById<View>(R.id.btnEditUsernameSmall)
+        btnEditUsernameSmall.setOnClickListener {
+            showChangeUsernameDialog()
+        }
+
+        // Obsługa przycisku zmiany hasła
+        val btnChangePassword = findViewById<Button>(R.id.buttonChangePassword)
+
+        btnChangePassword.setOnClickListener {
+            showChangePasswordDialog()
+        }
+
 
         // Ustawienie koloru przycisku programowo
         val btnDeleteAccount = binding.buttonDeleteAccount
@@ -128,6 +141,154 @@ class ProfileActivity : BaseActivity() {
     }
 
     /**
+     * Metoda obsługująca zmianę hasła
+     */
+
+    private fun showChangePasswordDialog() {
+        val user = auth.currentUser
+        if (user == null || !isUserLoggedIn()) return
+
+        // pole tekstowe do wpisania hasła
+        val input = android.widget.EditText(this).apply {
+            hint = "Nowe hasło (min. 8 znaków, wielka litera i cyfra)"
+            inputType =
+                android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+            setPadding(50, 30, 50, 30)
+            background = ContextCompat.getDrawable(context, R.drawable.bg_edittext_rounded)
+        }
+
+        // Kontener dla marginesów
+        val container = android.widget.FrameLayout(this).apply {
+            setPadding(40, 20, 40, 20)
+            addView(input)
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("Zmiana hasła")
+            .setView(container)
+            .setPositiveButton("Zmień") { dialog, _ ->
+                val newPassword = input.text.toString().trim()
+
+                if (newPassword.length < 8) {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.password_error_length),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@setPositiveButton
+                }
+                if (!newPassword.any { it.isUpperCase() }) {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.password_error_uppercase),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@setPositiveButton
+                }
+
+                if (!newPassword.any { it.isDigit() }) {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.password_error_digit),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@setPositiveButton
+                }
+
+                // Firebase: Zmiana hasła
+                user.updatePassword(newPassword)
+                    .addOnSuccessListener {
+                        Toast.makeText(
+                            this,
+                            getString(R.string.password_changed_success),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        dialog.dismiss()
+                    }
+                    .addOnFailureListener { e ->
+                        // Firebase wymaga "świeżego" logowania do zmiany hasła.
+                        if (e is FirebaseAuthRecentLoginRequiredException) {
+                            Toast.makeText(
+                                this,
+                                getString(R.string.password_change_reauth_error),
+                                Toast.LENGTH_LONG
+                            ).show()
+                        } else {
+                            Toast.makeText(
+                                this,
+                                getString(R.string.error_prefix, e.message),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    /**
+     * Wyświetla dialog do zmiany nazwy użytkownika i aktualizuje ją w bazie
+     */
+    private fun showChangeUsernameDialog() {
+        val user = auth.currentUser
+        if (user == null || !isUserLoggedIn()) return
+
+        // Pole tekstowe do wpisania nowej nazwy
+        val input = android.widget.EditText(this).apply {
+            hint = getString(R.string.new_username_hint)
+            // Pobieramy obecną nazwę żeby user mógł ją edytować
+            setText(binding.textUsername.text.toString())
+            inputType =
+                android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PERSON_NAME
+            setPadding(50, 30, 50, 30)
+            background = ContextCompat.getDrawable(context, R.drawable.bg_edittext_rounded)
+        }
+
+        val container = android.widget.FrameLayout(this).apply {
+            setPadding(40, 20, 40, 20)
+            addView(input)
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.change_username_title))
+            .setView(container)
+            .setPositiveButton(getString(R.string.change_btn)) { dialog, _ ->
+                val newUsername = input.text.toString().trim()
+
+                if (newUsername.isEmpty()) {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.username_empty_error),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@setPositiveButton
+                }
+
+                // Aktualizacja w Firebase Realtime Database
+                val uid = user.uid
+                db.getReference("users").child(uid).child("username").setValue(newUsername)
+                    .addOnSuccessListener {
+                        binding.textUsername.text = newUsername
+                        Toast.makeText(
+                            this,
+                            getString(R.string.username_changed_success),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        dialog.dismiss()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(
+                            this,
+                            getString(R.string.error_prefix, e.message),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    /**
      * Pokazuje komunikat i przycisk, gdy użytkownik nie jest zalogowany
      */
     private fun showLoginPrompt() {
@@ -166,7 +327,7 @@ class ProfileActivity : BaseActivity() {
 
                 if (snapshot.exists()) {
                     val username = snapshot.child("username").value as? String ?: "Brak nazwy"
-                    val currentStreak = snapshot.child("streak").value as? Long ?: 0
+                    val currentStreak = calculateDisplayStreak(snapshot)
                     val bestStreak = snapshot.child("bestStreak").value as? Long ?: 0
 
                     findViewById<TextView>(R.id.textUsername).text = username

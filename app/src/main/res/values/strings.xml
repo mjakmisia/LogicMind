@@ -50,7 +50,7 @@
     <string name="game_2">Gra 2</string>
     <string name="instructions">Instrukcja</string>
     <string name="user_account">Profil użytkownika</string>
-    <string name="last_played">Ostatnio zagrane</string>
+    <string name="last_played">Ostatnio zagrana gra</string>
     <string name="app_policy">Polityka aplikacji</string>
     <string name="continuee">Kontynuuj</string>
     <string name="restart">Zagraj ponownie</string>
@@ -87,7 +87,7 @@
     <string name="tempo_display">%1$s  %2$.1f s</string>
     <string name="blue_container">Niebieska strefa dotyku</string>
     <string name="red_container">Czerwona strefa dotyku</string>
-    <string name="last_played_game">Ostatnio zagrana gra: %1$s (%2$s)</string>
+    <string name="last_played_game">%1$s (%2$s)</string>
     <string name="last_played_game_none">Ostatnio zagrana gra: brak</string>
     <string name="current_streak_text">%1$d dni</string>
     <string name="best_streak_text">%1$d dni</string>
@@ -95,6 +95,23 @@
     <string name="zero_days">0 dni</string>
     <string name="reset_progress_message">Czy na pewno chcesz zresetować wszystkie postępy? Tej operacji nie można cofnąć.</string>
     <string name="reset_progress_title">Reset postępów</string>
+    <string name="password_change">Zmień hasło</string>
+    <string name="change_password_title">Zmiana hasła</string>
+    <string name="new_password_hint">Nowe hasło</string>
+    <string name="change_btn">Zmień</string>
+
+    <string name="password_error_length">Hasło musi mieć min. 8 znaków</string>
+    <string name="password_error_uppercase">Hasło musi zawierać wielką literę</string>
+    <string name="password_error_digit">Hasło musi zawierać cyfrę</string>
+
+    <string name="password_changed_success">Hasło zostało zmienione!</string>
+    <string name="password_change_reauth_error">Ze względów bezpieczeństwa wyloguj się i zaloguj ponownie, aby zmienić hasło.</string>
+    <string name="error_prefix">Błąd: %1$s</string>
+
+    <string name="change_username_title">Zmień nazwę</string>
+    <string name="new_username_hint">Nowa nazwa użytkownika</string>
+    <string name="username_empty_error">Nazwa nie może być pusta</string>
+    <string name="username_changed_success">Nazwa użytkownika została zmieniona!</string>
 
 
     <!-- OPISY GIER DO INTRO -->

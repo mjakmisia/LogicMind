@@ -207,6 +207,9 @@ class ColorSequenceActivity : BaseActivity() {
         outState.putLong("sequenceDelayRemaining", sequenceDelayRemaining)
         outState.putLong("pendingShowSequenceDelay", pendingShowSequenceDelay)
         starManager.saveState(outState)
+
+        //zapisz statystyki
+        saveGameStats(outState)
     }
 
     private fun restoreGameState(savedInstanceState: Bundle) {
@@ -289,6 +292,8 @@ class ColorSequenceActivity : BaseActivity() {
                 }
             }
         }
+        //przywroc statystyki
+        restoreGameStats(savedInstanceState)
     }
 
     // Inicjalizuje nową grę na podanym poziomie

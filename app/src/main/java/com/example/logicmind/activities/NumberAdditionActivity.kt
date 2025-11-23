@@ -224,6 +224,8 @@ class NumberAdditionActivity : BaseActivity() {
         outState.putIntegerArrayList("selectedIndices", ArrayList(selectedButtons.mapNotNull { it -> numberGrid.indexOfChild(it).takeIf { it >= 0 } }))
         outState.putBoolean("isShowingError", isShowingError)
         starManager.saveState(outState)
+
+        saveGameStats(outState)
     }
 
     override fun onDestroy() {
@@ -591,5 +593,6 @@ class NumberAdditionActivity : BaseActivity() {
         }
 
         pauseMenu.syncWithOverlay()
+        restoreGameStats(savedInstanceState)
     }
 }
