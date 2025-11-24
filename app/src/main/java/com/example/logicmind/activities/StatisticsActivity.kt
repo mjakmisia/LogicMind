@@ -61,6 +61,7 @@ class StatisticsActivity : BaseActivity() {
             auth.currentUser?.let {
                 loadUserStats(it.uid)
                 loadLastPlayedGame(it.uid)
+                loadGlobalStats(it.uid)
             }
         }
     }
@@ -353,6 +354,48 @@ class StatisticsActivity : BaseActivity() {
             getString(R.string.total_points_value, totalValue ?: "0")
         binding.root.findViewById<TextView>(bestId).text =
             getString(R.string.highest_score_value, bestValue ?: "0")
+    }
+
+    /**
+     * Pobiera globalne statystyki z bazy
+     */
+    private fun loadGlobalStats(uid: String) {
+        db.getReference("users").child(uid).child("statistics")
+            .get()
+            .addOnSuccessListener { snapshot ->
+                if (snapshot.exists()) {
+                    // Pobranie wartości
+                    val avgReactionMs =
+                        snapshot.child("avgReactionTime").getValue(Double::class.java) ?: 0.0
+                    val avgAccuracyVal =
+                        snapshot.child("avgAccuracy").getValue(Double::class.java) ?: 0.0
+
+                    // Formatowanie czasu reakcji z milisekund jak jest w bazie na sekundy
+                    val formattedReaction = if (avgReactionMs > 0) {
+                        String.format(Locale.getDefault(), "%.2f s", avgReactionMs / 1000.0)
+                    } else {
+                        "-"
+                    }
+
+                    // Formatowanie dokładności
+                    val formattedAccuracy = if (avgAccuracyVal > 0) {
+                        String.format(Locale.getDefault(), "%.1f%%", avgAccuracyVal)
+                    } else {
+                        "-"
+                    }
+
+                    binding.tvGlobalReactionTime.text = formattedReaction
+                    binding.tvGlobalAccuracy.text = formattedAccuracy
+                } else {
+                    binding.tvGlobalReactionTime.text = "-"
+                    binding.tvGlobalAccuracy.text = "-"
+                }
+            }
+            .addOnFailureListener {
+                Log.e("STATS_DEBUG", "Błąd pobierania globalnych statystyk", it)
+                binding.tvGlobalReactionTime.text = "Błąd"
+                binding.tvGlobalAccuracy.text = "Błąd"
+            }
     }
 
 
