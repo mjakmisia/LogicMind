@@ -88,7 +88,7 @@ object GameIntroProvider {
             "left_or_right" -> GameIntroConfig(
                 colorRes = R.color.category_yellow_dark_mode,
                 titleRes = R.string.left_or_right,
-                imageRes = R.drawable.ic_close, //obrazek do zmiany
+                imageRes = R.drawable.image_left_or_right,
                 sections = listOf(
                     IntroSection(R.string.lor_section_visual_recognition, R.string.lor_desc_visual_recognition),
                     IntroSection(R.string.lor_section_attention, R.string.lor_desc_attention),
