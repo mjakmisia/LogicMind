@@ -452,7 +452,7 @@ class LeftOrRightActivity : BaseActivity() {
     // Przesuwa kolejkę do następnego owocu z animacją lotu
     private fun advanceToNextFruit(isCorrect: Boolean, targetBasket: View) {
 
-        registerAttempt(isCorrect)
+        gameStatsManager.registerAttempt(isCorrect)
 
         gameContainer.post {
             if (isCorrect) {
