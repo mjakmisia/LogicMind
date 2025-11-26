@@ -14,6 +14,7 @@ import com.example.logicmind.common.PauseMenu
 import com.example.logicmind.common.StarManager
 import androidx.core.view.children
 import androidx.core.view.isEmpty
+import androidx.core.view.isVisible
 
 class LeftOrRightActivity : BaseActivity() {
     private lateinit var countdownText: TextView // Pole tekstowe dla odliczania
@@ -88,10 +89,6 @@ class LeftOrRightActivity : BaseActivity() {
         setContentView(R.layout.activity_left_or_right)
         supportActionBar?.hide()
 
-        // Ustawienie bazowego rozmiaru owoców i ich nachodzenia
-        fruitSizePx = (120 * resources.displayMetrics.density).toInt()
-        overlapMarginPx = -(60 * resources.displayMetrics.density).toInt()
-
         // Inicjalizacja widoków
         countdownText = findViewById(R.id.countdownText)
         pauseButton = findViewById(R.id.pauseButton)
@@ -105,6 +102,8 @@ class LeftOrRightActivity : BaseActivity() {
         rightBasket = findViewById(R.id.rightBasket)
         leftBasketTargetContainer = findViewById(R.id.leftBasketTargetContainer)
         rightBasketTargetContainer = findViewById(R.id.rightBasketTargetContainer)
+
+        updateLayoutForOrientation()
 
         // Ustawienie nasłuchiwania na kliknięcia koszyków
         leftBasket.setOnClickListener {
@@ -187,6 +186,12 @@ class LeftOrRightActivity : BaseActivity() {
         outState.putInt("countdownIndex", countdownManager.getIndex())
         outState.putBoolean("countdownInProgress", countdownManager.isInProgress())
         outState.putInt("currentLevel", currentLevel)
+        outState.putInt("fruitsSpawnedTotal", fruitsSpawnedTotal)
+        outState.putInt("fruitsToSpawnLimit", fruitsToSpawnLimit)
+        outState.putIntegerArrayList("fruitQueue", ArrayList(fruitQueue))
+        outState.putIntegerArrayList("leftBasketTargets", ArrayList(leftBasketTargets))
+        outState.putIntegerArrayList("rightBasketTargets", ArrayList(rightBasketTargets))
+        outState.putIntegerArrayList("activeGameFruits", ArrayList(activeGameFruits))
         starManager.saveState(outState)
     }
 
@@ -197,6 +202,8 @@ class LeftOrRightActivity : BaseActivity() {
         gameContainer.visibility = savedInstanceState.getInt("gameContainerVisibility", View.VISIBLE)
         pauseButton.visibility = savedInstanceState.getInt("pauseButtonVisibility", View.VISIBLE)
         currentLevel = savedInstanceState.getInt("currentLevel", 1)
+        fruitsSpawnedTotal = savedInstanceState.getInt("fruitsSpawnedTotal", 0)
+        fruitsToSpawnLimit = savedInstanceState.getInt("fruitsToSpawnLimit", 0)
         starManager.restoreState(savedInstanceState)
 
         // Przywracanie stanu timera
@@ -208,7 +215,7 @@ class LeftOrRightActivity : BaseActivity() {
             timerProgressBar.start()
         }
 
-        //Przywracanie stanu odliczania
+        // Przywracanie stanu odliczania
         val countdownIndex = savedInstanceState.getInt("countdownIndex", 0)
         val countdownInProgress = savedInstanceState.getBoolean("countdownInProgress", false)
         // Kontynuowanie odliczania, jeśli było aktywne
@@ -217,6 +224,58 @@ class LeftOrRightActivity : BaseActivity() {
         }
 
         pauseMenu.syncWithOverlay()
+
+        fruitQueue.clear()
+        savedInstanceState.getIntegerArrayList("fruitQueue")?.let { fruitQueue.addAll(it) }
+
+        leftBasketTargets.clear()
+        savedInstanceState.getIntegerArrayList("leftBasketTargets")?.let { leftBasketTargets.addAll(it) }
+
+        rightBasketTargets.clear()
+        savedInstanceState.getIntegerArrayList("rightBasketTargets")?.let { rightBasketTargets.addAll(it) }
+
+        activeGameFruits.clear()
+        savedInstanceState.getIntegerArrayList("activeGameFruits")?.let { activeGameFruits.addAll(it) }
+
+        // Odtwarzanie widoku na podstawie danych
+        if (gameContainer.isVisible && !countdownInProgress) {
+            displayBasketTargets()
+            displayFruitQueue()
+        }
+    }
+
+    // Dostosowuje wygląd gry do orientacji ekranu (pion/poziom)
+    private fun updateLayoutForOrientation() {
+        val isLandscape = resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+
+        // Ustaw rozmiar owoców w kolejce
+        if (isLandscape) {
+            fruitSizePx = (70 * resources.displayMetrics.density).toInt()
+            overlapMarginPx = -(35 * resources.displayMetrics.density).toInt()
+        } else {
+            fruitSizePx = (120 * resources.displayMetrics.density).toInt()
+            overlapMarginPx = -(60 * resources.displayMetrics.density).toInt()
+        }
+
+        // Dostosuj marginesy i pozycje (tylko dla poziomu)
+        if (isLandscape) {
+            // Podnieś kolejkę
+            val queueParams = fruitQueueContainer.layoutParams as ConstraintLayout.LayoutParams
+            queueParams.topMargin = 0
+            queueParams.verticalBias = 0.15f
+            fruitQueueContainer.layoutParams = queueParams
+
+            // Obniż koszyki
+            val smallBottomMargin = (4 * resources.displayMetrics.density).toInt()
+
+            val leftParams = leftBasket.layoutParams as ConstraintLayout.LayoutParams
+            leftParams.bottomMargin = smallBottomMargin
+            leftBasket.layoutParams = leftParams
+
+            val rightParams = rightBasket.layoutParams as ConstraintLayout.LayoutParams
+            rightParams.bottomMargin = smallBottomMargin
+            rightBasket.layoutParams = rightParams
+        }
     }
 
     private fun getLevelConfig(level: Int): LevelConfig {
@@ -317,7 +376,7 @@ class LeftOrRightActivity : BaseActivity() {
     // Tworzy pojedynczą ikonę celu
     private fun createTargetIcon(fruitId: Int): ImageView {
         val iconSizePx = (64 * resources.displayMetrics.density).toInt()
-        val iconMarginPx = (4 * resources.displayMetrics.density).toInt()
+        val iconMarginPx = (1 * resources.displayMetrics.density).toInt()
         val paddingPx = (12 * resources.displayMetrics.density).toInt() // Wewnętrzny padding
 
         return ImageView(this).apply {
@@ -394,7 +453,7 @@ class LeftOrRightActivity : BaseActivity() {
         updateQueueVisuals()
 
         // Sprawdź koniec poziomu
-        if (fruitQueueContainer.childCount == 0) {
+        if (fruitQueueContainer.isEmpty()) {
             val config = getLevelConfig(currentLevel)
             if (config.timeBonus > 0) {
                 timerProgressBar.addTime(config.timeBonus)
