@@ -1,14 +1,20 @@
 package com.example.logicmind.activities
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.example.logicmind.R
 import com.example.logicmind.databinding.ActivityMainBinding
 
 class MainActivity : BaseActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private val PERMISSION_REQUEST_CODE = 1001 // stały kod żądania
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -17,6 +23,9 @@ class MainActivity : BaseActivity() {
         setContentView(binding.root)
 
         supportActionBar?.hide()
+
+        //żądanie uprawnień powiadomień
+        requestNotificationPermission()
 
         //wyświetlanie streak pod ogniem
         loadUserStreak()
@@ -86,4 +95,43 @@ class MainActivity : BaseActivity() {
                 Log.e("STREAK_DEBUG", "Błąd pobierania streaka", it)
             }
     }
+
+    // Metoda do obsługi żądania uprawnienia
+    private fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                // Jeśli uprawnienie nie jest przyznane, wyświetl okno systemowe
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    PERMISSION_REQUEST_CODE
+                )
+            }
+        }
+    }
+
+    // Obsługa wyniku żądania uprawnienia
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Powiadomienia są włączone
+                Log.d("NOTIF_PERM", "Uprawnienie do powiadomień przyznane.")
+            } else {
+                // Użytkownik odrzucił uprawnienie
+                Log.d("NOTIF_PERM", "Uprawnienie do powiadomień odrzucone.")
+            }
+        }
+    }
+
 }

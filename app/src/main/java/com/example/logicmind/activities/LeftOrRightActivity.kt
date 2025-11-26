@@ -122,6 +122,21 @@ class LeftOrRightActivity : BaseActivity() {
                 Toast.makeText(this, "Czas minął! Koniec gry!", Toast.LENGTH_LONG).show()
                 gameContainer.isEnabled = false
                 pauseOverlay.visibility = View.GONE
+                
+                updateUserStatistics(
+                    categoryKey = GameKeys.CATEGORY_FOCUS,
+                    gameKey = GameKeys.GAME_LEFT_OR_RIGHT,
+                    starsEarned = starManager.starCount,
+                    accuracy = gameStatsManager.calculateAccuracy(),
+                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
+                )
+
+                lastPlayedGame(
+                    GameKeys.CATEGORY_FOCUS,
+                    GameKeys.GAME_LEFT_OR_RIGHT,
+                    getString(R.string.left_or_right)
+                )
+                
                 finish()
             }
         }
@@ -141,6 +156,10 @@ class LeftOrRightActivity : BaseActivity() {
                 timerProgressBar.stop()
                 timerProgressBar.reset()
                 timerProgressBar.start()
+
+                gameStatsManager.startReactionTracking()
+                gameStatsManager.setGameStartTime(this@LeftOrRightActivity)
+                
                 startNewGame()
             }
         )
@@ -159,9 +178,30 @@ class LeftOrRightActivity : BaseActivity() {
 
                 countdownManager.startCountdown()
             },
-            onResume = { timerProgressBar.start() }, // Wznawia timer po pauzie
-            onPause = { timerProgressBar.pause() },  // Zatrzymuje timer podczas pauzy
-            onExit = { finish() }, // Kończy aktywność
+            onResume = {
+                onGameResumed() 
+                timerProgressBar.start() 
+            },
+            onPause = { 
+                onGamePaused() 
+                timerProgressBar.pause() 
+            },
+            onExit = { 
+                updateUserStatistics(
+                    categoryKey = GameKeys.CATEGORY_FOCUS,
+                    gameKey = GameKeys.GAME_LEFT_OR_RIGHT,
+                    starsEarned = starManager.starCount,
+                    accuracy = gameStatsManager.calculateAccuracy(),
+                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
+                )
+
+                lastPlayedGame(
+                    GameKeys.CATEGORY_FOCUS,
+                    GameKeys.GAME_LEFT_OR_RIGHT,
+                    getString(R.string.left_or_right)
+                )
+                finish() 
+            }, 
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.left_or_right_instruction),
         )
@@ -411,6 +451,8 @@ class LeftOrRightActivity : BaseActivity() {
 
     // Przesuwa kolejkę do następnego owocu z animacją lotu
     private fun advanceToNextFruit(isCorrect: Boolean, targetBasket: View) {
+
+        registerAttempt(isCorrect)
 
         gameContainer.post {
             if (isCorrect) {

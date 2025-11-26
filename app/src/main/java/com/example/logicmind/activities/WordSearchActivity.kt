@@ -1,6 +1,8 @@
 package com.example.logicmind.activities
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.PointF
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
@@ -8,15 +10,13 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import android.graphics.PointF
-import android.content.res.Configuration
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.gridlayout.widget.GridLayout
 import androidx.core.graphics.toColorInt
+import androidx.gridlayout.widget.GridLayout
 import com.example.logicmind.R
-import com.example.logicmind.additional.WordBank
 import com.example.logicmind.additional.SelectionOverlayView
+import com.example.logicmind.additional.WordBank
 import com.example.logicmind.additional.WordSearchGenerator
 import com.example.logicmind.common.GameCountdownManager
 import com.example.logicmind.common.GameTimerProgressBar
@@ -112,6 +112,19 @@ class WordSearchActivity : BaseActivity() {
                 Toast.makeText(this, "Czas minął! Koniec gry!", Toast.LENGTH_LONG).show()
                 gridLayout.isEnabled = false
                 pauseOverlay.visibility = View.GONE
+                updateUserStatistics(
+                    categoryKey = GameKeys.CATEGORY_FOCUS,
+                    gameKey = GameKeys.GAME_WORD_SEARCH,
+                    starsEarned = starManager.starCount,
+                    accuracy = gameStatsManager.calculateAccuracy(),
+                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
+                )
+
+                lastPlayedGame(
+                    GameKeys.CATEGORY_FOCUS,
+                    GameKeys.GAME_WORD_SEARCH,
+                    getString(R.string.word_search)
+                )
                 finish()
             }
         }
@@ -134,6 +147,8 @@ class WordSearchActivity : BaseActivity() {
                 timerProgressBar.stop()
                 timerProgressBar.reset()
                 timerProgressBar.start()
+                gameStatsManager.startReactionTracking()
+                gameStatsManager.setGameStartTime(this@WordSearchActivity)
                 startNewGame()
             }
         )
@@ -152,9 +167,30 @@ class WordSearchActivity : BaseActivity() {
 
                 countdownManager.startCountdown()
             },
-            onResume = { timerProgressBar.start() },
-            onPause = { timerProgressBar.pause() },
-            onExit = { finish() },
+            onResume = {
+                onGameResumed()
+                timerProgressBar.start()
+            },
+            onPause = {
+                onGamePaused()
+                timerProgressBar.pause()
+            },
+            onExit = {
+                updateUserStatistics(
+                    categoryKey = GameKeys.CATEGORY_FOCUS,
+                    gameKey = GameKeys.GAME_WORD_SEARCH,
+                    starsEarned = starManager.starCount,
+                    accuracy = gameStatsManager.calculateAccuracy(),
+                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
+                )
+
+                lastPlayedGame(
+                    GameKeys.CATEGORY_FOCUS,
+                    GameKeys.GAME_WORD_SEARCH,
+                    getString(R.string.word_search)
+                )
+                finish()
+            },
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.word_search_instruction),
         )
@@ -338,6 +374,7 @@ class WordSearchActivity : BaseActivity() {
     }
 
     private fun startNewGame() {
+        gameStatsManager.startReactionTracking()
         // Wyczyść stany
         currentBoard = null
         wordsToFind = emptyList()

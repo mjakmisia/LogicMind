@@ -4,9 +4,11 @@ import android.app.AlertDialog
 import android.content.res.Configuration
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
-import com.example.logicmind.R
-import com.example.logicmind.databinding.ActivitySettingsBinding
 import androidx.core.content.edit
+import com.example.logicmind.R
+import com.example.logicmind.additional.ReminderNotification
+import com.example.logicmind.common.SoundManager
+import com.example.logicmind.databinding.ActivitySettingsBinding
 
 class SettingsActivity : BaseActivity() {
 
@@ -30,7 +32,21 @@ class SettingsActivity : BaseActivity() {
         val isDarkModeNow = (resources.configuration.uiMode and
                 Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
 
-        binding.switchSound.isChecked = sharedPrefs.getBoolean("Sound_Enabled", true)
+        val isSoundEnabledSaved = sharedPrefs.getBoolean("Sound_Enabled", true)
+        binding.switchSound.isChecked = isSoundEnabledSaved
+
+        //ustawia stan SoundManager na start
+        SoundManager.isSoundEnabled = isSoundEnabledSaved
+
+        val isNotificationsEnabledSaved = sharedPrefs.getBoolean("Notifications_Enabled", true)
+        binding.switchNotification.isChecked = isNotificationsEnabledSaved
+
+        // czy alarm jest aktywny przy starcie, jeśli był włączony
+        if (isNotificationsEnabledSaved) {
+            ReminderNotification.scheduleNotification(this)
+        } else {
+            ReminderNotification.cancelNotification(this)
+        }
 
         //jeśli istnieje zapisane ustawienie w SharedPrefs — użyj go,
         //w przeciwnym razie ustaw zgodnie z aktualnym trybem systemowym
@@ -90,6 +106,18 @@ class SettingsActivity : BaseActivity() {
                             apply()
                         }
 
+                        //aktualizacja SoundManager
+                        SoundManager.isSoundEnabled = binding.switchSound.isChecked
+
+                        //logika planowania powiadomień
+                        if (binding.switchNotification.isChecked) {
+                            // przełącznik jest włączony = zaplanuj powtarzalny alarm
+                            ReminderNotification.scheduleNotification(this)
+                        } else {
+                            // przełącznik jest wyłączony = anuluj istniejący alarm
+                            ReminderNotification.cancelNotification(this)
+                        }
+
                         // tylko jeśli język się zmienił
                         if (selectedLanguage != currentLangBeforeChange) {
                             recreate()   // przeładowanie całej aktywności
@@ -119,9 +147,11 @@ class SettingsActivity : BaseActivity() {
                     binding.switchDarkMode.isChecked = false
                     binding.switchNotification.isChecked = true
 
+                    SoundManager.isSoundEnabled = true
                     selectedLanguage = "pl"
                     updateLanguageSelectionUI("pl")
                     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                    ReminderNotification.scheduleNotification(this)
 
                     recreate()
                 }

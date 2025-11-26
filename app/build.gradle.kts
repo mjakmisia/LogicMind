@@ -6,6 +6,10 @@ plugins {
 
 }
 
+tasks.withType<Test> {
+    useJUnitPlatform()
+}
+
 android {
     namespace = "com.example.logicmind"
     compileSdk = 36
@@ -50,11 +54,22 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.androidx.espresso.intents)
 
     //implementation(libs.google.firebase.auth.ktx)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
+    //Testy jednostkowe
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    testImplementation("org.junit.jupiter:junit-jupiter-params")
+    testImplementation("org.robolectric:robolectric:4.16")
+    testImplementation("androidx.test:core-ktx:1.7.0")
+    testImplementation("androidx.test:rules:1.7.0")
+
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test:rules:1.6.1")
     implementation(libs.androidx.gridlayout)
 
     // Firebase BOM – zarządza wersjami
@@ -65,4 +80,5 @@ dependencies {
 
     // Add the dependencies for any other desired Firebase products
     // https://firebase.google.com/docs/android/setup#available-libraries
+    testImplementation(kotlin("test"))
 }

@@ -89,8 +89,14 @@ class RoadDashActivity : BaseActivity() {
 
                 countdownManager.startCountdown()
             },
-            onResume = { timerProgressBar.start() }, // Wznawia timer po pauzie
-            onPause = { timerProgressBar.pause() },  // Zatrzymuje timer podczas pauzy
+            onResume = {
+                gameStatsManager.onGameResumed()
+                timerProgressBar.start()
+            }, // Wznawia timer po pauzie
+            onPause = {
+                gameStatsManager.onGamePaused()
+                timerProgressBar.pause()
+            },  // Zatrzymuje timer podczas pauzy
             onExit = { finish() }, // Kończy aktywność
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.road_dash_instruction),
@@ -149,6 +155,7 @@ class RoadDashActivity : BaseActivity() {
     }
 
     private fun startNewGame() {
+        gameStatsManager.startReactionTracking()
 
     }
 

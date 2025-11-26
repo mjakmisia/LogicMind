@@ -3,13 +3,12 @@ package com.example.logicmind.activities
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.example.logicmind.R
+import com.example.logicmind.common.GameStatsManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -35,6 +34,8 @@ open class BaseActivity : AppCompatActivity() {
     protected lateinit var auth: FirebaseAuth
     protected lateinit var db: FirebaseDatabase
 
+    protected val gameStatsManager = GameStatsManager()
+
     override fun attachBaseContext(newBase: Context) {
         // aktualnie zapisany język z ustawień
         //MODE_PRIVATE - tylko dla tej aplikacji (nie dla innychna urządzeniu)
@@ -57,14 +58,22 @@ open class BaseActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         super.onCreate(savedInstanceState)
 
+        //przywracamy zapisany motyw jeśli był
+        val sharedPrefs = getSharedPreferences("Settings", MODE_PRIVATE)
+        val isDarkMode = sharedPrefs.getBoolean("DarkMode_Enabled", false)
+        androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(
+            if (isDarkMode) androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
+            else androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
+        )
+
         // Ustawiamy pełny ekran i pozwalamy layoutowi wchodzić w wycięcia (notch)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.attributes.layoutInDisplayCutoutMode =
-            android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES //pod kamerą na górze
 
         // Ukrywamy paski systemowe
         val insetsController = WindowInsetsControllerCompat(window, window.decorView)
-        insetsController.hide(
+        insetsController.hide( //ukrywa dolny i górny pasek systemowy
             androidx.core.view.WindowInsetsCompat.Type.statusBars() or androidx.core.view.WindowInsetsCompat.Type.navigationBars()
         )
         insetsController.systemBarsBehavior =
@@ -239,7 +248,7 @@ open class BaseActivity : AppCompatActivity() {
         const val GAME_COLOR_SEQUENCE = "color_sequence"
         const val GAME_WORD_SEARCH = "word_search"
         const val GAME_SYMBOL_RACE = "symbol_race"
-        const val GAME_FRUIT_SORT = "fruit_sort"
+        const val GAME_LEFT_OR_RIGHT = "left_or_right"
         const val GAME_NUMBER_ADDITION = "number_addition"
         const val GAME_PATH_CHANGE = "path_change"
         const val GAME_ROAD_DASH = "road_dash"
@@ -373,56 +382,6 @@ open class BaseActivity : AppCompatActivity() {
         }
     }
 
-    /*
-    Liczymy średni czas reakcji jako czas trwania gry / liczba gwiazdek
-
-    - startReactionTracking() — startuje licznik czasu.
-    - pauseReactionTracking() — zatrzymuje czas gry (np. gdy gracz pauzuje).
-    - resumeReactionTracking() — wznawia licznik po pauzie.
-    - getAverageReactionTime() — zwraca średni czas reakcji (w sekundach)
-     */
-
-    private var gameStartTime: Long = 0L
-    private var totalActiveTime: Long = 0L
-    private var pauseStartTime: Long = 0L
-    private var isPaused: Boolean = false
-
-    //śledzenie gry
-    //wywoływana na początku gry
-    protected fun startReactionTracking() {
-        totalActiveTime = 0L
-        isPaused = false
-        pauseStartTime = 0L
-
-        //resetuje liczniki poprawnosci i prob
-        resetAccuracyCounters()
-
-        Handler(Looper.getMainLooper()).postDelayed({
-            gameStartTime = System.currentTimeMillis()
-            //Toast.makeText(this, "Rozpoczęcie gry", Toast.LENGTH_SHORT).show()
-        }, 4000)
-    }
-
-    //pauzowanie gry
-    protected fun onGamePaused() {
-        if (!isPaused) {
-            pauseStartTime = System.currentTimeMillis()
-            isPaused = true
-            //Toast.makeText(this, "Gra zapauzowana o ${pauseStartTime}", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    //wznowienie gry
-    protected fun onGameResumed() {
-        if (isPaused) {
-            //przesuwamy startTime żeby nie liczyc pauzy
-            val pauseDuration = System.currentTimeMillis() - pauseStartTime
-            gameStartTime += pauseDuration
-            isPaused = false
-            //Toast.makeText(this, "Gra wznowiona o ${pauseDuration}", Toast.LENGTH_SHORT).show()
-        }
-    }
-
 
     /**obliczanie średniego czasu reakcji = czas gry / liczba gwiazdek
      * gdy gra się zaczyna = startReactionTracking(),
@@ -433,17 +392,17 @@ open class BaseActivity : AppCompatActivity() {
 
      * getAverageReactionTime() używa już tylko aktywnego czasu.
      */
+    protected fun onGamePaused() = gameStatsManager.onGamePaused()
+    protected fun onGameResumed() = gameStatsManager.onGameResumed()
+
     protected fun getAverageReactionTime(stars: Int = 0): Double {
-        val currentTime = System.currentTimeMillis()
-        val duration = (currentTime - gameStartTime).coerceAtLeast(1L)
+//        Toast.makeText(
+//            this,
+//            "AVG: ${gameStatsManager.calculateAvgReactionTime()}",
+//            Toast.LENGTH_SHORT
+//        ).show()
 
-        //jezeli przekazemy w argumatrze gwiazdki to wykorzytsa gwiazdki, jeżeli nie - użyje kliknięć
-        val starsEarned = stars.coerceAtLeast(1)
-
-        val avgReactionSec = duration.toDouble() / starsEarned.toDouble() / 1000.0 //w sekundach
-
-        //coerceAtLeast - upewnie sie ze liczba nie bedzie mniejsza niz dana wartość
-        //przez to unikamy dzielenia przez 0 jezeli gra bedzie trwała krótko
+        val avgReactionSec = gameStatsManager.calculateAvgReactionTime(stars)
 
         // Pobranie globalnej średniej z bazy
         //pożniej usuń Toasty
@@ -470,37 +429,7 @@ open class BaseActivity : AppCompatActivity() {
         return avgReactionSec
     }
 
-    /**
-     * Liczenie poprawności
-     *
-     */
 
-    private var totalAttempts: Int = 0 //liczba prób
-    private var successfulAttempts: Int = 0 //liczba poprawnych prób
-
-    //resetuje licznik na start
-    private fun resetAccuracyCounters() {
-        totalAttempts = 0
-        successfulAttempts = 0
-    }
-
-    /**
-     * Rejestruje próbę gracza
-     * @param isSuccessful - true jeśli była poprawna np. trafienie pary
-     */
-    protected fun registerAttempt(isSuccessful: Boolean) {
-        totalAttempts++
-        if (isSuccessful) successfulAttempts++
-    }
-
-    /**
-     * Oblicza procent poprawnych prób
-     * Zwraca wartość od 0.0 do 100.0
-     */
-    protected fun calculateAccuracy(): Double {
-        return if (totalAttempts > 0) (successfulAttempts.toDouble() / totalAttempts.toDouble()) * 100.0
-        else 0.0
-    }
 
 }
 
