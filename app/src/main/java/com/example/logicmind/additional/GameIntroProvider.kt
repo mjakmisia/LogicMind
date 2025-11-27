@@ -112,7 +112,7 @@ object GameIntroProvider {
             "road_dash" -> GameIntroConfig(
                 colorRes = R.color.category_blue_dark_mode,
                 titleRes = R.string.road_dash,
-                imageRes = R.drawable.ic_close, //obrazek do zmiany
+                imageRes = R.drawable.image_road_dash,
                 sections = listOf(
                     IntroSection(R.string.rd_section_divided_attention, R.string.rd_desc_divided_attention),
                     IntroSection(R.string.rd_section_visual_motor, R.string.rd_desc_visual_motor),
