@@ -168,7 +168,6 @@ class WelcomeActivity : BaseActivity() {
                 if (task.isSuccessful) {
                     val userId = auth.currentUser!!.uid
                     val userRef = db.getReference("users").child(userId)
-
                     val userData = mapOf(
                         "username" to username,
                         "email" to email,
@@ -183,7 +182,6 @@ class WelcomeActivity : BaseActivity() {
                             "sumReactionTime" to 0.0
                         )
                     )
-
                     userRef.setValue(userData)
                         .addOnSuccessListener {
                             createDefaultCategoriesAndGames(userId)

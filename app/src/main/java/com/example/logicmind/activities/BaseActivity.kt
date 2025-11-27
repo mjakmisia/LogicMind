@@ -7,8 +7,11 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.util.Log
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.example.logicmind.R
 import com.example.logicmind.common.GameOverDialogFragment
@@ -75,42 +78,41 @@ open class BaseActivity : AppCompatActivity() {
         //przywracamy zapisany motyw jeśli był
         val sharedPrefs = getSharedPreferences("Settings", MODE_PRIVATE)
         val isDarkMode = sharedPrefs.getBoolean("DarkMode_Enabled", false)
-        androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(
-            if (isDarkMode) androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
-            else androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
+        AppCompatDelegate.setDefaultNightMode(
+            if (isDarkMode) AppCompatDelegate.MODE_NIGHT_YES
+            else AppCompatDelegate.MODE_NIGHT_NO
         )
 
         // Ustawiamy pełny ekran i pozwalamy layoutowi wchodzić w wycięcia (notch)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.attributes.layoutInDisplayCutoutMode =
-            android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES //pod kamerą na górze
+            WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES //pod kamerą na górze
 
         // Ukrywamy paski systemowe
         val insetsController = WindowInsetsControllerCompat(window, window.decorView)
         insetsController.hide( //ukrywa dolny i górny pasek systemowy
-            androidx.core.view.WindowInsetsCompat.Type.statusBars() or androidx.core.view.WindowInsetsCompat.Type.navigationBars()
+            WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.navigationBars()
         )
         insetsController.systemBarsBehavior =
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+
+        // Inicjalizacja Firebase w każdej aktywności
+        auth = FirebaseAuth.getInstance()
+        db =
+            FirebaseDatabase.getInstance("https://logicmind-default-rtdb.europe-west1.firebasedatabase.app")
 
         // ustawienie persystencji tylko raz
         //używamy do zapisu danych jeżeli rozłączy się internet
         if (!isPersistenceEnabled) {
             try {
                 // Pobierz instancję
-                val database =
-                    FirebaseDatabase.getInstance("https://logicmind-default-rtdb.europe-west1.firebasedatabase.app")
-                database.setPersistenceEnabled(true) // Włącz tryb offline
+                db.setPersistenceEnabled(true) // Włącz tryb offline
                 isPersistenceEnabled = true // Zablokuj ponowne wywołanie
             } catch (e: Exception) {
                 Log.w("FIREBASE_INIT", "${e.message}")
             }
         }
 
-        // Inicjalizacja Firebase w każdej aktywności
-        auth = FirebaseAuth.getInstance()
-        db =
-            FirebaseDatabase.getInstance("https://logicmind-default-rtdb.europe-west1.firebasedatabase.app")
 
         //synchronizacja danych po powrocie online
         db.getReference("users").keepSynced(true)
