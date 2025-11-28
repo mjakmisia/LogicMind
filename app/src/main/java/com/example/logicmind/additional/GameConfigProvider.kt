@@ -45,7 +45,7 @@ object GameConfigProvider {
                 colorRes = R.color.category_blue_dark_mode,
                 nameRes = R.string.category_coordination,
                 games = listOf(
-                    GameOption("road_dash", R.string.road_dash, R.drawable.ic_close), //obrazek do ustawienia
+                    GameOption("road_dash", R.string.road_dash, R.drawable.image_road_dash),
                     GameOption("symbol_race", R.string.symbol_race, R.drawable.image_symbol_race)
                 )
             )
