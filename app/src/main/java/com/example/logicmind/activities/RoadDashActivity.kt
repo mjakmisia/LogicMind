@@ -1,12 +1,17 @@
 package com.example.logicmind.activities
+
+import android.animation.ValueAnimator
 import android.os.Bundle
 import android.view.View
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.LinearInterpolator
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.gridlayout.widget.GridLayout
 import com.example.logicmind.R
 import com.example.logicmind.common.GameCountdownManager
 import com.example.logicmind.common.GameTimerProgressBar
@@ -15,19 +20,41 @@ import com.example.logicmind.common.StarManager
 
 class RoadDashActivity : BaseActivity() {
 
-    private lateinit var gridLayout: GridLayout // Siatka do wyświetlania elementów
-    private lateinit var countdownText: TextView // Pole tekstowe dla odliczania
-    private lateinit var pauseButton: ImageButton // Przycisk pauzy
-    private lateinit var pauseOverlay: ConstraintLayout // Nakładka menu pauzy
-    private lateinit var timerProgressBar: GameTimerProgressBar // Pasek postępu czasu gry
-    private lateinit var starManager: StarManager // Manager gwiazdek
-    private lateinit var pauseMenu: PauseMenu // Menu pauzy gry
-    private lateinit var countdownManager: GameCountdownManager // Manager odliczania
-    private var isGameEnding = false // Flaga końca gry
-    private var currentLevel = 1 // Aktualny poziom gry
+    // Widoki
+    private lateinit var gameContainer: LinearLayout
+    private lateinit var leftLaneContainer: FrameLayout
+    private lateinit var rightLaneContainer: FrameLayout
+    private lateinit var countdownText: TextView
+    private lateinit var pauseButton: ImageButton
+    private lateinit var pauseOverlay: ConstraintLayout
+    private lateinit var timerProgressBar: GameTimerProgressBar
+
+    // Samochody
+    private lateinit var carLeft: ImageView
+    private lateinit var carRight: ImageView
+
+    // Elementy Drogi
+    private lateinit var roadLeft1: ImageView
+    private lateinit var roadLeft2: ImageView
+    private lateinit var roadRight1: ImageView
+    private lateinit var roadRight2: ImageView
+
+    // Logika
+    private lateinit var starManager: StarManager
+    private lateinit var pauseMenu: PauseMenu
+    private lateinit var countdownManager: GameCountdownManager
+
+    private var roadAnimator: ValueAnimator? = null
+    private var isGameEnding = false
+    private var currentLevel = 1
+
+    // Sterowanie
+    private var isLeftCarOnLeft = true
+    private var isRightCarOnLeft = false
+    private var laneOffset = 0f
 
     companion object {
-        private const val BASE_TIME_SECONDS = 90 // Czas trwania jednej rundy (w sekundach)
+        private const val BASE_TIME_SECONDS = 90
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,118 +62,253 @@ class RoadDashActivity : BaseActivity() {
         setContentView(R.layout.activity_road_dash)
         supportActionBar?.hide()
 
-        // Inicjalizacja widoków
-        gridLayout = findViewById(R.id.gridLayout)
+        initViews()
+        setupGameLogic()
+        setupCarControls()
+
+        // Czekamy na narysowanie layoutu, by pobrać wymiary
+        gameContainer.post {
+            calculateDimensions()
+            resetCarsPosition()
+
+            // Ustawiamy drugie kawałki drogi NAD ekranem przed startem
+            val height = gameContainer.height.toFloat()
+            roadLeft2.translationY = -height
+            roadRight2.translationY = -height
+
+            if (savedInstanceState == null) {
+                countdownManager.startCountdown()
+            }
+        }
+
+        if (savedInstanceState != null) {
+            restoreGameState(savedInstanceState)
+        }
+    }
+
+    private fun initViews() {
+        gameContainer = findViewById(R.id.gameContainer)
+        leftLaneContainer = findViewById(R.id.leftLaneContainer)
+        rightLaneContainer = findViewById(R.id.rightLaneContainer)
+
+        carLeft = findViewById(R.id.carLeft)
+        carRight = findViewById(R.id.carRight)
+
+        roadLeft1 = findViewById(R.id.roadLeft1)
+        roadLeft2 = findViewById(R.id.roadLeft2)
+        roadRight1 = findViewById(R.id.roadRight1)
+        roadRight2 = findViewById(R.id.roadRight2)
+
         countdownText = findViewById(R.id.countdownText)
         pauseButton = findViewById(R.id.pauseButton)
         pauseOverlay = findViewById(R.id.pauseOverlay)
         timerProgressBar = findViewById(R.id.gameTimerProgressBar)
+
         starManager = StarManager()
         starManager.init(findViewById(R.id.starCountText))
+    }
 
-        // Inicjalizacja paska czasu
+    private fun calculateDimensions() {
+        // Obliczamy o ile przesunąć auto (ćwierć szerokości pasa)
+        val laneWidth = leftLaneContainer.width.toFloat()
+        laneOffset = laneWidth / 4
+    }
+
+    private fun resetCarsPosition() {
+        isLeftCarOnLeft = true
+        isRightCarOnLeft = false
+        updateCarPosition(carLeft, isLeftCarOnLeft, animate = false)
+        updateCarPosition(carRight, isRightCarOnLeft, animate = false)
+    }
+
+    private fun setupCarControls() {
+        leftLaneContainer.setOnClickListener {
+            if (isGameRunning()) {
+                isLeftCarOnLeft = !isLeftCarOnLeft
+                updateCarPosition(carLeft, isLeftCarOnLeft, animate = true)
+            }
+        }
+
+        rightLaneContainer.setOnClickListener {
+            if (isGameRunning()) {
+                isRightCarOnLeft = !isRightCarOnLeft
+                updateCarPosition(carRight, isRightCarOnLeft, animate = true)
+            }
+        }
+    }
+
+    private fun isGameRunning(): Boolean {
+        return !countdownManager.isInProgress() && !pauseMenu.isPaused && !isGameEnding
+    }
+
+    private fun updateCarPosition(car: ImageView, isLeft: Boolean, animate: Boolean) {
+        val targetX = if (isLeft) -laneOffset else laneOffset
+
+        if (animate) {
+            car.animate()
+                .translationX(targetX)
+                .setDuration(150)
+                .setInterpolator(DecelerateInterpolator())
+                .start()
+        } else {
+            car.translationX = targetX
+        }
+    }
+
+    private fun setupGameLogic() {
         timerProgressBar.setTotalTime(BASE_TIME_SECONDS)
         timerProgressBar.setOnFinishCallback {
             runOnUiThread {
+                stopGameLoop()
                 isGameEnding = true
-                Toast.makeText(this, "Czas minął! Koniec gry!", Toast.LENGTH_LONG).show()
-                gridLayout.isEnabled = false
+                Toast.makeText(this, "Czas minął!", Toast.LENGTH_LONG).show()
+                gameContainer.isEnabled = false
                 pauseOverlay.visibility = View.GONE
                 finish()
             }
         }
 
-        // Inicjalizacja managera odliczania
         countdownManager = GameCountdownManager(
             countdownText = countdownText,
-            gameView = gridLayout,
-            viewsToHide = listOf(
-                pauseButton,
-                findViewById<TextView>(R.id.starCountText),
-                findViewById<ImageView>(R.id.starIcon),
-                timerProgressBar),
+            gameView = gameContainer,
+            viewsToHide = listOf(pauseButton, findViewById(R.id.starCountText), findViewById(R.id.starIcon), timerProgressBar),
             onCountdownFinished = {
                 currentLevel = 1
                 starManager.reset()
-                timerProgressBar.stop()
                 timerProgressBar.reset()
                 timerProgressBar.start()
-                startNewGame()
+                startRoadAnimation()
             }
         )
 
-        // Inicjalizacja menu pauzy
         pauseMenu = PauseMenu(
             context = this,
             pauseOverlay = pauseOverlay,
             pauseButton = pauseButton,
             onRestart = {
                 if (pauseMenu.isPaused) pauseMenu.resume()
+                stopGameLoop()
+                resetCarsPosition()
                 currentLevel = 1
                 starManager.reset()
-                timerProgressBar.stop()
                 timerProgressBar.reset()
-
                 countdownManager.startCountdown()
             },
             onResume = {
                 gameStatsManager.onGameResumed()
                 timerProgressBar.start()
-            }, // Wznawia timer po pauzie
+                resumeGameLoop()
+            },
             onPause = {
                 gameStatsManager.onGamePaused()
                 timerProgressBar.pause()
-            },  // Zatrzymuje timer podczas pauzy
-            onExit = { finish() }, // Kończy aktywność
+                pauseGameLoop()
+            },
+            onExit = { finish() },
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.road_dash_instruction),
         )
+    }
 
-        // Sprawdzenie, czy gra jest uruchamiana po raz pierwszy
-        if (savedInstanceState == null) {
-            countdownManager.startCountdown() // Rozpoczyna odliczanie początkowe
-        } else {
-            restoreGameState(savedInstanceState) // Przywraca stan po rotacji
+    private fun startRoadAnimation() {
+        val height = gameContainer.height.toFloat()
+        if (height == 0f) {
+            gameContainer.post { startRoadAnimation() }
+            return
+        }
+
+        roadAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 1500L
+            repeatCount = ValueAnimator.INFINITE
+            interpolator = LinearInterpolator()
+            addUpdateListener { animation ->
+                val progress = animation.animatedValue as Float
+                val translation = height * progress
+
+                moveRoadSegment(roadLeft1, roadLeft2, translation, height)
+                moveRoadSegment(roadRight1, roadRight2, translation, height)
+            }
+            start()
         }
     }
 
-    // Zapisuje stan aktywności
+    private fun moveRoadSegment(view1: View, view2: View, translation: Float, height: Float) {
+        var newY1 = translation
+        var newY2 = translation - height
+
+        // Resetowanie pozycji (zapętlanie)
+        if (newY1 > height) newY1 -= 2 * height
+        if (newY2 > height) newY2 -= 2 * height
+
+        view1.translationY = newY1
+        view2.translationY = newY2
+    }
+
+    private fun stopGameLoop() {
+        roadAnimator?.cancel()
+        roadAnimator = null
+    }
+
+    private fun pauseGameLoop() {
+        roadAnimator?.pause()
+    }
+
+    private fun resumeGameLoop() {
+        roadAnimator?.resume()
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putInt("pauseOverlayVisibility", pauseOverlay.visibility)
         outState.putInt("countdownTextVisibility", countdownText.visibility)
-        outState.putInt("gridLayoutVisibility", gridLayout.visibility)
+        outState.putInt("gameContainerVisibility", gameContainer.visibility)
         outState.putInt("pauseButtonVisibility", pauseButton.visibility)
         outState.putLong("timerRemainingTimeMs", timerProgressBar.getRemainingTimeSeconds() * 1000L)
         outState.putBoolean("timerIsRunning", timerProgressBar.isRunning())
         outState.putInt("countdownIndex", countdownManager.getIndex())
         outState.putBoolean("countdownInProgress", countdownManager.isInProgress())
         outState.putInt("currentLevel", currentLevel)
+        outState.putBoolean("isLeftCarOnLeft", isLeftCarOnLeft)
+        outState.putBoolean("isRightCarOnLeft", isRightCarOnLeft)
         starManager.saveState(outState)
     }
 
-    // Przywraca stan aktywności
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        // Uwaga: super.onRestoreInstanceState przywraca widoki, ale my robimy to ręcznie
+        // poniżej, więc nie wywołujemy super, albo wywołujemy na końcu.
+        // Tutaj używam sprawdzonego wzorca z Twoich innych gier:
+    }
+
+    // Zamiast onRestoreInstanceState używamy logiki w onCreate z savedInstanceState
     private fun restoreGameState(savedInstanceState: Bundle) {
         pauseOverlay.visibility = savedInstanceState.getInt("pauseOverlayVisibility", View.GONE)
         countdownText.visibility = savedInstanceState.getInt("countdownTextVisibility", View.GONE)
-        gridLayout.visibility = savedInstanceState.getInt("gridLayoutVisibility", View.VISIBLE)
+        gameContainer.visibility = savedInstanceState.getInt("gameContainerVisibility", View.VISIBLE)
         pauseButton.visibility = savedInstanceState.getInt("pauseButtonVisibility", View.VISIBLE)
         currentLevel = savedInstanceState.getInt("currentLevel", 1)
+
+        isLeftCarOnLeft = savedInstanceState.getBoolean("isLeftCarOnLeft")
+        isRightCarOnLeft = savedInstanceState.getBoolean("isRightCarOnLeft")
+
         starManager.restoreState(savedInstanceState)
 
-        // Przywracanie stanu timera
         val timerRemainingTimeMs = savedInstanceState.getLong("timerRemainingTimeMs", BASE_TIME_SECONDS * 1000L)
         val timerIsRunning = savedInstanceState.getBoolean("timerIsRunning", false)
         timerProgressBar.setRemainingTimeMs(timerRemainingTimeMs.coerceAtLeast(1L))
 
         if (timerIsRunning && pauseOverlay.visibility != View.VISIBLE) {
             timerProgressBar.start()
+            gameContainer.post { startRoadAnimation() }
         }
 
-        //Przywracanie stanu odliczania
+        gameContainer.post {
+            calculateDimensions()
+            updateCarPosition(carLeft, isLeftCarOnLeft, false)
+            updateCarPosition(carRight, isRightCarOnLeft, false)
+        }
+
         val countdownIndex = savedInstanceState.getInt("countdownIndex", 0)
         val countdownInProgress = savedInstanceState.getBoolean("countdownInProgress", false)
-        // Kontynuowanie odliczania, jeśli było aktywne
         if (countdownInProgress) {
             countdownManager.startCountdown(countdownIndex)
         }
@@ -154,14 +316,8 @@ class RoadDashActivity : BaseActivity() {
         pauseMenu.syncWithOverlay()
     }
 
-    private fun startNewGame() {
-        gameStatsManager.startReactionTracking()
-
-    }
-
     override fun onPause() {
         super.onPause()
-        // Pauzuje grę automatycznie przy wyjściu z aktywności
         if (!pauseMenu.isPaused && !isChangingConfigurations) {
             pauseMenu.pause()
         }
@@ -169,6 +325,7 @@ class RoadDashActivity : BaseActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        stopGameLoop()
         timerProgressBar.stop()
         countdownManager.cancel()
     }
