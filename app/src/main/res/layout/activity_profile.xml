@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:background="?attr/pageBackground">
 
-    <!-- Scrollable content -->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scrollView"
         android:layout_width="0dp"
@@ -18,12 +17,10 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Reszta zawartości NestedScrollView pozostaje bez zmian -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <!-- Górna linia pomocnicza -->
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/topGuideline"
                 android:layout_width="wrap_content"
@@ -31,7 +28,6 @@
                 android:orientation="horizontal"
                 app:layout_constraintGuide_percent="0.08" />
 
-            <!-- Nagłówek -->
             <TextView
                 android:id="@+id/profileHeader"
                 android:layout_width="wrap_content"
@@ -45,24 +41,82 @@
                 app:layout_constraintTop_toBottomOf="@id/topGuideline"
                 app:layout_constraintStart_toStartOf="parent" />
 
-            <!-- Nazwa użytkownika -->
-            <TextView
-                android:id="@+id/textUsername"
+            <LinearLayout
+                android:id="@+id/totalStarsContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toBottomOf="@+id/profileHeader"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/profileHeader">
+
+                <ImageView
+                    android:id="@+id/ivProfileStar"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_marginEnd="6dp"
+                    android:contentDescription="@string/icon_star"
+                    android:src="@drawable/icon_star" />
+
+                <TextView
+                    android:id="@+id/tvProfileTotalStars"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="?attr/text_dark"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/usernameContainer"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="username"
-                android:textSize="25sp"
-                android:textStyle="bold"
-                android:textColor="?attr/text_dark"
+                android:baselineAligned="true"
                 android:gravity="center"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="32dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
+                android:orientation="horizontal"
                 app:layout_constraintTop_toBottomOf="@id/profileHeader"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
+                app:layout_constraintEnd_toEndOf="parent">
 
-            <!-- Aktualny streak po lewej -->
+                <TextView
+                    android:id="@+id/textUsername"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="center"
+                    android:includeFontPadding="false"
+                    android:text="username"
+                    android:textColor="?attr/text_dark"
+                    android:textSize="32sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/btnEditUsernameSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="2dp"
+                    android:background="@drawable/bg_small_edit_button"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:includeFontPadding="false"
+                    android:padding="6dp"
+                    android:text="zmień"
+                    android:textAllCaps="true"
+                    android:textColor="?attr/text_light"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
             <LinearLayout
                 android:id="@+id/currentStreakLayout"
                 android:layout_width="0dp"
@@ -74,10 +128,10 @@
                 android:layout_marginEnd="8dp"
                 android:background="@drawable/bg_current_streak"
                 android:padding="16dp"
-                app:layout_constraintTop_toBottomOf="@id/textUsername"
+                app:layout_constraintHorizontal_chainStyle="spread"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/bestStreakLayout"
-                app:layout_constraintWidth_percent="0.45">
+                app:layout_constraintTop_toBottomOf="@id/usernameContainer">
 
                 <TextView
                     android:id="@+id/labelCurrentStreak"
@@ -99,7 +153,6 @@
                     android:gravity="center"/>
             </LinearLayout>
 
-            <!-- Najlepszy streak po prawej -->
             <LinearLayout
                 android:id="@+id/bestStreakLayout"
                 android:layout_width="0dp"
@@ -111,10 +164,9 @@
                 android:layout_marginEnd="16dp"
                 android:background="@drawable/bg_best_streak"
                 android:padding="16dp"
-                app:layout_constraintTop_toBottomOf="@id/textUsername"
-                app:layout_constraintStart_toEndOf="@id/currentStreakLayout"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintWidth_percent="0.45">
+                app:layout_constraintStart_toEndOf="@id/currentStreakLayout"
+                app:layout_constraintTop_toBottomOf="@id/usernameContainer">
 
                 <TextView
                     android:id="@+id/labelBestStreak"
@@ -136,7 +188,6 @@
                     android:gravity="center"/>
             </LinearLayout>
 
-            <!-- Mini kalendarz tygodnia -->
             <LinearLayout
                 android:id="@+id/weekCalendar"
                 android:layout_width="0dp"
@@ -150,7 +201,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
 
-                <!-- Każdy dzień: Container z vertikalnym układem -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -395,7 +445,6 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Przycisk Resetuj postęp -->
             <Button
                 android:id="@+id/buttonResetProgress"
                 android:layout_width="0dp"
@@ -416,7 +465,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
 
-            <!-- Polityka aplikacji -->
             <LinearLayout
                 android:id="@+id/policyLayout"
                 android:layout_width="0dp"
@@ -449,7 +497,25 @@
                     app:tint="@color/textGray" />
             </LinearLayout>
 
-            <!-- Przycisk Wyloguj się -->
+            <Button
+                android:id="@+id/buttonChangePassword"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="24dp"
+                android:background="@drawable/bg_rounded_light_gray"
+                android:text="@string/change_password_title"
+                android:textAllCaps="true"
+                android:textColor="?attr/colorOnPrimary"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:visibility="visible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/policyLayout" />
+
             <Button
                 android:id="@+id/buttonLogout"
                 android:layout_width="0dp"
@@ -467,12 +533,8 @@
                 android:visibility="visible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/policyLayout" />
+                app:layout_constraintTop_toBottomOf="@id/buttonChangePassword" />
 
-            <!-- Przycisk Usuń konto -->
-            <!-- W motywach opartych o Material Components (Theme.MaterialComponents.*)
-            Android domyślnie nakłada kolor colorButtonNormal jako backgroundTint na wszystkie Button
-            dlatego na button jest nakładany tint z motywu-->
             <Button
                 android:id="@+id/buttonDeleteAccount"
                 android:layout_width="0dp"
@@ -496,7 +558,6 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Widok dla niezalogowanego użytkownika -->
     <TextView
         android:id="@+id/textLoginPrompt"
         android:layout_width="wrap_content"
@@ -541,7 +602,6 @@
 
 
 
-    <!-- Dolny pasek nawigacji -->
     <include
         layout="@layout/bottom_navigation"
         android:id="@+id/includeBottomNav"

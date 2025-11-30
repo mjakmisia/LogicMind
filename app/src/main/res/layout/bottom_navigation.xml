@@ -10,6 +10,7 @@
     android:elevation="12dp"
     android:paddingTop="8dp"
     android:paddingBottom="24dp"
+    app:paddingBottomSystemWindowInsets="false"
     app:itemIconTint="@color/selector_nav_item_color"
     app:itemTextColor="@color/selector_nav_item_color"
     app:itemIconSize="36dp"

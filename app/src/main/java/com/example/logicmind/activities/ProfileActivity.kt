@@ -4,15 +4,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import com.example.logicmind.R
 import com.example.logicmind.databinding.ActivityProfileBinding
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import java.util.Calendar.DAY_OF_WEEK
 import java.util.Calendar.FRIDAY
 import java.util.Calendar.MONDAY
@@ -44,13 +42,14 @@ class ProfileActivity : BaseActivity() {
         val dayOfWeek = calendar.get(DAY_OF_WEEK) // 1=Sunday, 2=Monday, ... 7=Saturday
 
         val arrows = mapOf(
-            MONDAY to findViewById(R.id.arrowMon),
-            TUESDAY to findViewById(R.id.arrowTue),
-            WEDNESDAY to findViewById(R.id.arrowWed),
-            THURSDAY to findViewById(R.id.arrowThu),
-            FRIDAY to findViewById(R.id.arrowFri),
-            SATURDAY to findViewById(R.id.arrowSat),
-            SUNDAY to findViewById<ImageView>(R.id.arrowSun))
+            MONDAY to binding.arrowMon,
+            TUESDAY to binding.arrowTue,
+            WEDNESDAY to binding.arrowWed,
+            THURSDAY to binding.arrowThu,
+            FRIDAY to binding.arrowFri,
+            SATURDAY to binding.arrowSat,
+            SUNDAY to binding.arrowSun
+        )
 
         arrows[dayOfWeek]?.visibility = View.VISIBLE
 
@@ -59,15 +58,10 @@ class ProfileActivity : BaseActivity() {
             "Aktualny użytkownik: ${FirebaseAuth.getInstance().currentUser?.uid ?: "brak"}"
         )
 
-        // Odwołania do widoków
-        val scrollView = findViewById<View>(R.id.scrollView)
-        val textLoginPrompt = findViewById<TextView>(R.id.textLoginPrompt)
-        val buttonLogin = findViewById<Button>(R.id.buttonLogin)
-
         // Na start ukryj wszystkie widoki
-        scrollView.visibility = View.GONE
-        textLoginPrompt.visibility = View.GONE
-        buttonLogin.visibility = View.GONE
+        binding.scrollView.visibility = View.GONE
+        binding.textLoginPrompt.visibility = View.GONE
+        binding.buttonLogin.visibility = View.GONE
         binding.progressBar.visibility = View.VISIBLE
 
         // Pobranie danych użytkownika
@@ -81,12 +75,20 @@ class ProfileActivity : BaseActivity() {
         } else {
             binding.scrollView.visibility = View.VISIBLE
             loadUserData((user!!.uid))
-
         }
         binding.buttonResetProgress.setOnClickListener {
             resetUserProgress()
         }
 
+        // Edycja nazwy
+        binding.btnEditUsernameSmall.setOnClickListener {
+            showChangeUsernameDialog()
+        }
+
+        //zmiana hasła
+        binding.buttonChangePassword.setOnClickListener {
+            showChangePasswordDialog()
+        }
 
         // Ustawienie koloru przycisku programowo
         val btnDeleteAccount = binding.buttonDeleteAccount
@@ -128,22 +130,165 @@ class ProfileActivity : BaseActivity() {
     }
 
     /**
+     * Metoda obsługująca zmianę hasła
+     */
+
+    private fun showChangePasswordDialog() {
+        val user = auth.currentUser
+        if (user == null || !isUserLoggedIn()) return
+
+        // pole tekstowe do wpisania hasła
+        val input = android.widget.EditText(this).apply {
+            hint = "Nowe hasło (min. 8 znaków, wielka litera i cyfra)"
+            inputType =
+                android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+            setPadding(50, 30, 50, 30)
+            background = ContextCompat.getDrawable(context, R.drawable.bg_edittext_rounded)
+        }
+
+        // Kontener dla marginesów
+        val container = android.widget.FrameLayout(this).apply {
+            setPadding(40, 20, 40, 20)
+            addView(input)
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("Zmiana hasła")
+            .setView(container)
+            .setPositiveButton("Zmień") { dialog, _ ->
+                val newPassword = input.text.toString().trim()
+
+                if (newPassword.length < 8) {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.password_error_length),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@setPositiveButton
+                }
+                if (!newPassword.any { it.isUpperCase() }) {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.password_error_uppercase),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@setPositiveButton
+                }
+
+                if (!newPassword.any { it.isDigit() }) {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.password_error_digit),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@setPositiveButton
+                }
+
+                // Firebase: Zmiana hasła
+                user.updatePassword(newPassword)
+                    .addOnSuccessListener {
+                        Toast.makeText(
+                            this,
+                            getString(R.string.password_changed_success),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        dialog.dismiss()
+                    }
+                    .addOnFailureListener { e ->
+                        // Firebase wymaga "świeżego" logowania do zmiany hasła.
+                        if (e is FirebaseAuthRecentLoginRequiredException) {
+                            Toast.makeText(
+                                this,
+                                getString(R.string.password_change_reauth_error),
+                                Toast.LENGTH_LONG
+                            ).show()
+                        } else {
+                            Toast.makeText(
+                                this,
+                                getString(R.string.error_prefix, e.message),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    /**
+     * Wyświetla dialog do zmiany nazwy użytkownika i aktualizuje ją w bazie
+     */
+    private fun showChangeUsernameDialog() {
+        val user = auth.currentUser
+        if (user == null || !isUserLoggedIn()) return
+
+        // Pole tekstowe do wpisania nowej nazwy
+        val input = android.widget.EditText(this).apply {
+            hint = getString(R.string.new_username_hint)
+            // Pobieramy obecną nazwę żeby user mógł ją edytować
+            setText(binding.textUsername.text.toString())
+            inputType =
+                android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PERSON_NAME
+            setPadding(50, 30, 50, 30)
+            background = ContextCompat.getDrawable(context, R.drawable.bg_edittext_rounded)
+        }
+
+        val container = android.widget.FrameLayout(this).apply {
+            setPadding(40, 20, 40, 20)
+            addView(input)
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.change_username_title))
+            .setView(container)
+            .setPositiveButton(getString(R.string.change_btn)) { dialog, _ ->
+                val newUsername = input.text.toString().trim()
+
+                if (newUsername.isEmpty()) {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.username_empty_error),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@setPositiveButton
+                }
+
+                // Aktualizacja w Firebase Realtime Database
+                val uid = user.uid
+                db.getReference("users").child(uid).child("username").setValue(newUsername)
+                    .addOnSuccessListener {
+                        binding.textUsername.text = newUsername
+                        Toast.makeText(
+                            this,
+                            getString(R.string.username_changed_success),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        dialog.dismiss()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(
+                            this,
+                            getString(R.string.error_prefix, e.message),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    /**
      * Pokazuje komunikat i przycisk, gdy użytkownik nie jest zalogowany
      */
     private fun showLoginPrompt() {
-        val scrollView = findViewById<View>(R.id.scrollView)
-        val textLoginPrompt = findViewById<TextView>(R.id.textLoginPrompt)
-        val buttonLogin = findViewById<Button>(R.id.buttonLogin)
+        // Ukryj główną zawartość
+        binding.scrollView.visibility = View.GONE
 
-        // Ukryj główną zawartość profilu
-        scrollView.visibility = View.GONE
+        // Pokaż komunikaty
+        binding.textLoginPrompt.visibility = View.VISIBLE
+        binding.buttonLogin.visibility = View.VISIBLE
 
-        // Pokaż komunikat i przycisk logowania
-        textLoginPrompt.visibility = View.VISIBLE
-        buttonLogin.visibility = View.VISIBLE
-
-        // Po kliknięciu — przekieruj do WelcomeActivity
-        buttonLogin.setOnClickListener {
+        binding.buttonLogin.setOnClickListener {
             startActivity(Intent(this, WelcomeActivity::class.java))
             finish()
         }
@@ -166,12 +311,20 @@ class ProfileActivity : BaseActivity() {
 
                 if (snapshot.exists()) {
                     val username = snapshot.child("username").value as? String ?: "Brak nazwy"
-                    val currentStreak = snapshot.child("streak").value as? Long ?: 0
+                    val currentStreak = calculateDisplayStreak(snapshot)
                     val bestStreak = snapshot.child("bestStreak").value as? Long ?: 0
 
-                    findViewById<TextView>(R.id.textUsername).text = username
-                    findViewById<TextView>(R.id.textCurrentStreak).text = getString(R.string.current_streak_text, currentStreak)
-                    findViewById<TextView>(R.id.textBestStreak).text = getString(R.string.best_streak_text, bestStreak)
+                    // Pobieranie gwiazdek
+                    val totalStars = snapshot.child("statistics")
+                        .child("totalStars")
+                        .value as? Long ?: 0
+
+                    binding.textUsername.text = username
+                    binding.textCurrentStreak.text =
+                        getString(R.string.current_streak_text, currentStreak)
+                    binding.textBestStreak.text = getString(R.string.best_streak_text, bestStreak)
+
+                    binding.tvProfileTotalStars.text = totalStars.toString()
                 } else {
                     Log.e("PROFILE", "Brak danych użytkownika w bazie dla UID: $uid")
                     // Wyloguj użytkownika i pokaż widok logowania
@@ -188,9 +341,10 @@ class ProfileActivity : BaseActivity() {
                 Toast.makeText(this, "Błąd pobierania danych: ${e.message}", Toast.LENGTH_SHORT)
                     .show()
                 // Ustaw domyślne wartości w razie błędu
-                findViewById<TextView>(R.id.textUsername).text = getString(R.string.error_fetching_user_data)
-                findViewById<TextView>(R.id.textCurrentStreak).text = getString(R.string.zero_days)
-                findViewById<TextView>(R.id.textBestStreak).text = getString(R.string.zero_days)
+                binding.textUsername.text = getString(R.string.error_fetching_user_data)
+                binding.textCurrentStreak.text = getString(R.string.zero_days)
+                binding.textBestStreak.text = getString(R.string.zero_days)
+                binding.tvProfileTotalStars.text = "-"
             }
     }
 

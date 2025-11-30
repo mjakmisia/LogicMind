@@ -84,6 +84,12 @@ class WelcomeActivity : BaseActivity() {
                 showToast("Niepoprawny adres e-mail")
                 return@setOnClickListener
             }
+
+            //sprawdzenie połączenia z internetemm
+            if (!isNetworkAvailable()) {
+                Toast.makeText(this, "Brak internetu.", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
             loginUser(email, password)
         }
 
@@ -98,6 +104,11 @@ class WelcomeActivity : BaseActivity() {
             }
             if (!isEmailValid(email)) {
                 showToast("Niepoprawny adres e-mail")
+                return@setOnClickListener
+            }
+            //sprawdzenie połączenia z internetemm
+            if (!isNetworkAvailable()) {
+                Toast.makeText(this, "Brak internetu.", Toast.LENGTH_LONG).show()
                 return@setOnClickListener
             }
 
@@ -157,7 +168,6 @@ class WelcomeActivity : BaseActivity() {
                 if (task.isSuccessful) {
                     val userId = auth.currentUser!!.uid
                     val userRef = db.getReference("users").child(userId)
-
                     val userData = mapOf(
                         "username" to username,
                         "email" to email,
@@ -172,7 +182,6 @@ class WelcomeActivity : BaseActivity() {
                             "sumReactionTime" to 0.0
                         )
                     )
-
                     userRef.setValue(userData)
                         .addOnSuccessListener {
                             createDefaultCategoriesAndGames(userId)

@@ -1,9 +1,11 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Theme dla jasnego trybu -->
+    <!-- TRYB JASNY -->
     <style name="Theme.LogicMind" parent="Theme.MaterialComponents.DayNight.NoActionBar">
 
-        <!-- Obecnie używane -->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
         <item name="text_dark">@color/textGray</item>
         <item name="text">@color/black</item>
         <item name="text_light">@color/textGrayLight</item>
@@ -14,17 +16,16 @@
         <item name="colorOnBackground_transparent">@color/background_light_transparent</item>
         <item name="colorOnBackgroundMenu">@color/background_light_menu</item>
 
-        <item name="categoryKoordynacja">@color/category_blue_light_mode</item>
+        <item name="categoryCoordination">@color/category_blue_light_mode</item>
         <item name="categoryMemory">@color/category_green_light_mode</item>
-        <item name="categoryProblemSolving">@color/category_pink_light_mode</item>
-        <item name="categorySkupienie">@color/category_yellow_light_mode</item>
+        <item name="categoryReasoning">@color/category_pink_light_mode</item>
+        <item name="categoryAttention">@color/category_yellow_light_mode</item>
 
         <item name="switchTrackColor">@color/switch_track_color</item>
         <item name="switchThumbColor">@color/switch_thumb_color</item>
 
-        <item name="langTextColor">#555555</item> <!-- np. ciemnoszary -->
-        <item name="langTextColorSelected">#000000</item> <!-- czarny, bardziej widoczny -->
-
+        <item name="langTextColor">#555555</item>
+        <item name="langTextColorSelected">#000000</item>
 
         <item name="colorPrimary">@color/navy_blue</item>
         <item name="colorPrimaryVariant">@color/purple_700</item>
@@ -35,20 +36,6 @@
         <item name="colorOnSecondary">@color/black</item>
 
         <item name="pause_background">@color/almost_white</item>
-
-        <!--        -->
-
-
-        <!--
-
-        <item name="android:windowBackground">@color/white</item>
-        <item name="colorSurface">@color/white</item>
-        <item name="colorOnSurface">@color/textGrey</item>
-
-
-        <item name="colorError">@color/category_pink</item>
-        <item name="colorOnError">@color/white</item> -->
-
     </style>
 
 </resources>

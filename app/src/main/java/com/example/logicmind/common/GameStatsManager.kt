@@ -9,7 +9,7 @@ package com.example.logicmind.common
  */
 open class GameStatsManager {
 
-    /** Uruchamia licznik czasu po opóźnieniu (wywoływana przez Activity). */
+    /** Uruchamia licznik czasu po opóźnieniu (wywoływana przez Activity) */
     fun setGameStartTime(context: android.content.Context) {
         gameStartTime = System.currentTimeMillis()
         //pozniej usun
@@ -35,6 +35,27 @@ open class GameStatsManager {
     protected var totalActiveTime: Long = 0L
     protected var pauseStartTime: Long = 0L
     protected var isPaused: Boolean = false
+
+    //pobranie stanu czasu
+    fun getStartTime(): Long {
+        return gameStartTime
+    }
+
+    //przywrócenie stanu czasu
+    fun restoreStartTime(time: Long) {
+        this.gameStartTime = time
+    }
+
+    //pobranie danych o pauzie
+    fun getPauseData(): Pair<Boolean, Long> {
+        return Pair(isPaused, pauseStartTime)
+    }
+
+    //przywrócenie danych o pauzie
+    fun restorePauseData(paused: Boolean, pauseTime: Long) {
+        this.isPaused = paused
+        this.pauseStartTime = pauseTime
+    }
 
     //śledzenie gry
     //wywoływana na początku gry
@@ -64,6 +85,23 @@ open class GameStatsManager {
             isPaused = false
             //Toast.makeText(this, "Gra wznowiona o ${pauseDuration}", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    /**
+     * Zwraca całkowity czas gry w sekundach z wyłączeniem pauz
+     */
+    fun getPlayedTimeSec(): Double {
+        val currentTime = System.currentTimeMillis()
+        var duration = (currentTime - gameStartTime).coerceAtLeast(0L)
+
+        // Jeśli gra jest aktualnie zapauzowana,
+        // odejmujemy czas trwania obecnej pauzy, aby wynik był dokładny.
+        if (isPaused) {
+            val currentPauseDuration = currentTime - pauseStartTime
+            duration -= currentPauseDuration
+        }
+
+        return duration.toDouble() / 1000.0
     }
 
     /** Oblicza średni czas reakcji.

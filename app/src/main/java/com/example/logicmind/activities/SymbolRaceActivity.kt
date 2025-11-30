@@ -113,6 +113,8 @@ class SymbolRaceActivity : BaseActivity() {
         val symbol: Symbol
     ) : Serializable
 
+    private var currentBestScore = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_symbol_race)
@@ -132,25 +134,20 @@ class SymbolRaceActivity : BaseActivity() {
         tempoInfoText = findViewById(R.id.tempoInfoText)
         trackContainer.clipChildren = false
 
+        if (isUserLoggedIn()) {
+            val uid = auth.currentUser!!.uid
+            db.getReference("users").child(uid).child("categories")
+                .child(GameKeys.CATEGORY_COORDINATION).child(GameKeys.GAME_SYMBOL_RACE)
+                .child("bestStars").get().addOnSuccessListener { snapshot ->
+                    currentBestScore = snapshot.getValue(Int::class.java) ?: 0
+                }
+        }
+
         // Inicjalizacja paska czasu gry
         timerProgressBar.setTotalTime(BASE_TIME_SECONDS)
         timerProgressBar.setOnFinishCallback {
             // Gdy czas minie - koniec gry
-            runOnUiThread {
-                isGameEnding = true
-                Toast.makeText(this, "Czas minął!", Toast.LENGTH_LONG).show()
-                trackContainer.isEnabled = false
-                updateUserStatistics(
-                    categoryKey = GameKeys.CATEGORY_COORDINATION,
-                    gameKey = GameKeys.GAME_SYMBOL_RACE,
-                    starsEarned = starManager.starCount,
-                    accuracy = gameStatsManager.calculateAccuracy(),
-                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
-                )
-
-                lastPlayedGame(GameKeys.CATEGORY_COORDINATION, GameKeys.GAME_SYMBOL_RACE, getString(R.string.symbol_race))
-                finish()
-            }
+            handleGameOver()
         }
 
         // Konfiguracja odliczania startowego
@@ -215,17 +212,7 @@ class SymbolRaceActivity : BaseActivity() {
             },
             onExit = {
                 // Wyjście z gry
-
-                updateUserStatistics(
-                    categoryKey = GameKeys.CATEGORY_COORDINATION,
-                    gameKey = GameKeys.GAME_SYMBOL_RACE,
-                    starsEarned = starManager.starCount,
-                    accuracy = gameStatsManager.calculateAccuracy(),
-                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
-                )
-
-                lastPlayedGame(GameKeys.CATEGORY_COORDINATION, GameKeys.GAME_SYMBOL_RACE, getString(R.string.symbol_race))
-                finish()
+                handleGameOver()
             },
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.symbol_race_instruction)
@@ -285,6 +272,8 @@ class SymbolRaceActivity : BaseActivity() {
             CircleState(it.id, it.color, it.symbol)
         })
         outState.putSerializable("circleQueueState", queueToSave)
+
+        saveGameStats(outState)
     }
 
     // Przywrócenie stanu gry po zmianie konfiguracji
@@ -390,6 +379,7 @@ class SymbolRaceActivity : BaseActivity() {
                 if (circleQueue.isNotEmpty()) startActiveTimer()
             }
         }
+        restoreGameStats(savedInstanceState)
     }
 
     // Dynamicznie dostosowuje layout do orientacji
@@ -1029,5 +1019,44 @@ class SymbolRaceActivity : BaseActivity() {
         timerProgressBar.stop()
         countdownManager.cancel()
         handler.removeCallbacksAndMessages(null)
+    }
+
+    private fun handleGameOver() {
+        isGameEnding = true
+        isGameRunning = false
+        trackContainer.isEnabled = false
+        blueContainer.isEnabled = false
+        redContainer.isEnabled = false
+        pauseOverlay.visibility = View.GONE
+
+        // Czyścimy kolejkę żeby nic nie klikało w tle
+        circleQueue.clear()
+        trackContainer.removeAllViews()
+
+        showGameOverDialog(
+            categoryKey = GameKeys.CATEGORY_COORDINATION,
+            gameKey = GameKeys.GAME_SYMBOL_RACE,
+            gameName = getString(R.string.symbol_race),
+            starManager = starManager,
+            timerProgressBar = timerProgressBar,
+            countdownManager = countdownManager,
+            currentBestScore = currentBestScore,
+            onRestartAction = {
+                if (starManager.starCount > currentBestScore) {
+                    currentBestScore = starManager.starCount
+                }
+                // Reset zmiennych gry
+                currentReactionTimeMs = 3500L
+                successfulStreak = 0
+                totalMoves = 0
+                nextCircleId = 1
+
+                trackContainer.isEnabled = true
+                blueContainer.isEnabled = true
+                redContainer.isEnabled = true
+
+                startNewGame()
+            }
+        )
     }
 }

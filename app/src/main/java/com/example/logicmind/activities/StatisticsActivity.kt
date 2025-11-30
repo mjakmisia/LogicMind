@@ -61,6 +61,7 @@ class StatisticsActivity : BaseActivity() {
             auth.currentUser?.let {
                 loadUserStats(it.uid)
                 loadLastPlayedGame(it.uid)
+                loadGlobalStats(it.uid)
             }
         }
     }
@@ -126,7 +127,7 @@ class StatisticsActivity : BaseActivity() {
                     )
                 ),
                 Triple(
-                    "Skupienie", "fruit_sort", listOf(
+                    "Skupienie", "left_or_right", listOf(
                         R.id.tvAttentionGame2Reaction,
                         R.id.tvAttentionGame2Accuracy,
                         R.id.tvAttentionGame2Total,
@@ -246,7 +247,7 @@ class StatisticsActivity : BaseActivity() {
             Pair("Koordynacja", "road_dash"),
             Pair("Koordynacja", "symbol_race"),
             Pair("Skupienie", "word_search"),
-            Pair("Skupienie", "fruit_sort"),
+            Pair("Skupienie", "left_or_right"),
             Pair("Pamiec", "color_sequence"),
             Pair("Pamiec", "card_match"),
             Pair("Rozwiazywanie_problemow", "number_addition"),
@@ -318,7 +319,7 @@ class StatisticsActivity : BaseActivity() {
         } else {
             gameKey
         }
-        val dateFormat = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
         val lastPlayedDate = dateFormat.format(Date(timestamp))
         binding.tvLastPlayedGame.text = getString(R.string.last_played_game, displayName, lastPlayedDate)
     }
@@ -341,7 +342,7 @@ class StatisticsActivity : BaseActivity() {
 
         //2 miejsca po przecinku
         val formattedAccuracy = if (accuracyValue is Double && accuracyValue >= 0) {
-            String.format("%.2f%%", accuracyValue)
+            String.format("%.2f", accuracyValue)
         } else {
             "0"
         }
@@ -354,4 +355,48 @@ class StatisticsActivity : BaseActivity() {
         binding.root.findViewById<TextView>(bestId).text =
             getString(R.string.highest_score_value, bestValue ?: "0")
     }
+
+    /**
+     * Pobiera globalne statystyki z bazy
+     */
+    private fun loadGlobalStats(uid: String) {
+        db.getReference("users").child(uid).child("statistics")
+            .get()
+            .addOnSuccessListener { snapshot ->
+                if (snapshot.exists()) {
+                    // Pobranie wartości
+                    val avgReactionMs =
+                        snapshot.child("avgReactionTime").getValue(Double::class.java) ?: 0.0
+                    val avgAccuracyVal =
+                        snapshot.child("avgAccuracy").getValue(Double::class.java) ?: 0.0
+
+                    // Formatowanie czasu reakcji z milisekund jak jest w bazie na sekundy
+                    val formattedReaction = if (avgReactionMs > 0) {
+                        String.format(Locale.getDefault(), "%.2f s", avgReactionMs / 1000.0)
+                    } else {
+                        "-"
+                    }
+
+                    // Formatowanie dokładności
+                    val formattedAccuracy = if (avgAccuracyVal > 0) {
+                        String.format(Locale.getDefault(), "%.1f%%", avgAccuracyVal)
+                    } else {
+                        "-"
+                    }
+
+                    binding.tvGlobalReactionTime.text = formattedReaction
+                    binding.tvGlobalAccuracy.text = formattedAccuracy
+                } else {
+                    binding.tvGlobalReactionTime.text = "-"
+                    binding.tvGlobalAccuracy.text = "-"
+                }
+            }
+            .addOnFailureListener {
+                Log.e("STATS_DEBUG", "Błąd pobierania globalnych statystyk", it)
+                binding.tvGlobalReactionTime.text = "Błąd"
+                binding.tvGlobalAccuracy.text = "Błąd"
+            }
+    }
+
+
 }

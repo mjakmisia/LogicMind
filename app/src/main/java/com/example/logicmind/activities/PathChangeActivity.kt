@@ -69,6 +69,7 @@ class PathChangeActivity : BaseActivity() {
     private var isSpawnLoopRunning = false
     private val spawnLoopInterval = 100L
 
+    private var currentBestScore = 0
 
     // Klasa do przechowywania stanu każdej aktywnej kulki
     private data class BallState(
@@ -135,32 +136,20 @@ class PathChangeActivity : BaseActivity() {
         starManager.init(findViewById(R.id.starCountText))
         streakCountText = findViewById(R.id.streakCountText)
 
+        if (isUserLoggedIn()) {
+            val uid = auth.currentUser!!.uid
+            db.getReference("users").child(uid).child("categories")
+                .child(GameKeys.CATEGORY_REASONING).child(GameKeys.GAME_PATH_CHANGE)
+                .child("bestStars").get().addOnSuccessListener { snapshot ->
+                    currentBestScore = snapshot.getValue(Int::class.java) ?: 0
+                }
+        }
+
         // Inicjalizacja paska czasu
         timerProgressBar.setTotalTime(BASE_TIME_SECONDS)
         timerProgressBar.setOnFinishCallback {
             runOnUiThread {
-                isGameEnding = true
-                isGameRunning = false
-                stopSpawningBalls()
-                clearAllBalls()
-                Toast.makeText(this, "Czas minął! Koniec gry!", Toast.LENGTH_LONG).show()
-                gridLayout.isEnabled = false
-                pauseOverlay.visibility = View.GONE
-                updateUserStatistics(
-                    categoryKey = GameKeys.CATEGORY_REASONING,
-                    gameKey = GameKeys.GAME_PATH_CHANGE,
-                    starsEarned = starManager.starCount,
-                    accuracy = gameStatsManager.calculateAccuracy(),
-                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
-                )
-
-                lastPlayedGame(
-                    GameKeys.CATEGORY_REASONING,
-                    GameKeys.GAME_PATH_CHANGE,
-                    getString(R.string.card_match)
-                )
-
-                finish()
+                handleGameOver()
             }
         }
 
@@ -219,21 +208,7 @@ class PathChangeActivity : BaseActivity() {
                 onGamePaused()
             },
             onExit = {
-                updateUserStatistics(
-                    categoryKey = GameKeys.CATEGORY_REASONING,
-                    gameKey = GameKeys.GAME_PATH_CHANGE,
-                    starsEarned = starManager.starCount,
-                    accuracy = gameStatsManager.calculateAccuracy(),
-                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
-                )
-
-                lastPlayedGame(
-                    GameKeys.CATEGORY_REASONING,
-                    GameKeys.GAME_PATH_CHANGE,
-                    getString(R.string.card_match)
-                )
-
-                finish()
+                handleGameOver()
             },
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.path_change_instruction),
@@ -285,6 +260,8 @@ class PathChangeActivity : BaseActivity() {
         outState.putLong("currentSpawnDelayMs", currentSpawnDelayMs)
         outState.putInt("totalMoves", totalMoves)
         outState.putInt("successfulStreak", successfulStreak)
+
+        saveGameStats(outState)
     }
 
     // Przywraca stan gry
@@ -360,6 +337,7 @@ class PathChangeActivity : BaseActivity() {
         }
 
         pauseMenu.syncWithOverlay()
+        restoreGameStats(savedInstanceState)
     }
 
     // Funkcja wywoływana po odliczaniu, rozpoczyna nową grę
@@ -846,5 +824,32 @@ class PathChangeActivity : BaseActivity() {
         countdownManager.cancel()
         stopSpawningBalls()
         clearAllBalls()
+    }
+
+    private fun handleGameOver() {
+        isGameEnding = true
+        isGameRunning = false
+        stopSpawningBalls()
+        clearAllBalls()
+        gridLayout.isEnabled = false
+        pauseOverlay.visibility = View.GONE
+
+        showGameOverDialog(
+            categoryKey = GameKeys.CATEGORY_REASONING,
+            gameKey = GameKeys.GAME_PATH_CHANGE,
+            gameName = getString(R.string.path_change),
+            starManager = starManager,
+            timerProgressBar = timerProgressBar,
+            countdownManager = countdownManager,
+            currentBestScore = currentBestScore,
+            onRestartAction = {
+                if (starManager.starCount > currentBestScore) {
+                    currentBestScore = starManager.starCount
+                }
+                currentLevel = 1
+                // startNewGame() czyści planszę i zmienne
+                startNewGame()
+            }
+        )
     }
 }

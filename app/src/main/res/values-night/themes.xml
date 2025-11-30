@@ -1,9 +1,11 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Base application theme for dark mode -->
+    <!-- TRYB CIEMNY -->
     <style name="Theme.LogicMind" parent="Theme.MaterialComponents.DayNight.NoActionBar">
 
-        <!-- Obecnie używane -->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
         <item name="text_dark">@color/white</item>
         <item name="text">@color/white</item>
         <item name="text_light">@color/light_gray_2</item>
@@ -14,17 +16,16 @@
         <item name="colorOnBackground_transparent">@color/background_dark_transparent</item>
         <item name="colorOnBackgroundMenu">@color/background_dark_menu</item>
 
-        <item name="categoryKoordynacja">@color/category_blue_dark_mode</item>
+        <item name="categoryCoordination">@color/category_blue_dark_mode</item>
         <item name="categoryMemory">@color/category_green_dark_mode</item>
-        <item name="categoryProblemSolving">@color/category_pink_dark_mode</item>
-        <item name="categorySkupienie">@color/category_yellow_dark_mode</item>
+        <item name="categoryReasoning">@color/category_pink_dark_mode</item>
+        <item name="categoryAttention">@color/category_yellow_dark_mode</item>
 
         <item name="switchTrackColor">@color/switch_track_color</item>
         <item name="switchThumbColor">@color/switch_thumb_color</item>
 
-        <item name="langTextColor">#AAAAAA</item> <!-- szary -->
-        <item name="langTextColorSelected">#FFFFFF</item> <!-- biały, jaśniejszy -->
-
+        <item name="langTextColor">#AAAAAA</item>
+        <item name="langTextColorSelected">#FFFFFF</item>
 
         <item name="colorPrimary">@color/purple</item>
         <item name="colorPrimaryVariant">@color/purple_700</item>
@@ -35,19 +36,6 @@
         <item name="colorOnSecondary">@color/white</item>
 
         <item name="pause_background">@color/dark_gray</item>
-
-        <!--      -->
-
-        <!--
-
-
-        <item name="android:windowBackground">@color/dark_grey</item>
-        <item name="colorSurface">@color/dark_grey</item>
-
-        <item name="colorOnSurface">@color/light_grey</item>
-        <item name="colorError">@color/category_pink_lighter</item> -->
-
-
     </style>
 
 </resources>
