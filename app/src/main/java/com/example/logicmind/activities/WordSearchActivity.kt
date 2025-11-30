@@ -356,8 +356,6 @@ class WordSearchActivity : BaseActivity() {
     }
 
     private fun startNewGame() {
-        gameStatsManager.startReactionTracking()
-        // Wyczyść stany
         currentBoard = null
         wordsToFind = emptyList()
         foundWords.clear()

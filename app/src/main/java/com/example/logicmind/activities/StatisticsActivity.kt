@@ -127,7 +127,7 @@ class StatisticsActivity : BaseActivity() {
                     )
                 ),
                 Triple(
-                    "Skupienie", "fruit_sort", listOf(
+                    "Skupienie", "left_or_right", listOf(
                         R.id.tvAttentionGame2Reaction,
                         R.id.tvAttentionGame2Accuracy,
                         R.id.tvAttentionGame2Total,
@@ -247,7 +247,7 @@ class StatisticsActivity : BaseActivity() {
             Pair("Koordynacja", "road_dash"),
             Pair("Koordynacja", "symbol_race"),
             Pair("Skupienie", "word_search"),
-            Pair("Skupienie", "fruit_sort"),
+            Pair("Skupienie", "left_or_right"),
             Pair("Pamiec", "color_sequence"),
             Pair("Pamiec", "card_match"),
             Pair("Rozwiazywanie_problemow", "number_addition"),
@@ -342,7 +342,7 @@ class StatisticsActivity : BaseActivity() {
 
         //2 miejsca po przecinku
         val formattedAccuracy = if (accuracyValue is Double && accuracyValue >= 0) {
-            String.format("%.2f%%", accuracyValue)
+            String.format("%.2f", accuracyValue)
         } else {
             "0"
         }
