@@ -60,7 +60,6 @@
         app:layout_constraintTop_toBottomOf="@id/topGuideline"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <!-- Napis: Wybierz kategorię... -->
     <TextView
         android:id="@+id/welcomeMessage"
         android:layout_width="0dp"
@@ -73,9 +72,8 @@
         android:textSize="18sp"
         app:layout_constraintTop_toBottomOf="@id/helloText"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toStartOf="@id/streakContainer" />
 
-    <!-- KOORDYNACJA -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardKoordynacja"
         android:layout_width="0dp"
@@ -86,7 +84,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="8dp"
-        app:cardBackgroundColor="?attr/categoryKoordynacja"
+        app:cardBackgroundColor="?attr/categoryCoordination"
         app:cardCornerRadius="20dp"
         app:cardElevation="4dp"
         app:layout_constraintTop_toBottomOf="@id/welcomeMessage"
@@ -105,7 +103,6 @@
             android:textStyle="bold" />
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- ROZWIĄZYWANIE PROBLEMÓW-->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardRozwiazywanieProblemow"
         android:layout_width="0dp"
@@ -116,7 +113,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
-        app:cardBackgroundColor="?attr/categoryProblemSolving"
+        app:cardBackgroundColor="?attr/categoryReasoning"
         app:cardCornerRadius="20dp"
         app:cardElevation="4dp"
         app:layout_constraintTop_toBottomOf="@id/cardKoordynacja"
@@ -134,7 +131,6 @@
             android:textStyle="bold" />
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- SKUPIENIE -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardSkupienie"
         android:layout_width="0dp"
@@ -145,7 +141,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
-        app:cardBackgroundColor="?attr/categorySkupienie"
+        app:cardBackgroundColor="?attr/categoryAttention"
         app:cardCornerRadius="20dp"
         app:cardElevation="4dp"
         app:layout_constraintTop_toBottomOf="@id/cardRozwiazywanieProblemow"
@@ -163,7 +159,6 @@
             android:textStyle="bold" />
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- PAMIĘĆ -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardPamiec"
         android:layout_width="0dp"
@@ -192,7 +187,6 @@
             android:textStyle="bold" />
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Dolny pasek nawigacji -->
     <include
         layout="@layout/bottom_navigation"
         android:id="@+id/includeBottomNav"

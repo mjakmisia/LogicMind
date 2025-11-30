@@ -1,27 +1,17 @@
 <resources>
-    <!--To plik, w którym definiujesz własne atrybuty XML (custom attributes),
-     które potem możesz przypisać do swojego custom view.
-     „Mój widok GameIntroView będzie obsługiwał atrybuty
-     gameTitle, gameCategory, gameDescription, gameIcon”.
-
-     colors.xml → definiuje kolory.
-     attrs.xml → definiuje własne atrybuty, np. dla switcha.
-     themes.xml → przypisuje kolory i atrybuty do konkretnego motywu (light/dark).
-     Layout → odwołuje się do theme przez ?attr albo do colors bezpośrednio.-->
     <declare-styleable name="GameIntroView">
         <attr name="gameTitle" format="string" />
         <attr name="gameCategory" format="string" />
         <attr name="gameDescription" format="string" />
         <attr name="gameIcon" format="reference" />
 
-        <!-- Deklaracja własnych atrybutów dla switch -->
         <attr name="switchTrackColor" format="color"/>
         <attr name="switchThumbColor" format="color"/>
 
-        <attr name="categoryKoordynacja" format="color"/>
+        <attr name="categoryCoordination" format="color"/>
         <attr name="categoryMemory" format="color"/>
-        <attr name="categoryProblemSolving" format="color"/>
-        <attr name="categorySkupienie" format="color"/>
+        <attr name="categoryReasoning" format="color"/>
+        <attr name="categoryAttention" format="color"/>
 
         <attr name="text_dark" format="color"/>
         <attr name="text" format="color"/>
