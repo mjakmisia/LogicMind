@@ -23,71 +23,62 @@ import com.example.logicmind.common.StarManager
 import kotlin.random.Random
 
 class ColorSequenceActivity : BaseActivity() {
-    private var keyButtons: List<KeyButton> = emptyList()   // Lista klawiszy z ich widokami i indeksami
-    private var currentSequence = mutableListOf<Int>()      // Sekwencja pokazana przez grę
-    private var userSequence = mutableListOf<Int>()         // Sekwencja wpisana przez gracza
-    private var sequenceDelayRemaining: Long = 0L      // Pozostały czas opóźnienia
-    private var pendingShowSequenceDelay: Long = 0L  // Pozostały czas do następnego showSequence po checkUserSequence
+    private var keyButtons: List<KeyButton> = emptyList()
+    private var currentSequence = mutableListOf<Int>()
+    private var userSequence = mutableListOf<Int>()
+    private var sequenceDelayRemaining: Long = 0L
+    private var pendingShowSequenceDelay: Long = 0L
+    private var isShowingSequence = false
+    private var isUserTurn = false
+    private var isGameEnding = false
+    private var currentLevel = 1
+    private var numKeys = 0
+    private var currentSeqLength = 0
+    private var sequenceShowIndex = 0
+    private var currentBestScore = 0
+    private lateinit var gridLayout: GridLayout
+    private lateinit var countdownText: TextView
+    private lateinit var pauseButton: ImageButton
+    private lateinit var pauseOverlay: ConstraintLayout
+    private lateinit var timerProgressBar: GameTimerProgressBar
+    private lateinit var starManager: StarManager
+    private lateinit var pauseMenu: PauseMenu
+    private lateinit var countdownManager: GameCountdownManager
 
-    //Flagi
-    private var isShowingSequence = false     // Flaga: gra pokazuje sekwencję
-    private var isUserTurn = false            // Flaga: tura gracza do wpisania sekwencji
-    private var isGameEnding = false          // Flaga zakończenia gry
-
-    // Parametry sekwencji
-    private var currentLevel = 1           // Aktualny poziom gry
-    private var numKeys = 0                // Liczba klawiszy
-    private var currentSeqLength = 0       // Aktualna długość sekwencji do zapamiętania
-    private var sequenceShowIndex = 0      // Indeks aktualnie odtwarzanego klawisza w sekwencji
-
-    // UI elementy gry
-    private lateinit var gridLayout: GridLayout                  // Siatka do wyświetlania klawiszy
-    private lateinit var countdownText: TextView                 // Pole tekstowe odliczania
-    private lateinit var pauseButton: ImageButton                // Przycisk pauzy
-    private lateinit var pauseOverlay: ConstraintLayout          // Nakładka z menu pauzy
-    private lateinit var timerProgressBar: GameTimerProgressBar  // Pasek postępu czasu gry
-    private lateinit var starManager: StarManager                // Manager gwiazdek
-    private lateinit var pauseMenu: PauseMenu                    // Menu pauzy gry
-    private lateinit var countdownManager: GameCountdownManager  // Manager odliczania początkowego
-
-    // Mapowanie klawiszy na dźwięki
     private val soundOrder4 = listOf(2, 5, 7, 1)              // C E G B
     private val soundOrder6 = listOf(2, 5, 6, 7, 1, 3)        // C E F G B C (wyższe C)
     private val soundOrder8 = listOf(2, 4, 5, 6, 7, 0, 1, 3)  // C D E F G A B C (wyższe C)
     private val soundResources = listOf(
-        R.raw.key_sound_a,        // 0
-        R.raw.key_sound_b,        // 1
-        R.raw.key_sound_c,        // 2
-        R.raw.key_sound_c_higher, // 3
-        R.raw.key_sound_d,        // 4
-        R.raw.key_sound_e,        // 5
-        R.raw.key_sound_f,        // 6
-        R.raw.key_sound_g         // 7
+        R.raw.key_sound_a,
+        R.raw.key_sound_b,
+        R.raw.key_sound_c,
+        R.raw.key_sound_c_higher,
+        R.raw.key_sound_d,
+        R.raw.key_sound_e,
+        R.raw.key_sound_f,
+        R.raw.key_sound_g
     )
 
-    // Klasy danych pomocnicze
-    private data class KeyButton(val view: Button, val index: Int) // Klawisz z widokiem i indeksem
+    private data class KeyButton(val view: Button, val index: Int)
+
     private data class SequenceConfig(
         val numKeys: Int,
         val startLength: Int,
         val step: Int,
         val maxLength: Int
     )
-    companion object {
-        const val BASE_TIME_SECONDS = 90 // Czas gry w sekundach
-    }
 
-    private var currentBestScore = 0
+    companion object {
+        const val BASE_TIME_SECONDS = 90
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_color_sequence)
         supportActionBar?.hide()
 
-        // Inicjalizacja dźwięku
         SoundManager.init(this)
 
-        // Inicjalizacja widoków
         gridLayout = findViewById(R.id.gridLayout)
         countdownText = findViewById(R.id.countdownText)
         pauseButton = findViewById(R.id.pauseButton)
@@ -96,7 +87,6 @@ class ColorSequenceActivity : BaseActivity() {
         starManager = StarManager()
         starManager.init(findViewById(R.id.starCountText))
 
-        // Pobieranie rekordu
         if (isUserLoggedIn()) {
             val uid = auth.currentUser!!.uid
             db.getReference("users").child(uid).child("categories")
@@ -106,15 +96,13 @@ class ColorSequenceActivity : BaseActivity() {
                 }
         }
 
-        // Inicjalizacja paska czasu
-        timerProgressBar.setTotalTime(BASE_TIME_SECONDS) // Ustaw czas na 1,5 minuty
+        timerProgressBar.setTotalTime(BASE_TIME_SECONDS)
         timerProgressBar.setOnFinishCallback {
             runOnUiThread {
                 handleGameOver()
             }
         }
 
-        // Inicjalizacja managera odliczania
         countdownManager = GameCountdownManager(
             countdownText = countdownText,
             gameView = gridLayout,
@@ -133,7 +121,6 @@ class ColorSequenceActivity : BaseActivity() {
             }
         )
 
-        // Inicjalizacja menu pauzy
         pauseMenu = PauseMenu(
             context = this,
             pauseOverlay = pauseOverlay,
@@ -142,8 +129,8 @@ class ColorSequenceActivity : BaseActivity() {
                 if (pauseMenu.isPaused) pauseMenu.resume()
                 currentLevel = 1
                 timerProgressBar.stop()
-                timerProgressBar.reset() // Resetuje timer
-                countdownManager.startCountdown() // Rozpoczyna odliczanie początkowe
+                timerProgressBar.reset()
+                countdownManager.startCountdown()
             },
             onResume = {
                 onGameResumed()
@@ -154,7 +141,7 @@ class ColorSequenceActivity : BaseActivity() {
                     gridLayout.isEnabled = true
                     keyButtons.forEach { it.view.isEnabled = true }
                 }
-            }, // Wznawia timer po pauzie
+            },
             onPause = {
                 onGamePaused()
                 if (!isShowingSequence) {
@@ -162,7 +149,7 @@ class ColorSequenceActivity : BaseActivity() {
                 }
                 gridLayout.isEnabled = false
                 keyButtons.forEach { it.view.isEnabled = false }
-            }, // Zatrzymuje timer podczas pauzy
+            },
             onExit = {
                 handleGameOver()
             },
@@ -170,11 +157,10 @@ class ColorSequenceActivity : BaseActivity() {
             instructionMessage = getString(R.string.color_sequence_instruction),
         )
 
-        // Sprawdzenie, czy gra jest uruchamiana po raz pierwszy
         if (savedInstanceState == null) {
-            countdownManager.startCountdown() // Rozpoczyna odliczanie początkowe
+            countdownManager.startCountdown()
         } else {
-            restoreGameState(savedInstanceState) // Przywraca stan gry
+            restoreGameState(savedInstanceState)
         }
     }
 
@@ -199,13 +185,10 @@ class ColorSequenceActivity : BaseActivity() {
         outState.putLong("sequenceDelayRemaining", sequenceDelayRemaining)
         outState.putLong("pendingShowSequenceDelay", pendingShowSequenceDelay)
         starManager.saveState(outState)
-
-        //zapisz statystyki
         saveGameStats(outState)
     }
 
     private fun restoreGameState(savedInstanceState: Bundle) {
-        // Przywracanie zmiennych
         currentLevel = savedInstanceState.getInt("currentLevel", 1)
         numKeys = savedInstanceState.getInt("numKeys", 4)
         currentSeqLength = savedInstanceState.getInt("currentSeqLength", 1)
@@ -222,35 +205,28 @@ class ColorSequenceActivity : BaseActivity() {
         pendingShowSequenceDelay = savedInstanceState.getLong("pendingShowSequenceDelay", 0L)
         starManager.restoreState(savedInstanceState)
 
-        // Przywracanie stanu timera
         val timerRemainingTimeMs = savedInstanceState.getLong("timerRemainingTimeMs", BASE_TIME_SECONDS * 1000L)
         val timerIsRunning = savedInstanceState.getBoolean("timerIsRunning", false)
         timerProgressBar.setRemainingTimeMs(timerRemainingTimeMs.coerceAtLeast(1L))
 
-        // Przywracanie odliczania początkowego
         val countdownIndex = savedInstanceState.getInt("countdownIndex", 0)
         val countdownInProgress = savedInstanceState.getBoolean("countdownInProgress", false)
 
-        // Odtwarzanie planszy gry
         if (numKeys != 0) {
             keyButtons = createKeys(numKeys)
         }
 
-        // Synchronizacja menu pauzy
         pauseMenu.syncWithOverlay()
 
-        // Wznowienie odliczania, jeśli było aktywne
         if (countdownInProgress) {
             countdownManager.startCountdown(countdownIndex)
             return
         }
 
-        // Wznowienie timera, jeśli gra była aktywna
         if (timerIsRunning && !isShowingSequence && pauseOverlay.visibility != View.VISIBLE) {
             timerProgressBar.start()
         }
 
-        // Wznowienie pokazu sekwencji lub tury gracza
         if (isShowingSequence) {
             gridLayout.isEnabled = false
             keyButtons.forEach { it.view.isEnabled = false }
@@ -275,7 +251,6 @@ class ColorSequenceActivity : BaseActivity() {
             keyButtons.forEach { it.view.isEnabled = true }
         }
 
-        // Wznawiamy showSequence() jeśli obrót był po checkUserSequence()
         if (pendingShowSequenceDelay > 0L) {
             runDelayed(pendingShowSequenceDelay) {
                 if (!isFinishing && !isDestroyed) {
@@ -284,14 +259,11 @@ class ColorSequenceActivity : BaseActivity() {
                 }
             }
         }
-        //przywroc statystyki
         restoreGameStats(savedInstanceState)
     }
 
-    // Inicjalizuje nową grę na podanym poziomie
     private fun startNewGame() {
         gameStatsManager.startReactionTracking()
-        // Upewnij się że menu pauzy jest schowane
         if (pauseMenu.isPaused) {
             pauseMenu.resume()
         } else {
@@ -301,14 +273,12 @@ class ColorSequenceActivity : BaseActivity() {
         timerProgressBar.stop()
         timerProgressBar.reset()
 
-        gridLayout.isEnabled = true // Włącz interakcje
+        gridLayout.isEnabled = true
 
-        // Ustaw konfigurację poziomu
         val config = getSequenceConfig(currentLevel)
         numKeys = config.numKeys
         currentSeqLength = config.startLength
 
-        // Tworzenie klawiszy i sekwencji
         keyButtons = createKeys(numKeys)
         userSequence.clear()
         currentSequence.clear()
@@ -316,60 +286,56 @@ class ColorSequenceActivity : BaseActivity() {
         showSequence()
     }
 
-    // Pobiera konfigurację sekwencji dla danego poziomu
     private fun getSequenceConfig(level: Int): SequenceConfig = when (level) {
-        1 -> SequenceConfig(4, 1, 1, 6)   // 1→2→3→4→5→6
-        2 -> SequenceConfig(4, 1, 1, 8)   // 1→2→3→4→5→6→7→8
-        3 -> SequenceConfig(4, 2, 2, 10)  // 2→4→6→8→10
-        4 -> SequenceConfig(6, 1, 1, 6)   // 1→2→3→4→5→6
-        5 -> SequenceConfig(6, 1, 1, 8)   // 1→2→3→4→5→6→7→8
-        6 -> SequenceConfig(6, 2, 2, 10)  // 2→4→6→8→10
-        7 -> SequenceConfig(8, 1, 1, 6)   // 1→2→3→4→5→6
-        8 -> SequenceConfig(8, 1, 1, 8)   // 1→2→3→4→5→6→7→8
-        9 -> SequenceConfig(8, 2, 2, 10)  // 2→4→6→8→10
-        else -> SequenceConfig(8, 2, 2, 10) // 2→4→6→8→10
+        1 -> SequenceConfig(4, 1, 1, 6)
+        2 -> SequenceConfig(4, 1, 1, 8)
+        3 -> SequenceConfig(4, 2, 2, 10)
+        4 -> SequenceConfig(6, 1, 1, 6)
+        5 -> SequenceConfig(6, 1, 1, 8)
+        6 -> SequenceConfig(6, 2, 2, 10)
+        7 -> SequenceConfig(8, 1, 1, 6)
+        8 -> SequenceConfig(8, 1, 1, 8)
+        9 -> SequenceConfig(8, 2, 2, 10)
+        else -> SequenceConfig(8, 2, 2, 10)
     }
 
-    // Pobiera kolory klawiszy
     private fun getKeyColors(numKeys: Int): List<Int> = when (numKeys) {
         4 -> listOf(
-            Color.RED,              // Czerwony
-            Color.YELLOW,           // Żółty
-            Color.rgb(84, 237, 56), // Zielony
-            Color.rgb(18, 26, 255), // Niebieski
+            Color.RED,
+            Color.YELLOW,
+            Color.rgb(84, 237, 56),
+            Color.rgb(18, 26, 255),
         )
         6 -> listOf(
-            Color.RED,               // Czerwony
-            Color.rgb(255, 165, 0),  // Pomarańczowy
-            Color.YELLOW,            // Żółty
-            Color.rgb(84, 237, 56),  // Zielony
-            Color.rgb(18, 26, 255),  // Niebieski
-            Color.rgb(124, 9, 181)   // Fiolet
+            Color.RED,
+            Color.rgb(255, 165, 0),
+            Color.YELLOW,
+            Color.rgb(84, 237, 56),
+            Color.rgb(18, 26, 255),
+            Color.rgb(124, 9, 181)
         )
         else -> listOf(
-            Color.rgb(234, 83, 185), // Różowy
-            Color.RED,               // Czerwony
-            Color.rgb(255, 165, 0),  // Pomarańczowy
-            Color.YELLOW,            // Żółty
-            Color.rgb(84, 237, 56),  // Zielony
-            Color.rgb(78, 255, 242), // Cyan
-            Color.rgb(18, 26, 255),  // Niebieski
-            Color.rgb(124, 9, 181)   // Fiolet
+            Color.rgb(234, 83, 185),
+            Color.RED,
+            Color.rgb(255, 165, 0),
+            Color.YELLOW,
+            Color.rgb(84, 237, 56),
+            Color.rgb(78, 255, 242),
+            Color.rgb(18, 26, 255),
+            Color.rgb(124, 9, 181)
         )
     }
 
-    // Pobiera mapowanie dźwięków dla danej liczby klawiszy
     private fun getSoundOrder(numKeys: Int): List<Int> = when (numKeys) {
         4 -> soundOrder4
         6 -> soundOrder6
         else -> soundOrder8
     }
 
-    // Tworzy siatkę klawiszy z kolorami i listenerami
     private fun createKeys(numKeys: Int): List<KeyButton> {
         val buttonsList = mutableListOf<KeyButton>()
         val colors = getKeyColors(numKeys)
-        gridLayout.removeAllViews() // Wyczyść siatkę
+        gridLayout.removeAllViews()
 
         val cols = when (numKeys) {
             4 -> 2
@@ -405,7 +371,7 @@ class ColorSequenceActivity : BaseActivity() {
                 }
                 isEnabled = isUserTurn && !isShowingSequence
 
-                elevation = 8f  // Cień
+                elevation = 8f
             }
 
             button.setOnClickListener {
@@ -420,17 +386,14 @@ class ColorSequenceActivity : BaseActivity() {
         return buttonsList
     }
 
-    // Generuje sekwencję klawiszy
     private fun generateNewSequence() {
         val config = getSequenceConfig(currentLevel)
 
-        // Jeśli to pierwsza runda – generujemy od zera
         if (currentSequence.isEmpty()) {
             repeat(config.startLength) {
                 currentSequence.add(Random.nextInt(0, numKeys))
             }
         }
-        // Jeśli już mamy sekwencję – dodajemy nowe elementy
         else if (currentSequence.size < config.maxLength) {
             val remaining = config.maxLength - currentSequence.size
             val toAdd = minOf(config.step, remaining)
@@ -439,19 +402,15 @@ class ColorSequenceActivity : BaseActivity() {
                 currentSequence.add(Random.nextInt(0, numKeys))
             }
         }
-
-        // Aktualizuj długość sekwencji
         currentSeqLength = currentSequence.size
     }
 
-    // Rozpoczyna pokaz sekwencji (timer zatrzymany)
     private fun showSequence() {
         isUserTurn = false
         isShowingSequence = true
         gridLayout.isEnabled = false
         keyButtons.forEach { it.view.isEnabled = false }
 
-        //zatrzymaj czas reakcji gdy jest pokazywana sekwencja
         onGamePaused()
 
         timerProgressBar.pause()
@@ -459,7 +418,6 @@ class ColorSequenceActivity : BaseActivity() {
         playSequenceStep()
     }
 
-    // Odtwarza kolejny krok sekwencji
     private fun playSequenceStep() {
         if (sequenceShowIndex >= currentSequence.size) {
             endSequenceShow()
@@ -468,7 +426,7 @@ class ColorSequenceActivity : BaseActivity() {
 
         val keyIndex = currentSequence[sequenceShowIndex]
         val soundOrder = getSoundOrder(numKeys)
-        val soundIndex = soundOrder[keyIndex]  // Mapowanie na właściwy dźwięk
+        val soundIndex = soundOrder[keyIndex]
         highlightKey(keyIndex, true)
         playKeySound(soundIndex)
 
@@ -479,7 +437,6 @@ class ColorSequenceActivity : BaseActivity() {
         }
     }
 
-    // Kończy pokaz sekwencji, rozpoczyna turę gracza
     private fun endSequenceShow() {
         isShowingSequence = false
         gridLayout.isEnabled = true
@@ -487,13 +444,11 @@ class ColorSequenceActivity : BaseActivity() {
         isUserTurn = true
         userSequence.clear()
 
-        //wznawia czar reakcji gdy sie konczy sekwencja
         onGameResumed()
 
         timerProgressBar.start()
     }
 
-    // Obsługuje kliknięcie klawisza
     private fun onKeyPress(keyIndex: Int) {
         val soundOrder = getSoundOrder(numKeys)
         val soundIndex = soundOrder[keyIndex]
@@ -505,7 +460,6 @@ class ColorSequenceActivity : BaseActivity() {
 
         userSequence.add(keyIndex)
 
-        // Sprawdź błąd (po każdym kliknięciu)
         if (userSequence.size > currentSequence.size ||
             userSequence[userSequence.size - 1] != currentSequence[userSequence.size - 1]) {
             gameStatsManager.registerAttempt(false)
@@ -513,13 +467,11 @@ class ColorSequenceActivity : BaseActivity() {
             return
         }
 
-        // Tylko jeśli sekwencja kompletna - kontynuuj
         if (userSequence.size == currentSequence.size) {
             checkUserSequence()
         }
     }
 
-    // Sprawdza poprawność sekwencji wpisanej przez gracza
     private fun checkUserSequence() {
         isUserTurn = false
         gridLayout.isEnabled = false
@@ -527,14 +479,10 @@ class ColorSequenceActivity : BaseActivity() {
         timerProgressBar.pause()
 
         if (userSequence == currentSequence) {
-            // Poprawna sekwencja
             starManager.increment()
-
             val config = getSequenceConfig(currentLevel)
 
-            // Sprawdź, czy osiągnięto maksymalną długość sekwencji
             if (currentSequence.size >= config.maxLength) {
-                // Osiągnięto max długość – przejście na nowy poziom
                 currentLevel++
                 timerProgressBar.addTime(15)
                 Toast.makeText(this, "Świetnie! Nowy poziom: $currentLevel +15s BONUS", Toast.LENGTH_SHORT).show()
@@ -545,7 +493,7 @@ class ColorSequenceActivity : BaseActivity() {
                 currentSequence.clear()
             }
 
-            generateNewSequence() // Dodaj krok
+            generateNewSequence()
 
             pendingShowSequenceDelay = 1500L
             runDelayed(1500L) {
@@ -555,7 +503,6 @@ class ColorSequenceActivity : BaseActivity() {
                 }
             }
         } else {
-            // Błędna sekwencja - powtórz
             Toast.makeText(this, "Błąd! Powtórka sekwencji.", Toast.LENGTH_SHORT).show()
             userSequence.clear()
             pendingShowSequenceDelay = 1500L
@@ -568,31 +515,26 @@ class ColorSequenceActivity : BaseActivity() {
         }
     }
 
-    // Odtwarza dźwięk dla danego indeksu nuty
     private fun playKeySound(soundIndex: Int) {
         SoundManager.play(this, soundResources[soundIndex])
     }
 
-    // Podświetla klawisz (animacja skalowania + efekt wblaknięcia)
     private fun highlightKey(keyIndex: Int, highlight: Boolean) {
         val button = keyButtons[keyIndex].view
         val bg = button.background as GradientDrawable
         val colors = getKeyColors(numKeys)
 
         if (highlight) {
-            // Kliknięcie – kolor bardziej wblakły, efekt naciśnięcia
             bg.setColor(makeFaded(colors[keyIndex]))
             ObjectAnimator.ofFloat(button, "scaleX", 1f, 0.95f).setDuration(100).start()
             ObjectAnimator.ofFloat(button, "scaleY", 1f, 0.95f).setDuration(100).start()
         } else {
-            // Powrót do oryginalnego koloru
             bg.setColor(colors[keyIndex])
             ObjectAnimator.ofFloat(button, "scaleX", 0.95f, 1f).setDuration(150).start()
             ObjectAnimator.ofFloat(button, "scaleY", 0.95f, 1f).setDuration(150).start()
         }
     }
 
-    // Tworzy "wyblakłą" wersję koloru
     private fun makeFaded(color: Int): Int {
         val hsv = FloatArray(3)
         Color.colorToHSV(color, hsv)
@@ -601,7 +543,6 @@ class ColorSequenceActivity : BaseActivity() {
         return Color.HSVToColor(hsv)
     }
 
-    // Uruchamia akcję z opóźnieniem, uwzględniając pauzę
     private fun runDelayed(delay: Long, action: () -> Unit) {
         val activityRef = java.lang.ref.WeakReference(this)
         var remaining = delay
@@ -650,7 +591,6 @@ class ColorSequenceActivity : BaseActivity() {
                 currentLevel = 1
                 userSequence.clear()
                 currentSequence.clear()
-                // startNewGame() zostanie wywołane po countdownie
                 startNewGame()
             }
         )
@@ -665,7 +605,7 @@ class ColorSequenceActivity : BaseActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        timerProgressBar.stop() // Zatrzymaj CountDownTimer
-        countdownManager.cancel() // Usuń handlery odliczania
+        timerProgressBar.stop()
+        countdownManager.cancel()
     }
 }
