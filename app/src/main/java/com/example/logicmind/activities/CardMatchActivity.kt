@@ -612,7 +612,6 @@ class CardMatchActivity : BaseActivity() {
         showGameOverDialog(
             categoryKey = GameKeys.CATEGORY_MEMORY,
             gameKey = GameKeys.GAME_CARD_MATCH,
-            gameName = getString(R.string.card_match),
             starManager = starManager,
             timerProgressBar = timerProgressBar,
             countdownManager = countdownManager,

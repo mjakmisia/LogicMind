@@ -686,7 +686,6 @@ class WordSearchActivity : BaseActivity() {
         showGameOverDialog(
             categoryKey = GameKeys.CATEGORY_FOCUS,
             gameKey = GameKeys.GAME_WORD_SEARCH,
-            gameName = getString(R.string.word_search),
             starManager = starManager,
             timerProgressBar = timerProgressBar,
             countdownManager = countdownManager,

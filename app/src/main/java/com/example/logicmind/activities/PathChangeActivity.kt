@@ -837,7 +837,6 @@ class PathChangeActivity : BaseActivity() {
         showGameOverDialog(
             categoryKey = GameKeys.CATEGORY_REASONING,
             gameKey = GameKeys.GAME_PATH_CHANGE,
-            gameName = getString(R.string.path_change),
             starManager = starManager,
             timerProgressBar = timerProgressBar,
             countdownManager = countdownManager,

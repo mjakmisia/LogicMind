@@ -639,7 +639,6 @@ class ColorSequenceActivity : BaseActivity() {
         showGameOverDialog(
             categoryKey = GameKeys.CATEGORY_MEMORY,
             gameKey = GameKeys.GAME_COLOR_SEQUENCE,
-            gameName = getString(R.string.color_sequence),
             starManager = starManager,
             timerProgressBar = timerProgressBar,
             countdownManager = countdownManager,

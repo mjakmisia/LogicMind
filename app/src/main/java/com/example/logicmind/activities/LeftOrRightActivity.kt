@@ -133,8 +133,7 @@ class LeftOrRightActivity : BaseActivity() {
 
                 lastPlayedGame(
                     GameKeys.CATEGORY_FOCUS,
-                    GameKeys.GAME_LEFT_OR_RIGHT,
-                    getString(R.string.left_or_right)
+                    GameKeys.GAME_LEFT_OR_RIGHT
                 )
                 
                 finish()
@@ -197,8 +196,7 @@ class LeftOrRightActivity : BaseActivity() {
 
                 lastPlayedGame(
                     GameKeys.CATEGORY_FOCUS,
-                    GameKeys.GAME_LEFT_OR_RIGHT,
-                    getString(R.string.left_or_right)
+                    GameKeys.GAME_LEFT_OR_RIGHT
                 )
                 finish() 
             }, 

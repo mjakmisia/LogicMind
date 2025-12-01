@@ -7,7 +7,6 @@
     android:background="?attr/pageBackground"
     tools:context=".activities.MainActivity">
 
-    <!-- Guideline dla przesunięcia góry -->
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/topGuideline"
         android:layout_width="wrap_content"
@@ -15,38 +14,25 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.05" />
 
-    <!-- Ikonka płomyka + liczba dni w prawym górnym rogu -->
-    <LinearLayout
-        android:id="@+id/streakContainer"
+    <TextView
+        android:id="@+id/streakText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="72dp"
+        android:layout_marginTop="50dp"
         android:layout_marginEnd="16dp"
+
+        android:text="@string/zero_days"
+        android:textSize="14sp"
+        android:textColor="?attr/text_light"
+        android:gravity="center_horizontal"
+
+        android:drawablePadding="0dp"
+        app:drawableTint="#EF476F"
+        app:drawableTopCompat="@drawable/ic_flame"
+
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent" />
 
-        <ImageView
-            android:id="@+id/flameIcon"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:layout_gravity="center_horizontal"
-            android:src="@drawable/ic_flame"
-            android:contentDescription="@string/zero"
-            app:tint="#EF476F" />
-
-        <TextView
-            android:id="@+id/streakText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="0 dni"
-            android:textSize="14sp"
-            android:textColor="?attr/text_light"
-            android:layout_marginTop="0dp"
-            android:gravity="center_horizontal" />
-    </LinearLayout>
-
-    <!-- Napis "Witaj!" -->
     <TextView
         android:id="@+id/helloText"
         android:layout_width="wrap_content"
@@ -70,9 +56,11 @@
         android:text="@string/welcome_message"
         android:textColor="?attr/text_light"
         android:textSize="18sp"
+
         app:layout_constraintTop_toBottomOf="@id/helloText"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/streakContainer" />
+
+        app:layout_constraintEnd_toStartOf="@id/streakText" />
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardKoordynacja"
@@ -98,7 +86,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="@string/category_coordination"
-            android:textColor="?attr/colorOnPrimary"
+            android:textColor="@color/white"
             android:textSize="22sp"
             android:textStyle="bold" />
     </com.google.android.material.card.MaterialCardView>
@@ -126,7 +114,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="@string/category_reasoning"
-            android:textColor="?attr/colorOnPrimary"
+            android:textColor="@color/white"
             android:textSize="22sp"
             android:textStyle="bold" />
     </com.google.android.material.card.MaterialCardView>
@@ -154,7 +142,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="@string/category_attention"
-            android:textColor="?attr/colorOnPrimary"
+            android:textColor="@color/white"
             android:textSize="22sp"
             android:textStyle="bold" />
     </com.google.android.material.card.MaterialCardView>
@@ -182,7 +170,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="@string/category_memory"
-            android:textColor="?attr/colorOnPrimary"
+            android:textColor="@color/white"
             android:textSize="22sp"
             android:textStyle="bold" />
     </com.google.android.material.card.MaterialCardView>

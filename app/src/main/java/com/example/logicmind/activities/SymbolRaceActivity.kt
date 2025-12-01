@@ -1036,7 +1036,6 @@ class SymbolRaceActivity : BaseActivity() {
         showGameOverDialog(
             categoryKey = GameKeys.CATEGORY_COORDINATION,
             gameKey = GameKeys.GAME_SYMBOL_RACE,
-            gameName = getString(R.string.symbol_race),
             starManager = starManager,
             timerProgressBar = timerProgressBar,
             countdownManager = countdownManager,

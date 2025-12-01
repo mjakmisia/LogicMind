@@ -14,7 +14,9 @@ import com.example.logicmind.databinding.ActivityMainBinding
 class MainActivity : BaseActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private val PERMISSION_REQUEST_CODE = 1001 // stały kod żądania
+    companion object {
+        private const val PERMISSION_REQUEST_CODE = 1001
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -24,18 +26,11 @@ class MainActivity : BaseActivity() {
 
         supportActionBar?.hide()
 
-        //żądanie uprawnień powiadomień
         requestNotificationPermission()
-
-        //wyświetlanie streak pod ogniem
-        loadUserStreak()
-
-        // Kategorie gier
 
         binding.cardKoordynacja.setOnClickListener {
             it.playSoundEffect(android.view.SoundEffectConstants.CLICK)
             val intent = Intent(this, GameSelectionActivity::class.java)
-            //putExtra - przekazywanie danych miedzy aktywnosciami
             intent.putExtra("CATEGORY_ID", "coordination")
             startActivity(intent)
         }
@@ -61,25 +56,25 @@ class MainActivity : BaseActivity() {
             startActivity(intent)
         }
 
-        // Obsługa bottom navigation
         setupBottomNavigation(binding.includeBottomNav.bottomNavigationView, R.id.nav_home)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadUserStreak()
     }
 
     private fun loadUserStreak() {
         val user = auth.currentUser
 
-        //sprawdzamy czy jest gościem
         if (user == null || !isUserLoggedIn()) {
             binding.streakText.text = getString(R.string.zero_days)
             return
         }
 
-        // pobranie z bazy
-        //odniesienie do konkretnego usera w bazie
         val userRef = db.getReference("users").child(user.uid)
 
-        //get - pobiera jednorazowo dane z bazy
-        userRef.get() //pobranie całego węzła żeby mieć datę
+        userRef.get()
             .addOnSuccessListener { snapshot ->
                 val streak = calculateDisplayStreak(snapshot)
                 binding.streakText.text = getString(R.string.current_streak_text, streak)
@@ -90,7 +85,6 @@ class MainActivity : BaseActivity() {
             }
     }
 
-    // Metoda do obsługi żądania uprawnienia
     private fun requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 
@@ -99,7 +93,6 @@ class MainActivity : BaseActivity() {
                     Manifest.permission.POST_NOTIFICATIONS
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
-                // Jeśli uprawnienie nie jest przyznane, wyświetl okno systemowe
                 ActivityCompat.requestPermissions(
                     this,
                     arrayOf(Manifest.permission.POST_NOTIFICATIONS),
@@ -109,23 +102,11 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    // Obsługa wyniku żądania uprawnienia
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        if (requestCode == PERMISSION_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Powiadomienia są włączone
-                Log.d("NOTIF_PERM", "Uprawnienie do powiadomień przyznane.")
-            } else {
-                // Użytkownik odrzucił uprawnienie
-                Log.d("NOTIF_PERM", "Uprawnienie do powiadomień odrzucone.")
-            }
-        }
     }
-
 }

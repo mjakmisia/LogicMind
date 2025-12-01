@@ -460,7 +460,6 @@ class NumberAdditionActivity : BaseActivity() {
         showGameOverDialog(
             categoryKey = GameKeys.CATEGORY_REASONING,
             gameKey = GameKeys.GAME_NUMBER_ADDITION,
-            gameName = getString(R.string.number_addition),
             starManager = starManager,
             timerProgressBar = timerProgressBar,
             countdownManager = countdownManager,
