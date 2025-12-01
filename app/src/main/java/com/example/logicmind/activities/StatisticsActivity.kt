@@ -25,22 +25,17 @@ class StatisticsActivity : BaseActivity() {
 
         supportActionBar?.hide()
 
-        //dolne menu
         setupBottomNavigation(binding.includeBottomNav.bottomNavigationView, R.id.nav_statistics)
 
-        // Na start ukryj wszystkie widoki
         binding.statisticsScrollView.visibility = View.GONE
         binding.layoutNotLoggedIn.visibility = View.GONE
         binding.progressBar.visibility = View.VISIBLE
 
-        val user = auth.currentUser //pobranie bieżącego użytkownika
-        // Debugowanie: Logowanie stanu użytkownika
+        val user = auth.currentUser
         Log.d("StatisticsActivity", "User: ${user?.uid ?: "null"}")
 
         if (!isUserLoggedIn()) {
-            // Ukryj progressbar
             binding.progressBar.visibility = View.GONE
-            // Niezalogowany użytkownik
             Log.d("StatisticsActivity", "Widok dla niezalogowanego użytkownika")
             binding.statisticsScrollView.visibility = View.GONE
             binding.layoutNotLoggedIn.visibility = View.VISIBLE
@@ -51,13 +46,11 @@ class StatisticsActivity : BaseActivity() {
             }
 
         } else {
-            // Zalogowany użytkownik
             Log.d("StatisticsActivity", "Widok dla zalogowanego użytkownika")
-            // Ukryj progressbar
             binding.progressBar.visibility = View.GONE
             binding.statisticsScrollView.visibility = View.VISIBLE
             binding.layoutNotLoggedIn.visibility = View.GONE
-            setupExpandableStats() //rozwijanie statystyk
+            setupExpandableStats()
             auth.currentUser?.let {
                 loadUserStats(it.uid)
                 loadLastPlayedGame(it.uid)
@@ -71,7 +64,7 @@ class StatisticsActivity : BaseActivity() {
      * Każdy wpis to para: (layout gry, układ statystyk dla tej gry)
      */
     private fun setupExpandableStats() {
-        val pairs = listOf( //lista par (List<Pair<Int, Int>>)
+        val pairs = listOf(
             Pair(R.id.layoutCoordinationGame1, R.id.layoutCoordinationGame1Stats),
             Pair(R.id.layoutCoordinationGame2, R.id.layoutCoordinationGame2Stats),
             Pair(R.id.layoutAttentionGame1, R.id.layoutAttentionGame1Stats),
@@ -82,13 +75,11 @@ class StatisticsActivity : BaseActivity() {
             Pair(R.id.layoutReasoningGame2, R.id.layoutReasoningGame2Stats)
         )
 
-        // Dla każdej pary ustawienie kliknięcia w layout gry
         pairs.forEach { (layoutId, statsId) ->
             val layout = binding.root.findViewById<LinearLayout>(layoutId)
             val stats = binding.root.findViewById<LinearLayout>(statsId)
 
             layout.setOnClickListener {
-                // Jeśli statystyki są ukryte to pokaż, jeśli widoczne to ukryj
                 stats.visibility = if (stats.isGone) View.VISIBLE else View.GONE
             }
         }
@@ -99,9 +90,8 @@ class StatisticsActivity : BaseActivity() {
      * Struktura danych: users/[uid]/categories/[category]/games/gameName
      */
     private fun loadUserStats(uid: String) {
-        // Mapowanie gier na widoki (nazwy gier z bazy na ID widoków)
         val gameMapping =
-            listOf( //gameMapping - lista par (List<Triple<String, String, List<Int>>>)
+            listOf(
                 Triple(
                     "Koordynacja", "road_dash", listOf(
                         R.id.tvCoordinationGame1Reaction,
@@ -168,20 +158,14 @@ class StatisticsActivity : BaseActivity() {
                 )
             )
 
-        // Pobieranie danych dla każdej gry
-        //gameMapping - lista par (List<Triple<String, String, List<Int>>>)
         gameMapping.forEach { (category, gameName, viewIds) ->
             db.getReference("users").child(uid).child("categories").child(category).child("games")
                 .child(gameName)
-                .get() //pobiera jednorazowo dane z bazy
+                .get()
                 .addOnSuccessListener { snapshot ->
                     val messageIfEmpty = "Zagraj w grę aby zobaczyć statystyki"
 
                     if (snapshot.exists()) {
-                        //snaphot - obiekt typu DataSnapshot zawierający dane z bazy w danym miejscu w momencie pobrania
-                        //zwraca całą strukturę danych dla jednej gry w postaci mapy
-
-                        //sprawdza czy snapshot jest mapą
                         val data = snapshot.value as? Map<*, *>
 
                         if (data != null) {
@@ -192,7 +176,6 @@ class StatisticsActivity : BaseActivity() {
                                 is String -> r.toDoubleOrNull() ?: -1.0
                                 else -> -1.0
                             }
-                            //sprawdzamy jak zapisywana jest accuracy i reaction żeby dobrze ja zmienic na Double
                             val accuracy = when (val acc = data["accuracy"]) {
                                 is Double -> acc
                                 is Long -> acc.toDouble()
@@ -200,27 +183,20 @@ class StatisticsActivity : BaseActivity() {
                                 is String -> acc.toDoubleOrNull() ?: -1.0
                                 else -> -1.0
                             }
-                            //Log.d("STATS_DEBUG", "accuracy=${data["accuracy"]} (${data["accuracy"]?.javaClass?.simpleName})")
                             val total = data["starsEarned"]?.toString() ?: messageIfEmpty
                             val best = data["bestStars"]?.toString() ?: messageIfEmpty
 
-                            //Ustawia wartości statystyk dla pojedynczej gry.
-                            //Każda gra ma 4 wskaźniki: czas reakcji, poprawność, punkty, najlepszy wynik.
                             setStatsForGame(
                                 viewIds[0], viewIds[1], viewIds[2], viewIds[3],
                                 reaction, accuracy, total, best
                             )
                         } else {
-                            // Dane istnieją ale nie są mapą
-                            //czyli są w złym formacie
                             setStatsForGame(
                                 viewIds[0], viewIds[1], viewIds[2], viewIds[3],
                                 messageIfEmpty, messageIfEmpty, messageIfEmpty, messageIfEmpty
                             )
                         }
                     } else {
-                        //Dane nie są w bazie
-                        //czyli gra nie została rozegrana
                         setStatsForGame(
                             viewIds[0], viewIds[1], viewIds[2], viewIds[3],
                             messageIfEmpty, messageIfEmpty, messageIfEmpty, messageIfEmpty
@@ -242,7 +218,6 @@ class StatisticsActivity : BaseActivity() {
      * Pobiera nazwę ostatnio zagranej gry na podstawie pola lastPlayed
      */
     private fun loadLastPlayedGame(uid: String) {
-        // Mapowanie kategorii i gier, zgodne z loadUserStats
         val gameMapping = listOf(
             Pair("Koordynacja", "road_dash"),
             Pair("Koordynacja", "symbol_race"),
@@ -256,22 +231,16 @@ class StatisticsActivity : BaseActivity() {
 
         var latestGameKey: String? = null
         var latestTimestamp: Long? = null
-        var completedRequests = 0 // ile zapytań z bazy już się zakończyło
-        //wyświetlamy wynik dopiero jak wszystkie pytania się zakończą (sukcesem lub błędem)
+        var completedRequests = 0
 
-
-        // Pobieranie lastPlayed dla każdej gry
         gameMapping.forEach { (category, gameName) ->
             db.getReference("users").child(uid).child("categories").child(category).child("games")
                 .child(gameName)
                 .child("lastPlayed")
-                .get() //pobiera jednorazowo dane z bazy
+                .get()
                 .addOnSuccessListener { snapshot ->
                     completedRequests++
                     if (snapshot.exists()) {
-                        //w timestamp większa liczba = nowsza gra
-                        //można wyswietlic dokładną datę i godzinę ostatniej gry
-                        //jeżeli timestamp nie jest Long to będzie null
                         val timestamp = snapshot.value as? Long
                         Log.d(
                             "LAST_PLAYED_DEBUG (StatisticsActivity)",
@@ -283,7 +252,6 @@ class StatisticsActivity : BaseActivity() {
                             latestGameKey = gameName
                         }
                     }
-                    //wszystkie pytania zakończone - aktualizuje textview
                     if (completedRequests == gameMapping.size) {
                         Log.d(
                             "LAST_PLAYED_DEBUG (StatisticsActivity)",
@@ -294,7 +262,6 @@ class StatisticsActivity : BaseActivity() {
                 }
                 .addOnFailureListener {
                     completedRequests++
-                    // Aktualizuj TextView po przetworzeniu wszystkich gier
                     if (completedRequests == gameMapping.size) {
                         updateLastPlayedText(latestGameKey, latestTimestamp)
                     }
@@ -305,7 +272,6 @@ class StatisticsActivity : BaseActivity() {
     /**
      * Ustawia tekst ostatnio zagranej gry
      */
-    //gameKey - klucz zapisany w Firebase
     @SuppressLint("DiscouragedApi")
     private fun updateLastPlayedText(gameKey: String?, timestamp: Long?) {
         if (gameKey == null || timestamp == null) {
@@ -333,14 +299,12 @@ class StatisticsActivity : BaseActivity() {
         reactionId: Int, accuracyId: Int, totalId: Int, bestId: Int,
         reactionValue: Any?, accuracyValue: Any?, totalValue: Any?, bestValue: Any?
     ) {
-        //2 miejsca po przecinku
         val formattedReaction = if (reactionValue is Double && reactionValue >= 0) {
             String.format("%.2f s", reactionValue / 1000.0)
         } else {
             "0"
         }
 
-        //2 miejsca po przecinku
         val formattedAccuracy = if (accuracyValue is Double && accuracyValue >= 0) {
             String.format("%.2f", accuracyValue)
         } else {
@@ -364,20 +328,17 @@ class StatisticsActivity : BaseActivity() {
             .get()
             .addOnSuccessListener { snapshot ->
                 if (snapshot.exists()) {
-                    // Pobranie wartości
                     val avgReactionMs =
                         snapshot.child("avgReactionTime").getValue(Double::class.java) ?: 0.0
                     val avgAccuracyVal =
                         snapshot.child("avgAccuracy").getValue(Double::class.java) ?: 0.0
 
-                    // Formatowanie czasu reakcji z milisekund jak jest w bazie na sekundy
                     val formattedReaction = if (avgReactionMs > 0) {
                         String.format(Locale.getDefault(), "%.2f s", avgReactionMs / 1000.0)
                     } else {
                         "-"
                     }
 
-                    // Formatowanie dokładności
                     val formattedAccuracy = if (avgAccuracyVal > 0) {
                         String.format(Locale.getDefault(), "%.1f%%", avgAccuracyVal)
                     } else {

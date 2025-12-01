@@ -12,78 +12,49 @@ open class GameStatsManager {
     /** Uruchamia licznik czasu po opóźnieniu (wywoływana przez Activity) */
     fun setGameStartTime(context: android.content.Context) {
         gameStartTime = System.currentTimeMillis()
-        //pozniej usun
-//        android.widget.Toast.makeText(
-//            context,
-//            "Pomiar Czasu się zaczyna (GameTime: ${gameStartTime})",
-//            android.widget.Toast.LENGTH_SHORT
-//        ).show()
     }
 
-    /*
-    Liczymy średni czas reakcji jako czas trwania gry / liczba gwiazdek
-
-    - startReactionTracking() — startuje licznik czasu.
-    - pauseReactionTracking() — zatrzymuje czas gry (np. gdy gracz pauzuje).
-    - resumeReactionTracking() — wznawia licznik po pauzie.
-    - getAverageReactionTime() — zwraca średni czas reakcji (w sekundach)
-     */
-
-
-    //protected żeby umożliwić dziedziczenie w testach
     protected var gameStartTime: Long = 0L
     protected var totalActiveTime: Long = 0L
     protected var pauseStartTime: Long = 0L
     protected var isPaused: Boolean = false
 
-    //pobranie stanu czasu
     fun getStartTime(): Long {
         return gameStartTime
     }
 
-    //przywrócenie stanu czasu
     fun restoreStartTime(time: Long) {
         this.gameStartTime = time
     }
 
-    //pobranie danych o pauzie
     fun getPauseData(): Pair<Boolean, Long> {
         return Pair(isPaused, pauseStartTime)
     }
 
-    //przywrócenie danych o pauzie
     fun restorePauseData(paused: Boolean, pauseTime: Long) {
         this.isPaused = paused
         this.pauseStartTime = pauseTime
     }
 
-    //śledzenie gry
-    //wywoływana na początku gry
     fun startReactionTracking() {
         totalActiveTime = 0L
         isPaused = false
         pauseStartTime = 0L
-        //gameStartTime = 0L
         resetAccuracyCounters()
     }
 
-    //pauzowanie gry
     fun onGamePaused() {
         if (!isPaused) {
             pauseStartTime = System.currentTimeMillis()
             isPaused = true
-            //Toast.makeText(this, "Gra zapauzowana o ${pauseStartTime}", Toast.LENGTH_SHORT).show()
         }
     }
 
-    //wznowienie gry
     fun onGameResumed() {
         if (isPaused) {
-            //przesuwamy startTime żeby nie liczyc pauzy
             val pauseDuration = System.currentTimeMillis() - pauseStartTime
             gameStartTime += pauseDuration
             isPaused = false
-            //Toast.makeText(this, "Gra wznowiona o ${pauseDuration}", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -94,8 +65,6 @@ open class GameStatsManager {
         val currentTime = System.currentTimeMillis()
         var duration = (currentTime - gameStartTime).coerceAtLeast(0L)
 
-        // Jeśli gra jest aktualnie zapauzowana,
-        // odejmujemy czas trwania obecnej pauzy, aby wynik był dokładny.
         if (isPaused) {
             val currentPauseDuration = currentTime - pauseStartTime
             duration -= currentPauseDuration
@@ -112,10 +81,7 @@ open class GameStatsManager {
         val currentTime = System.currentTimeMillis()
         var duration = (currentTime - gameStartTime).coerceAtLeast(1L)
 
-        // Jeśli gra jest aktualnie zapauzowana,
-        // trzeba odjąć bieżący czas trwania pauzy, aby obliczyć poprawny czas gry.
         if (isPaused) {
-            // Oblicz, ile czasu minęło od rozpoczęcia pauzy
             val currentPauseDuration = currentTime - pauseStartTime
             duration -= currentPauseDuration
         }
@@ -130,10 +96,9 @@ open class GameStatsManager {
      * protected żeby mozna bylo testowac
      */
 
-    protected var totalAttempts: Int = 0 //liczba prób
-    protected var successfulAttempts: Int = 0 //liczba poprawnych prób
+    protected var totalAttempts: Int = 0
+    protected var successfulAttempts: Int = 0
 
-    //resetuje licznik na start
     fun resetAccuracyCounters() {
         totalAttempts = 0
         successfulAttempts = 0

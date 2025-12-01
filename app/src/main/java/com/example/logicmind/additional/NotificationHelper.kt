@@ -28,9 +28,8 @@ object NotificationHelper {
 
     /** Wyświetla powiadomienia push */
     fun showNotification(context: Context, title: String, message: String) {
-        createNotificationChannel(context) //kanał istnieje
+        createNotificationChannel(context)
 
-        //uruchamia aplikacje po kliknięciu
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
