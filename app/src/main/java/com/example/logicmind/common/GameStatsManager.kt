@@ -1,16 +1,7 @@
 package com.example.logicmind.common
 
-
-/**
- * GameStatsManager
- * TYLKO KLASY NIEZALEŹNE OD FIREBASE
- * Klasa przechowująca i obliczająca statystyki gry, niezależna od kontekstu Android Activity.
- * Łatwiej jest ją testować
- */
 open class GameStatsManager {
-
-    /** Uruchamia licznik czasu po opóźnieniu (wywoływana przez Activity) */
-    fun setGameStartTime(context: android.content.Context) {
+    fun setGameStartTime() {
         gameStartTime = System.currentTimeMillis()
     }
 
@@ -58,9 +49,6 @@ open class GameStatsManager {
         }
     }
 
-    /**
-     * Zwraca całkowity czas gry w sekundach z wyłączeniem pauz
-     */
     fun getPlayedTimeSec(): Double {
         val currentTime = System.currentTimeMillis()
         var duration = (currentTime - gameStartTime).coerceAtLeast(0L)
@@ -73,9 +61,6 @@ open class GameStatsManager {
         return duration.toDouble() / 1000.0
     }
 
-    /** Oblicza średni czas reakcji.
-     * Jest testowalna jednostkowo.
-     */
     fun calculateAvgReactionTime(stars: Int = 0): Double {
 
         val currentTime = System.currentTimeMillis()
@@ -91,11 +76,6 @@ open class GameStatsManager {
         return duration.toDouble() / starsEarned.toDouble() // w milisekundach
     }
 
-    /**
-     * Liczenie poprawności
-     * protected żeby mozna bylo testowac
-     */
-
     protected var totalAttempts: Int = 0
     protected var successfulAttempts: Int = 0
 
@@ -104,19 +84,11 @@ open class GameStatsManager {
         successfulAttempts = 0
     }
 
-    /**
-     * Rejestruje próbę gracza
-     * @param isSuccessful - true jeśli była poprawna np. trafienie pary
-     */
     fun registerAttempt(isSuccessful: Boolean) {
         totalAttempts++
         if (isSuccessful) successfulAttempts++
     }
 
-    /**
-     * Oblicza procent poprawnych prób
-     * Zwraca wartość od 0.0 do 100.0
-     */
     fun calculateAccuracy(): Double {
         return if (totalAttempts > 0) (successfulAttempts.toDouble() / totalAttempts.toDouble()) * 100.0
         else 0.0

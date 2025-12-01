@@ -399,7 +399,7 @@ open class BaseActivity : AppCompatActivity() {
         dialog.onRestartListener = {
             starManager.reset()
             gameStatsManager.startReactionTracking()
-            gameStatsManager.setGameStartTime(this)
+            gameStatsManager.setGameStartTime()
             timerProgressBar.reset()
 
             onRestartAction()

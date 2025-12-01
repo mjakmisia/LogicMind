@@ -60,7 +60,6 @@ class WelcomeActivity : BaseActivity() {
             if (hasFocus) binding.passwordRequirementsLayout.visibility = View.VISIBLE
         }
 
-        // logowanie
         binding.btnLogin.setOnClickListener {
             val email = binding.etEmail.text.toString().trim()
             val password = binding.etPassword.text.toString().trim()

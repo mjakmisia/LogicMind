@@ -13,17 +13,15 @@ object SymbolRaceInstructionHelper {
     fun getSpanned(context: Context, html: String): Spanned {
         val imageGetter = Html.ImageGetter { source ->
 
-            // Puste koło
             if (source == "ic_empty_circle") {
                 return@ImageGetter ShapeDrawable(OvalShape()).apply {
                     intrinsicWidth = 72
                     intrinsicHeight = 72
-                    paint.color = 0xFFBBBBBB.toInt() // jasnoszary
+                    paint.color = 0xFFBBBBBB.toInt()
                     setBounds(0, 0, 72, 72)
                 }
             }
 
-            // Reszta – ikona + szare tło
             val resId = context.resources.getIdentifier(source, "drawable", context.packageName)
             val icon = ContextCompat.getDrawable(context, resId) ?: return@ImageGetter null
 

@@ -37,34 +37,28 @@ class WordSearchActivity : BaseActivity() {
     private lateinit var overlayView: SelectionOverlayView
     private var isGameEnding = false
     private var currentLevel = 1
-    private lateinit var rootLayout: ConstraintLayout // Layout do którego dynamicznie dodajemy widoki słów
-    private val wordViews = mutableListOf<TextView>() // Lista przechowująca widoki słów (dla Flow)
-    private var currentBoard: WordSearchGenerator.Board? = null // Logika planszy
-    private var wordsToFind: List<String> = emptyList() // Słowa do znalezienia w danej rundzie
-    private val foundWords = mutableSetOf<String>() // Słowa już znalezione
-    private val letterViews = mutableMapOf<Pair<Int, Int>, TextView>() // Mapa przechowująca widoki liter (Row, Col) -> TextView
+    private lateinit var rootLayout: ConstraintLayout
+    private val wordViews = mutableListOf<TextView>()
+    private var currentBoard: WordSearchGenerator.Board? = null
+    private var wordsToFind: List<String> = emptyList()
+    private val foundWords = mutableSetOf<String>()
+    private val letterViews = mutableMapOf<Pair<Int, Int>, TextView>()
     private var currentBestScore = 0
 
-    // Przechowuje dane linii na potrzeby rotacji
     data class PermanentLineData(
         val startRow: Int, val startCol: Int,
         val endRow: Int, val endCol: Int,
         val color: Int
     )
-
-    private val permanentLinesList = mutableListOf<PermanentLineData>() // Lista narysowanych linii
-
-    // Zmienne do zarządzania kolorami
+    private val permanentLinesList = mutableListOf<PermanentLineData>()
     private val pastelColors = listOf(
         "#FFC0CB".toColorInt(), "#B0E0E6".toColorInt(),
         "#98FB98".toColorInt(), "#FFFF99".toColorInt(),
         "#A8B1DD".toColorInt(), "#FFDAB9".toColorInt(),
         "#E6E6FA".toColorInt(), "#DDA0DD".toColorInt()
     )
-    private val availableColors = mutableListOf<Int>() // Kolory nieużyte w danej rundzie
-    private val assignedWordColors = mutableMapOf<String, Int>() // Mapa: słowo -> kolor
-
-    // Zmienne stanu dotyku
+    private val availableColors = mutableListOf<Int>()
+    private val assignedWordColors = mutableMapOf<String, Int>()
     private var startCell: Pair<Int, Int>? = null
     private var currentSelectionCoords = mutableListOf<Pair<Int, Int>>()
     private var currentTempColor: Int = Color.GRAY
@@ -76,9 +70,9 @@ class WordSearchActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_word_search)
+
         supportActionBar?.hide()
 
-        // Inicjalizacja widoków
         gridLayout = findViewById(R.id.gridLayout)
         overlayView = findViewById(R.id.selectionOverlayView)
         countdownText = findViewById(R.id.countdownText)
@@ -89,18 +83,15 @@ class WordSearchActivity : BaseActivity() {
         starManager = StarManager()
         starManager.init(findViewById(R.id.starCountText))
 
-        // Dynamiczne dostosowanie layoutu do orientacji ekranu
         val flow = findViewById<androidx.constraintlayout.helper.widget.Flow>(R.id.wordsToFindFlow)
         val orientation = resources.configuration.orientation
         val gridContainer = findViewById<android.widget.FrameLayout>(R.id.gridContainer)
         val params = gridContainer.layoutParams as ConstraintLayout.LayoutParams
 
         if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-            // PION - max 2 słowa w rzędzie + grid przymocowany do timera
             flow.setMaxElementsWrap(2)
             params.topToBottom = R.id.gameTimerProgressBar
         } else {
-            // POZIOM - max 6 słów w rzędzie + grid przymocowany do paska słów
             flow.setMaxElementsWrap(6)
             params.topToBottom = R.id.wordsToFindFlow
         }
@@ -114,13 +105,11 @@ class WordSearchActivity : BaseActivity() {
                 }
         }
 
-        // Inicjalizacja paska czasu
         timerProgressBar.setTotalTime(BASE_TIME_SECONDS)
         timerProgressBar.setOnFinishCallback {
             handleGameOver()
         }
 
-        // Inicjalizacja managera odliczania
         countdownManager = GameCountdownManager(
             countdownText = countdownText,
             gameView = gridLayout,
@@ -139,12 +128,11 @@ class WordSearchActivity : BaseActivity() {
                 timerProgressBar.reset()
                 timerProgressBar.start()
                 gameStatsManager.startReactionTracking()
-                gameStatsManager.setGameStartTime(this@WordSearchActivity)
+                gameStatsManager.setGameStartTime()
                 startNewGame()
             }
         )
 
-        // Inicjalizacja menu pauzy
         pauseMenu = PauseMenu(
             context = this,
             pauseOverlay = pauseOverlay,
@@ -173,15 +161,13 @@ class WordSearchActivity : BaseActivity() {
             instructionMessage = getString(R.string.word_search_instruction),
         )
 
-        // Sprawdzenie, czy gra jest uruchamiana po raz pierwszy
         if (savedInstanceState == null) {
-            countdownManager.startCountdown() // Rozpoczyna odliczanie początkowe
+            countdownManager.startCountdown()
         } else {
-            restoreGameState(savedInstanceState) // Przywraca stan po rotacji
+            restoreGameState(savedInstanceState)
         }
     }
 
-    // Zapisuje stan aktywności
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putInt("pauseOverlayVisibility", pauseOverlay.visibility)
@@ -199,11 +185,10 @@ class WordSearchActivity : BaseActivity() {
         outState.putStringArrayList("foundWords", ArrayList(foundWords))
         currentBoard?.let { board ->
             outState.putInt("boardSize", board.size)
-            val flatGrid = board.grid.flatten().toCharArray() // Zapisujemy siatkę jako płaską tablicę znaków
+            val flatGrid = board.grid.flatten().toCharArray()
             outState.putCharArray("flatGrid", flatGrid)
         }
 
-        // Zapisz dane linii
         outState.putInt("permanentLinesCount", permanentLinesList.size)
         permanentLinesList.forEachIndexed { index, line ->
             outState.putInt("line_${index}_sr", line.startRow)
@@ -212,14 +197,12 @@ class WordSearchActivity : BaseActivity() {
             outState.putInt("line_${index}_ec", line.endCol)
             outState.putInt("line_${index}_color", line.color)
         }
-        // Zapisz przypisane kolory
         outState.putStringArrayList("assignedWordKeys", ArrayList(assignedWordColors.keys))
         outState.putIntegerArrayList("assignedWordValues", ArrayList(assignedWordColors.values))
 
         saveGameStats(outState)
     }
 
-    // Przywraca stan aktywności
     private fun restoreGameState(savedInstanceState: Bundle) {
         pauseOverlay.visibility = savedInstanceState.getInt("pauseOverlayVisibility", View.GONE)
         countdownText.visibility = savedInstanceState.getInt("countdownTextVisibility", View.GONE)
@@ -228,7 +211,6 @@ class WordSearchActivity : BaseActivity() {
         currentLevel = savedInstanceState.getInt("currentLevel", 1)
         starManager.restoreState(savedInstanceState)
 
-        // Przywróć stan timera
         val timerRemainingTimeMs = savedInstanceState.getLong("timerRemainingTimeMs", BASE_TIME_SECONDS * 1000L)
         val timerIsRunning = savedInstanceState.getBoolean("timerIsRunning", false)
         timerProgressBar.setRemainingTimeMs(timerRemainingTimeMs.coerceAtLeast(1L))
@@ -237,11 +219,9 @@ class WordSearchActivity : BaseActivity() {
             timerProgressBar.start()
         }
 
-        // Przywróć stan odliczania
         val countdownIndex = savedInstanceState.getInt("countdownIndex", 0)
         val countdownInProgress = savedInstanceState.getBoolean("countdownInProgress", false)
 
-        // Przywróć przypisane kolory
         val assignedWordKeys = savedInstanceState.getStringArrayList("assignedWordKeys")
         val assignedWordValues = savedInstanceState.getIntegerArrayList("assignedWordValues")
         if (assignedWordKeys != null && assignedWordValues != null) {
@@ -257,7 +237,6 @@ class WordSearchActivity : BaseActivity() {
             }
         }
 
-        // Przywróć dane linii
         val lineCount = savedInstanceState.getInt("permanentLinesCount", 0)
         permanentLinesList.clear()
         for (i in 0 until lineCount) {
@@ -270,21 +249,17 @@ class WordSearchActivity : BaseActivity() {
             ))
         }
 
-        // Przywróc stan planszy
         val savedWords = savedInstanceState.getStringArrayList("wordsToFind")
         val savedFoundWords = savedInstanceState.getStringArrayList("foundWords")
         val savedFlatGrid = savedInstanceState.getCharArray("flatGrid")
         val savedBoardSize = savedInstanceState.getInt("boardSize", 0)
 
         if (countdownInProgress) {
-            // Jeśli odliczanie trwa, kontynuuj je
             countdownManager.startCountdown(countdownIndex)
         } else if (savedWords != null && savedFoundWords != null && savedFlatGrid != null && savedBoardSize > 0) {
-            // Jeśli mamy zapisany stan gry (i odliczanie się skończyło), odbuduj planszę
             wordsToFind = savedWords
             foundWords.addAll(savedFoundWords)
 
-            // Odbuduj siatkę 2D z płaskiej tablicy
             val grid = List(savedBoardSize) { row ->
                 List(savedBoardSize) { col ->
                     savedFlatGrid[row * savedBoardSize + col]
@@ -301,17 +276,12 @@ class WordSearchActivity : BaseActivity() {
         restoreGameStats(savedInstanceState)
     }
 
-    // Odbudowa UI (po rotacji)
     private fun rebuildUiFromState() {
-        val board = currentBoard ?: return // Bezpiecznik
+        val board = currentBoard ?: return
 
-        // Odbuduj listę słów
         populateWordListUi()
-
-        // Odbuduj siatkę
         populateGridUi(board)
 
-        // Odbuduj linie na nakładce
         gridLayout.post {
             overlayView.clearAllLines()
             permanentLinesList.forEach { lineData ->
@@ -323,14 +293,10 @@ class WordSearchActivity : BaseActivity() {
             }
         }
 
-        // Zastosuj przekreślenia dla znalezionych słów
         updateFoundWordsUi()
-
-        // Ponownie ustaw nasłuchiwanie dotyku
         setupTouchListener()
     }
 
-    // Zwraca ustawienia dla danego poziomu
     private fun getLevelSettings(level: Int): Pair<Int, Int> {
         return when (level) {
             1 -> Pair(5, 4)
@@ -362,18 +328,15 @@ class WordSearchActivity : BaseActivity() {
         letterViews.clear()
         gridLayout.removeAllViews()
 
-        // Wyczyść nakładkę i kolory
         overlayView.clearAllLines()
         permanentLinesList.clear()
         assignedWordColors.clear()
         availableColors.clear()
         availableColors.addAll(pastelColors.shuffled())
 
-        // Ustawienia poziomu pobierane dynamicznie
         val (boardSize, wordCount) = getLevelSettings(currentLevel)
         val lang = Locale.getDefault().language.take(2)
 
-        // Generuj planszę
         while (currentBoard == null) {
             val words = WordBank.getWords(lang, maxLength = boardSize, count = wordCount)
             if (words.size < wordCount) {
@@ -385,27 +348,21 @@ class WordSearchActivity : BaseActivity() {
             wordsToFind = currentBoard?.placedWords ?: emptyList()
         }
 
-        // Wypełnij planszę
         populateWordListUi()
         populateGridUi(currentBoard!!)
 
-        // Ustaw nasłuchiwanie dotyku
         setupTouchListener()
     }
 
-    // Wypełnia listę słów do znalezienia na ekranie
     private fun populateWordListUi() {
-        // Usuń stare widoki słów
         wordViews.forEach { rootLayout.removeView(it) }
         wordViews.clear()
 
-        // Pobierz referencję do Flow (automatyczne ułożenie widoków)
         val flow = findViewById<androidx.constraintlayout.helper.widget.Flow>(R.id.wordsToFindFlow)
 
-        // Utwórz nowy widok TextView dla każdego słowa do znalezienia
         wordsToFind.forEach { word ->
             val textView = TextView(this).apply {
-                id = View.generateViewId() // unikalne ID do śledzenia widoku
+                id = View.generateViewId()
                 text = word
                 textSize = 16f
                 setTextColor(Color.WHITE)
@@ -413,16 +370,13 @@ class WordSearchActivity : BaseActivity() {
                 background = AppCompatResources.getDrawable(context, R.drawable.bg_word_chip)
                 tag = word
             }
-            // Dodaj widok do głównego layoutu i listy śledzącej
             rootLayout.addView(textView)
             wordViews.add(textView)
         }
 
-        // Przekaż do Flow listę ID widoków
         flow.referencedIds = wordViews.map { it.id }.toIntArray()
     }
 
-    // Wypełnia GridLayout z literami
     private fun populateGridUi(board: WordSearchGenerator.Board) {
         gridLayout.removeAllViews()
         letterViews.clear()
@@ -441,11 +395,10 @@ class WordSearchActivity : BaseActivity() {
                     gravity = Gravity.CENTER
                     setBackgroundResource(R.drawable.bg_grid_cell)
 
-                    // Ustawienie parametrów GridLayout
                     val params = GridLayout.LayoutParams().apply {
                         width = 0
                         height = 0
-                        rowSpec = GridLayout.spec(row, 1f) // 1f = równe rozłożenie
+                        rowSpec = GridLayout.spec(row, 1f)
                         columnSpec = GridLayout.spec(col, 1f)
                         setMargins(0, 0, 0, 0)
                     }
@@ -453,11 +406,10 @@ class WordSearchActivity : BaseActivity() {
                 }
 
                 gridLayout.addView(textView)
-                letterViews[Pair(row, col)] = textView // Zapisz widok w mapie
+                letterViews[Pair(row, col)] = textView
             }
         }
 
-        // Obliczanie grubości linii po ustawieniu siatki
         gridLayout.post {
             val firstCell = letterViews[Pair(0, 0)]
             if (firstCell != null) {
@@ -466,19 +418,16 @@ class WordSearchActivity : BaseActivity() {
         }
     }
 
-    // Aktualizuje UI, przekreślając znalezione słowa
     private fun updateFoundWordsUi() {
         wordViews.forEach { view ->
             val word = view.tag as? String
             if (word != null && word in foundWords) {
-                // Zastosuj przekreślenie
                 view.paintFlags = view.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
                 view.setTextColor(Color.GRAY)
             }
         }
     }
 
-    // Pobiera środek komórki w pikselach (x, y) względem nakładki
     private fun getCellCenter(row: Int, col: Int): PointF? {
         val textView = letterViews[Pair(row, col)] ?: return null
         val rect = android.graphics.Rect()
@@ -486,7 +435,6 @@ class WordSearchActivity : BaseActivity() {
         return PointF(rect.centerX().toFloat(), rect.centerY().toFloat())
     }
 
-    // Znajduje komórkę (wiersz, kolumna) na podstawie pozycji dotyku (x, y)
     private fun findCellAt(x: Float, y: Float): Pair<Int, Int>? {
         for ((coords, textView) in letterViews) {
             val rect = android.graphics.Rect()
@@ -498,7 +446,6 @@ class WordSearchActivity : BaseActivity() {
         return null
     }
 
-    // Ustawia OnTouchListener dla nakładki do obsługi przesuwania palcem
     private fun setupTouchListener() {
         overlayView.setOnTouchListener { _, event ->
             val x = event.x
@@ -511,13 +458,11 @@ class WordSearchActivity : BaseActivity() {
 
                     val startPixels = getCellCenter(startCell!!.first, startCell!!.second) ?: return@setOnTouchListener false
 
-                    // Wybierz nowy tymczasowy kolor dla tego przeciągnięcia
-                    currentTempColor = availableColors.firstOrNull() ?: pastelColors.random() // awaryjnie - losowy
+                    currentTempColor = availableColors.firstOrNull() ?: pastelColors.random()
 
                     currentSelectionCoords.clear()
                     currentSelectionCoords.add(startCell!!)
 
-                    // Rysuj linię tymczasową
                     overlayView.setTemporaryLine(startPixels, startPixels, currentTempColor)
                     true
                 }
@@ -526,28 +471,24 @@ class WordSearchActivity : BaseActivity() {
                     if (startCell == null) return@setOnTouchListener false
 
                     val startPixels = getCellCenter(startCell!!.first, startCell!!.second) ?: return@setOnTouchListener false
-                    val endCell = findCellAt(x, y) ?: startCell!! // Jeśli wyjedziemy, użyj ostatniej znanej
+                    val endCell = findCellAt(x, y) ?: startCell!!
 
-                    // Oblicz prawidłową linię (H, V, D)
                     val lineCoords = calculateLine(startCell!!, endCell)
                     currentSelectionCoords = lineCoords.toMutableList()
 
-                    // Znajdź środek ostatniej komórki w prawidłowej linii
                     val lastValidCell = currentSelectionCoords.last()
                     val endPixels = getCellCenter(lastValidCell.first, lastValidCell.second) ?: startPixels
 
-                    // Zaktualizuj linię tymczasową
                     overlayView.setTemporaryLine(startPixels, endPixels, currentTempColor)
                     true
                 }
 
                 android.view.MotionEvent.ACTION_UP -> {
-                    overlayView.clearTemporaryLine() // Zawsze czyść tymczasową
+                    overlayView.clearTemporaryLine()
                     if (startCell == null) return@setOnTouchListener false
 
-                    checkSelectedWord() // Sprawdź czy słowo jest poprawne
+                    checkSelectedWord()
 
-                    // Poinformuj system że akcja się zakończyła
                     overlayView.performClick()
 
                     startCell = null
@@ -559,9 +500,7 @@ class WordSearchActivity : BaseActivity() {
         }
     }
 
-    // Sprawdza zaznaczone słowo i dodaje stałą linię, jeśli jest poprawne
     private fun checkSelectedWord() {
-        // Zbuduj słowo z zaznaczonych komórek
         val selectedWordBuilder = StringBuilder()
         for (coords in currentSelectionCoords) {
             val letter = currentBoard?.grid?.getOrNull(coords.first)?.getOrNull(coords.second)
@@ -570,7 +509,6 @@ class WordSearchActivity : BaseActivity() {
         val selectedWord = selectedWordBuilder.toString()
         val reversedSelectedWord = selectedWord.reversed()
 
-        // Sprawdź czy słowo jest na liście i nie zostało jeszcze znalezione
         val wordToFind = wordsToFind.find {
             (it.equals(selectedWord, ignoreCase = true) ||
                     it.equals(reversedSelectedWord, ignoreCase = true)) &&
@@ -578,11 +516,8 @@ class WordSearchActivity : BaseActivity() {
         }
 
         if (wordToFind != null) {
-            // Znaleziono słowo
             foundWords.add(wordToFind)
-
             starManager.increment()
-
             gameStatsManager.registerAttempt(true)
 
             val startCoords = currentSelectionCoords.first()
@@ -591,36 +526,25 @@ class WordSearchActivity : BaseActivity() {
             val endPixels = getCellCenter(endCoords.first, endCoords.second)
 
             if (startPixels != null && endPixels != null) {
-                // Użyj koloru który był używany do przeciągania
                 val finalColor = currentTempColor
 
-                // Dodaj stałą linię do nakładki
                 overlayView.addPermanentLine(startPixels, endPixels, finalColor)
 
-                // Zapisz dane linii na potrzeby rotacji
                 permanentLinesList.add(PermanentLineData(
                     startCoords.first, startCoords.second,
                     endCoords.first, endCoords.second,
                     finalColor
                 ))
 
-                // Zarządzaj pulą kolorów
                 availableColors.remove(finalColor)
                 assignedWordColors[wordToFind] = finalColor
             }
 
-            // Zaktualizuj listę słów (przekreślenie)
             updateFoundWordsUi()
 
-            // Sprawdź warunek ukończenia poziomu
             if (foundWords.size == wordsToFind.size) {
-
                 timerProgressBar.addTime(20)
-
                 currentLevel++
-
-                Toast.makeText(this, "+20 sekund! Poziom $currentLevel", Toast.LENGTH_SHORT).show()
-
                 startNewGame()
             }
         } else {
@@ -628,7 +552,6 @@ class WordSearchActivity : BaseActivity() {
         }
     }
 
-    // Oblicza listę współrzędnych komórek tworzących linię
     private fun calculateLine(start: Pair<Int, Int>, end: Pair<Int, Int>): List<Pair<Int, Int>> {
         val lineCoords = mutableListOf<Pair<Int, Int>>()
         val (r1, c1) = start
@@ -637,7 +560,6 @@ class WordSearchActivity : BaseActivity() {
         val dr = r2 - r1
         val dc = c2 - c1
 
-        // Pojedyncza komórka
         if (dr == 0 && dc == 0) {
             lineCoords.add(start)
             return lineCoords
@@ -648,7 +570,6 @@ class WordSearchActivity : BaseActivity() {
         val isDiagonal = (kotlin.math.abs(dr) == kotlin.math.abs(dc))
 
         if (!isHorizontal && !isVertical && !isDiagonal) {
-            // Nieprawidłowa linia, zwróć tylko komórkę startową
             lineCoords.add(start)
             return lineCoords
         }
@@ -664,23 +585,10 @@ class WordSearchActivity : BaseActivity() {
         return lineCoords
     }
 
-    override fun onPause() {
-        super.onPause()
-        if (!pauseMenu.isPaused && !isChangingConfigurations) {
-            pauseMenu.pause()
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        timerProgressBar.stop()
-        countdownManager.cancel()
-    }
-
     private fun handleGameOver() {
         isGameEnding = true
         gridLayout.isEnabled = false
-        overlayView.isEnabled = false // Blokada dotyku
+        overlayView.isEnabled = false
         pauseOverlay.visibility = View.GONE
 
         showGameOverDialog(
@@ -699,5 +607,18 @@ class WordSearchActivity : BaseActivity() {
                 startNewGame()
             }
         )
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (!pauseMenu.isPaused && !isChangingConfigurations) {
+            pauseMenu.pause()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        timerProgressBar.stop()
+        countdownManager.cancel()
     }
 }

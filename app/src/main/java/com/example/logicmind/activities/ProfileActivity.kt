@@ -49,11 +49,6 @@ class ProfileActivity : BaseActivity() {
 
         arrows[dayOfWeek]?.visibility = View.VISIBLE
 
-        Log.d(
-            "PROFILE",
-            "Aktualny użytkownik: ${FirebaseAuth.getInstance().currentUser?.uid ?: "brak"}"
-        )
-
         binding.scrollView.visibility = View.GONE
         binding.textLoginPrompt.visibility = View.GONE
         binding.buttonLogin.visibility = View.GONE
@@ -118,10 +113,6 @@ class ProfileActivity : BaseActivity() {
                 .show()
         }
     }
-
-    /**
-     * Metoda obsługująca zmianę hasła
-     */
 
     private fun showChangePasswordDialog() {
         val user = auth.currentUser
@@ -201,9 +192,6 @@ class ProfileActivity : BaseActivity() {
             .show()
     }
 
-    /**
-     * Wyświetla dialog do zmiany nazwy użytkownika i aktualizuje ją w bazie
-     */
     private fun showChangeUsernameDialog() {
         val user = auth.currentUser
         if (user == null || !isUserLoggedIn()) return
@@ -261,9 +249,6 @@ class ProfileActivity : BaseActivity() {
             .show()
     }
 
-    /**
-     * Pokazuje komunikat i przycisk, gdy użytkownik nie jest zalogowany
-     */
     private fun showLoginPrompt() {
         binding.scrollView.visibility = View.GONE
 
@@ -276,9 +261,6 @@ class ProfileActivity : BaseActivity() {
         }
     }
 
-    /**
-     * Pobiera dane użytkownika (username, streak, bestStreak) z Realtime Database
-     */
     private fun loadUserData(uid: String) {
         binding.progressBar.visibility = View.VISIBLE
         binding.scrollView.visibility = View.GONE
@@ -324,10 +306,6 @@ class ProfileActivity : BaseActivity() {
             }
     }
 
-    /**
-     * Usuwa konto użytkownika
-     * Firebase Auth wymaga, aby użytkownik był zalogowany ostatnio – jeśli sesja jest za stara, trzeba go ponownie uwierzytelnić
-     */
     private fun deleteAccount() {
         val user = FirebaseAuth.getInstance().currentUser
         if (user != null) {
@@ -336,11 +314,9 @@ class ProfileActivity : BaseActivity() {
             db.getReference("users").child(uid)
                 .removeValue()
                 .addOnSuccessListener {
-                    Log.d("PROFILE", "Dane użytkownika usunięte z bazy: $uid")
 
                     user.delete()
                         .addOnSuccessListener {
-                            Log.d("PROFILE", "Konto użytkownika usunięte: $uid")
                             Toast.makeText(this, "Konto zostało usunięte", Toast.LENGTH_SHORT)
                                 .show()
 
