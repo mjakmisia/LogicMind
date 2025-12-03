@@ -10,11 +10,8 @@ import androidx.fragment.app.DialogFragment
 import com.example.logicmind.databinding.DialogGameOverBinding
 
 class GameOverDialogFragment : DialogFragment() {
-
     private var _binding: DialogGameOverBinding? = null
     private val binding get() = _binding!!
-
-    // Callbacki do obsługi przycisków
     var onRestartListener: (() -> Unit)? = null
     var onExitListener: (() -> Unit)? = null
 
@@ -30,20 +27,16 @@ class GameOverDialogFragment : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Blokada zamykania dialogu przez kliknięcie obok lub przycisk wstecz
         isCancelable = false
 
-        // Pobieranie danych z argumentów
         val score = arguments?.getInt(ARG_SCORE) ?: 0
         val time = arguments?.getString(ARG_TIME) ?: "0s"
         val bestScore = arguments?.getInt(ARG_BEST_SCORE) ?: 0
 
-        // Ustawianie tekstów
         binding.tvCurrentScore.text = score.toString()
         binding.tvTimeTaken.text = time
         binding.tvBestScore.text = bestScore.toString()
 
-        // Obsługa przycisków
         binding.btnPlayAgain.setOnClickListener {
             dismiss()
             onRestartListener?.invoke()
@@ -57,9 +50,7 @@ class GameOverDialogFragment : DialogFragment() {
 
     override fun onStart() {
         super.onStart()
-        // Ustawienie przezroczystego tła okna, żeby zaokrąglone rogi CardView były widoczne
         dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        // Ustawienie szerokości dialogu (opcjonalne, ale wygląda lepiej)
         dialog?.window?.setLayout(
             (resources.displayMetrics.widthPixels * 0.90).toInt(),
             ViewGroup.LayoutParams.WRAP_CONTENT

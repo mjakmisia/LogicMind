@@ -116,7 +116,7 @@ class ColorSequenceActivity : BaseActivity() {
                 starManager.reset()
 
                 gameStatsManager.startReactionTracking()
-                gameStatsManager.setGameStartTime(this@ColorSequenceActivity)
+                gameStatsManager.setGameStartTime()
                 startNewGame()
             }
         )

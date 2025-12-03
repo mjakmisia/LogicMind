@@ -8,7 +8,6 @@ import java.util.Calendar
 
 object ReminderNotification {
     private const val NOTIFICATION_REQUEST_CODE = 100
-
     private const val HOUR_OF_DAY = 18
     private const val MINUTE = 13
 

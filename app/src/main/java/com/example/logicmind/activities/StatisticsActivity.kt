@@ -15,7 +15,6 @@ import java.util.Date
 import java.util.Locale
 
 class StatisticsActivity : BaseActivity() {
-
     private lateinit var binding: ActivityStatisticsBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,12 +30,8 @@ class StatisticsActivity : BaseActivity() {
         binding.layoutNotLoggedIn.visibility = View.GONE
         binding.progressBar.visibility = View.VISIBLE
 
-        val user = auth.currentUser
-        Log.d("StatisticsActivity", "User: ${user?.uid ?: "null"}")
-
         if (!isUserLoggedIn()) {
             binding.progressBar.visibility = View.GONE
-            Log.d("StatisticsActivity", "Widok dla niezalogowanego użytkownika")
             binding.statisticsScrollView.visibility = View.GONE
             binding.layoutNotLoggedIn.visibility = View.VISIBLE
             binding.buttonLogin.visibility = View.VISIBLE
@@ -44,9 +39,7 @@ class StatisticsActivity : BaseActivity() {
                 startActivity(Intent(this, WelcomeActivity::class.java))
                 finish()
             }
-
         } else {
-            Log.d("StatisticsActivity", "Widok dla zalogowanego użytkownika")
             binding.progressBar.visibility = View.GONE
             binding.statisticsScrollView.visibility = View.VISIBLE
             binding.layoutNotLoggedIn.visibility = View.GONE
@@ -59,10 +52,6 @@ class StatisticsActivity : BaseActivity() {
         }
     }
 
-    /**
-     * Funkcja pozwalająca rozwijać i zwijać statystyki po kliknięciu w tytuł gry.
-     * Każdy wpis to para: (layout gry, układ statystyk dla tej gry)
-     */
     private fun setupExpandableStats() {
         val pairs = listOf(
             Pair(R.id.layoutCoordinationGame1, R.id.layoutCoordinationGame1Stats),
@@ -85,10 +74,6 @@ class StatisticsActivity : BaseActivity() {
         }
     }
 
-    /**
-     * Wczytuje dane statystyk użytkownika z Firebase
-     * Struktura danych: users/[uid]/categories/[category]/games/gameName
-     */
     private fun loadUserStats(uid: String) {
         val gameMapping =
             listOf(
@@ -201,7 +186,6 @@ class StatisticsActivity : BaseActivity() {
                             viewIds[0], viewIds[1], viewIds[2], viewIds[3],
                             messageIfEmpty, messageIfEmpty, messageIfEmpty, messageIfEmpty
                         )
-
                     }
                 }
                 .addOnFailureListener {
@@ -214,9 +198,6 @@ class StatisticsActivity : BaseActivity() {
         }
     }
 
-    /**
-     * Pobiera nazwę ostatnio zagranej gry na podstawie pola lastPlayed
-     */
     private fun loadLastPlayedGame(uid: String) {
         val gameMapping = listOf(
             Pair("Koordynacja", "road_dash"),
@@ -242,10 +223,6 @@ class StatisticsActivity : BaseActivity() {
                     completedRequests++
                     if (snapshot.exists()) {
                         val timestamp = snapshot.value as? Long
-                        Log.d(
-                            "LAST_PLAYED_DEBUG (StatisticsActivity)",
-                            "Gra: $gameName | Timestamp: $timestamp"
-                        )
 
                         if (timestamp != null && (latestTimestamp == null || timestamp > latestTimestamp!!)) {
                             latestTimestamp = timestamp
@@ -253,10 +230,6 @@ class StatisticsActivity : BaseActivity() {
                         }
                     }
                     if (completedRequests == gameMapping.size) {
-                        Log.d(
-                            "LAST_PLAYED_DEBUG (StatisticsActivity)",
-                            "Wybrana gra (LastPlayedGame): $latestGameKey | Timestamp: $latestTimestamp"
-                        )
                         updateLastPlayedText(latestGameKey, latestTimestamp)
                     }
                 }
@@ -269,9 +242,6 @@ class StatisticsActivity : BaseActivity() {
         }
     }
 
-    /**
-     * Ustawia tekst ostatnio zagranej gry
-     */
     @SuppressLint("DiscouragedApi")
     private fun updateLastPlayedText(gameKey: String?, timestamp: Long?) {
         if (gameKey == null || timestamp == null) {
@@ -290,10 +260,6 @@ class StatisticsActivity : BaseActivity() {
         binding.tvLastPlayedGame.text = getString(R.string.last_played_game, displayName, lastPlayedDate)
     }
 
-    /**
-     * Ustawia wartości statystyk dla pojedynczej gry.
-     * Każda gra ma 4 wskaźniki: czas reakcji, poprawność, punkty, najlepszy wynik.
-     */
     @SuppressLint("DefaultLocale")
     private fun setStatsForGame(
         reactionId: Int, accuracyId: Int, totalId: Int, bestId: Int,
@@ -310,6 +276,7 @@ class StatisticsActivity : BaseActivity() {
         } else {
             "0"
         }
+
         binding.root.findViewById<TextView>(reactionId).text =
             getString(R.string.avg_reaction_time_value, formattedReaction)
         binding.root.findViewById<TextView>(accuracyId).text =
@@ -320,9 +287,6 @@ class StatisticsActivity : BaseActivity() {
             getString(R.string.highest_score_value, bestValue ?: "0")
     }
 
-    /**
-     * Pobiera globalne statystyki z bazy
-     */
     private fun loadGlobalStats(uid: String) {
         db.getReference("users").child(uid).child("statistics")
             .get()
@@ -340,13 +304,14 @@ class StatisticsActivity : BaseActivity() {
                     }
 
                     val formattedAccuracy = if (avgAccuracyVal > 0) {
-                        String.format(Locale.getDefault(), "%.1f%%", avgAccuracyVal)
+                        String.format(Locale.getDefault(), "%.1f%", avgAccuracyVal)
                     } else {
                         "-"
                     }
 
                     binding.tvGlobalReactionTime.text = formattedReaction
                     binding.tvGlobalAccuracy.text = formattedAccuracy
+
                 } else {
                     binding.tvGlobalReactionTime.text = "-"
                     binding.tvGlobalAccuracy.text = "-"
@@ -358,6 +323,4 @@ class StatisticsActivity : BaseActivity() {
                 binding.tvGlobalAccuracy.text = "Błąd"
             }
     }
-
-
 }

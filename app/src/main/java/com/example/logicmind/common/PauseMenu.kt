@@ -12,13 +12,14 @@ import androidx.core.view.isVisible
  * Uniwersalne menu pauzy dla gier.
  * Obsługuje wstrzymanie gry, wznowienie, restart, wyjście i pokazanie instrukcji.
  */
+
 class PauseMenu(
     private val context: Context,
     private val pauseOverlay: View,
     pauseButton: ImageView,
     private val onRestart: () -> Unit,
     private val onResume: () -> Unit,
-    private val onPause: () -> Unit, // Dodajemy callback dla pauzy
+    private val onPause: () -> Unit,
     private val onExit: () -> Unit,
     private val instructionTitle: String? = null,
     private val instructionMessage: String? = null
@@ -62,16 +63,14 @@ class PauseMenu(
         }
     }
 
-    /** Włącza tryb pauzy i pokazuje menu. */
     fun pause() {
         if (!isPaused) {
             pauseOverlay.visibility = View.VISIBLE
             isPaused = true
-            onPause() // Wywołujemy callback przy pauzie
+            onPause()
         }
     }
 
-    /** Wyłącza tryb pauzy i wznawia grę. */
     fun resume() {
         if (isPaused) {
             pauseOverlay.visibility = View.GONE

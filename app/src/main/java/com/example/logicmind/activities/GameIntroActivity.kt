@@ -22,11 +22,9 @@ class GameIntroActivity : BaseActivity() {
         val gameId = intent.getStringExtra("GAME_ID") ?: return
         val config = GameIntroProvider.getConfig(gameId)
 
-        //Ikona i tytuł
         findViewById<ImageView>(R.id.gameIcon).setImageResource(config.imageRes)
         findViewById<TextView>(R.id.gameTitle).text = getString(config.titleRes)
 
-        //Dynamiczne kafelki
         val container = findViewById<LinearLayout>(R.id.sectionsContainer)
         container.removeAllViews()
         config.sections.forEach { section ->
@@ -36,21 +34,18 @@ class GameIntroActivity : BaseActivity() {
             container.addView(view)
         }
 
-        //Przycisk start (kolor kategorii)
         val btnStart = findViewById<Button>(R.id.btnStartGame)
         btnStart.setBackgroundColor(ContextCompat.getColor(this, config.colorRes))
         btnStart.setOnClickListener {
             startActivity(Intent(this, config.gameActivity))
         }
 
-        //Zamknięcie (powrót do MainActivity)
         findViewById<ImageButton>(R.id.btnClose).setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
             finish()
         }
 
-        // Pomoc
         findViewById<ImageButton>(R.id.btnHelp).setOnClickListener {
             val config = GameIntroProvider.getConfig(gameId)
             if (config.instructionRes != 0) {

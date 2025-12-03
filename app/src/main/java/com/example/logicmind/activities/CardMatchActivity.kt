@@ -116,7 +116,7 @@ class CardMatchActivity : BaseActivity() {
                 starManager.reset()
 
                 gameStatsManager.startReactionTracking()
-                gameStatsManager.setGameStartTime(this@CardMatchActivity)
+                gameStatsManager.setGameStartTime()
                 startNewGame()
             }
         )
