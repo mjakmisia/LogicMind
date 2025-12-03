@@ -5,7 +5,6 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.example.logicmind.R
 import com.example.logicmind.common.GameCountdownManager
@@ -31,6 +30,7 @@ class LeftOrRightActivity : BaseActivity() {
     private lateinit var fruitQueueContainer: LinearLayout
     private lateinit var leftBasket: ImageView
     private lateinit var rightBasket: ImageView
+    private var currentBestScore = 0
     private val fruitDrawables = listOf(
         R.drawable.fruit_card_apple,
         R.drawable.fruit_card_banana,
@@ -89,6 +89,20 @@ class LeftOrRightActivity : BaseActivity() {
         leftBasketTargetContainer = findViewById(R.id.leftBasketTargetContainer)
         rightBasketTargetContainer = findViewById(R.id.rightBasketTargetContainer)
 
+        if (isUserLoggedIn()) {
+            val uid = auth.currentUser!!.uid
+            db.getReference("users")
+                .child(uid)
+                .child("categories")
+                .child(GameKeys.CATEGORY_FOCUS)
+                .child(GameKeys.GAME_LEFT_OR_RIGHT)
+                .child("bestStars")
+                .get()
+                .addOnSuccessListener { snapshot ->
+                    currentBestScore = snapshot.getValue(Int::class.java) ?: 0
+                }
+        }
+
         updateLayoutForOrientation()
 
         leftBasket.setOnClickListener {
@@ -102,25 +116,7 @@ class LeftOrRightActivity : BaseActivity() {
         timerProgressBar.setTotalTime(BASE_TIME_SECONDS)
         timerProgressBar.setOnFinishCallback {
             runOnUiThread {
-                isGameEnding = true
-                Toast.makeText(this, "Czas minął! Koniec gry!", Toast.LENGTH_LONG).show()
-                gameContainer.isEnabled = false
-                pauseOverlay.visibility = View.GONE
-                
-                updateUserStatistics(
-                    categoryKey = GameKeys.CATEGORY_FOCUS,
-                    gameKey = GameKeys.GAME_LEFT_OR_RIGHT,
-                    starsEarned = starManager.starCount,
-                    accuracy = gameStatsManager.calculateAccuracy(),
-                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
-                )
-
-                lastPlayedGame(
-                    GameKeys.CATEGORY_FOCUS,
-                    GameKeys.GAME_LEFT_OR_RIGHT
-                )
-                
-                finish()
+                handleGameOver()
             }
         }
 
@@ -167,20 +163,8 @@ class LeftOrRightActivity : BaseActivity() {
                 onGamePaused() 
                 timerProgressBar.pause() 
             },
-            onExit = { 
-                updateUserStatistics(
-                    categoryKey = GameKeys.CATEGORY_FOCUS,
-                    gameKey = GameKeys.GAME_LEFT_OR_RIGHT,
-                    starsEarned = starManager.starCount,
-                    accuracy = gameStatsManager.calculateAccuracy(),
-                    reactionTime = getAverageReactionTime(stars = starManager.starCount),
-                )
-
-                lastPlayedGame(
-                    GameKeys.CATEGORY_FOCUS,
-                    GameKeys.GAME_LEFT_OR_RIGHT
-                )
-                finish() 
+            onExit = {
+                handleGameOver()
             }, 
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.left_or_right_instruction),
@@ -206,6 +190,7 @@ class LeftOrRightActivity : BaseActivity() {
         outState.putInt("currentLevel", currentLevel)
         outState.putInt("fruitsSpawnedTotal", fruitsSpawnedTotal)
         outState.putInt("fruitsToSpawnLimit", fruitsToSpawnLimit)
+        outState.putInt("currentBestScore", currentBestScore)
         outState.putIntegerArrayList("fruitQueue", ArrayList(fruitQueue))
         outState.putIntegerArrayList("leftBasketTargets", ArrayList(leftBasketTargets))
         outState.putIntegerArrayList("rightBasketTargets", ArrayList(rightBasketTargets))
@@ -221,6 +206,7 @@ class LeftOrRightActivity : BaseActivity() {
         currentLevel = savedInstanceState.getInt("currentLevel", 1)
         fruitsSpawnedTotal = savedInstanceState.getInt("fruitsSpawnedTotal", 0)
         fruitsToSpawnLimit = savedInstanceState.getInt("fruitsToSpawnLimit", 0)
+        currentBestScore = savedInstanceState.getInt("currentBestScore", 0)
         starManager.restoreState(savedInstanceState)
 
         val timerRemainingTimeMs = savedInstanceState.getLong("timerRemainingTimeMs", BASE_TIME_SECONDS * 1000L)
@@ -526,6 +512,36 @@ class LeftOrRightActivity : BaseActivity() {
                 onAnimationEnd()
             }
             .start()
+    }
+
+    private fun handleGameOver() {
+        if (isGameEnding) return
+        isGameEnding = true
+
+        gameContainer.isEnabled = false
+        leftBasket.isEnabled = false
+        rightBasket.isEnabled = false
+        pauseOverlay.visibility = View.GONE
+
+        showGameOverDialog(
+            categoryKey = GameKeys.CATEGORY_FOCUS,
+            gameKey = GameKeys.GAME_LEFT_OR_RIGHT,
+            starManager = starManager,
+            timerProgressBar = timerProgressBar,
+            countdownManager = countdownManager,
+            currentBestScore = currentBestScore,
+            onRestartAction = {
+                if (starManager.starCount > currentBestScore) {
+                    currentBestScore = starManager.starCount
+                }
+                currentLevel = 1
+                fruitsSpawnedTotal = 0
+                fruitsToSpawnLimit = 0
+                fruitQueue.clear()
+                fruitQueueContainer.removeAllViews()
+                startNewGame()
+            }
+        )
     }
 
     override fun onPause() {
