@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.SoundEffectConstants
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.logicmind.R
@@ -29,28 +30,32 @@ class MainActivity : BaseActivity() {
         requestNotificationPermission()
 
         binding.cardKoordynacja.setOnClickListener {
-            it.playSoundEffect(android.view.SoundEffectConstants.CLICK)
-            val intent = Intent(this, GameSelectionActivity::class.java)
+            it.playSoundEffect(SoundEffectConstants.CLICK)
+            val intent =
+                Intent(
+                    this,
+                    GameSelectionActivity::class.java
+                )
             intent.putExtra("CATEGORY_ID", "coordination")
             startActivity(intent)
         }
 
         binding.cardRozwiazywanieProblemow.setOnClickListener {
-            it.playSoundEffect(android.view.SoundEffectConstants.CLICK)
+            it.playSoundEffect(SoundEffectConstants.CLICK)
             val intent = Intent(this, GameSelectionActivity::class.java)
             intent.putExtra("CATEGORY_ID", "reasoning")
             startActivity(intent)
         }
 
         binding.cardSkupienie.setOnClickListener {
-            it.playSoundEffect(android.view.SoundEffectConstants.CLICK)
+            it.playSoundEffect(SoundEffectConstants.CLICK)
             val intent = Intent(this, GameSelectionActivity::class.java)
             intent.putExtra("CATEGORY_ID", "attention")
             startActivity(intent)
         }
 
         binding.cardPamiec.setOnClickListener {
-            it.playSoundEffect(android.view.SoundEffectConstants.CLICK)
+            it.playSoundEffect(SoundEffectConstants.CLICK)
             val intent = Intent(this, GameSelectionActivity::class.java)
             intent.putExtra("CATEGORY_ID", "memory")
             startActivity(intent)
