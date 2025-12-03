@@ -76,7 +76,6 @@ open class BaseActivity : AppCompatActivity() {
 
         auth = FirebaseAuth.getInstance()
         db = FirebaseDatabase.getInstance("https://logicmind-default-rtdb.europe-west1.firebasedatabase.app")
-
         if (!isPersistenceEnabled) {
             try {
                 db.setPersistenceEnabled(true)
@@ -85,7 +84,6 @@ open class BaseActivity : AppCompatActivity() {
                 android.util.Log.w("FIREBASE_INIT", "Błąd włączenia persystencji Firebase: ${e.message}")
             }
         }
-
         db.getReference("users").keepSynced(true)
     }
 
@@ -259,26 +257,23 @@ open class BaseActivity : AppCompatActivity() {
 
         val userId = auth.currentUser?.uid ?: return
         val userRef = db.getReference("users").child(userId)
-        val statsRef = userRef.child("statistics")
 
+        //Fragment metody updateUserStatistics
+        val statsRef = userRef.child("statistics")
         statsRef.runTransaction(object : Transaction.Handler {
             override fun doTransaction(currentData: MutableData): Transaction.Result {
                 val currentStats = currentData.value as? Map<*, *> ?: emptyMap<String, Any>()
-
                 val currentStars = (currentStats["totalStars"] as? Long)?.toInt() ?: 0
                 val currentGamesPlayed = (currentStats["gamesPlayed"] as? Long)?.toInt() ?: 0
                 val currentSumAccuracy = (currentStats["sumAccuracy"] as? Double) ?: 0.0
                 val currentSumReaction = (currentStats["sumReactionTime"] as? Double) ?: 0.0
-
                 val newGamesPlayed = currentGamesPlayed + 1
                 val newSumAccuracy = currentSumAccuracy + accuracy
                 val newSumReaction = currentSumReaction + reactionTime
-
                 val newAvgAccuracy =
                     if (newGamesPlayed > 0) newSumAccuracy / newGamesPlayed else 0.0
                 val newAvgReaction =
                     if (newGamesPlayed > 0) newSumReaction / newGamesPlayed else 0.0
-
                 val updatedStats = mapOf<String, Any>(
                     "totalStars" to (currentStars + starsEarned),
                     "gamesPlayed" to newGamesPlayed,
@@ -287,11 +282,9 @@ open class BaseActivity : AppCompatActivity() {
                     "avgAccuracy" to newAvgAccuracy,
                     "avgReactionTime" to newAvgReaction
                 )
-
                 currentData.value = updatedStats
                 return Transaction.success(currentData)
             }
-
             override fun onComplete(
                 error: DatabaseError?, committed: Boolean, currentData: DataSnapshot?
             ) {
