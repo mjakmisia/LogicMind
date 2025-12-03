@@ -68,6 +68,7 @@ class SymbolRaceActivity : BaseActivity() {
         private const val ANIMATION_DURATION_MS = 300L
         private const val MIN_REACTION_TIME_MS = 800L
         private const val SPEEDUP_STEP_MS = 300L
+        private const val DOUBLE_TAP_WINDOW_MS = 600L
         private const val MOVES_PER_SPEEDUP = 12
     }
 
@@ -169,7 +170,6 @@ class SymbolRaceActivity : BaseActivity() {
             onResume = {
                 if (isGameRunning && !isProcessing) {
                     timerProgressBar.start()
-                    startAutoShift()
                     updateTempoDisplay()
                     if (circleQueue.isNotEmpty()) startActiveTimer()
                 }
@@ -188,13 +188,11 @@ class SymbolRaceActivity : BaseActivity() {
 
         @Suppress("ClickableViewAccessibility")
         blueContainer.setOnTouchListener { _, event ->
-            if (event.action == MotionEvent.ACTION_DOWN) blueContainer.performClick()
             handleTouch(isBlue = true, event)
             true
         }
         @Suppress("ClickableViewAccessibility")
         redContainer.setOnTouchListener { _, event ->
-            if (event.action == MotionEvent.ACTION_DOWN) redContainer.performClick()
             handleTouch(isBlue = false, event)
             true
         }
@@ -322,7 +320,6 @@ class SymbolRaceActivity : BaseActivity() {
         trackContainer.post {
             if (isGameRunning) {
                 adjustCircleQueueToView()
-                startAutoShift()
                 if (circleQueue.isNotEmpty()) startActiveTimer()
             }
         }
@@ -409,7 +406,6 @@ class SymbolRaceActivity : BaseActivity() {
 
         repeat(currentVisibleCircles) { createCircle() }
         updateCirclePositions()
-        startAutoShift()
         startActiveTimer()
 
         updateTempoDisplay()
@@ -656,26 +652,27 @@ class SymbolRaceActivity : BaseActivity() {
 
     private fun checkComboBonus() {
         when (successfulStreak) {
-            5 -> addTime(2)
-            10 -> addTime(4)
-            15 -> addTime(7)
-            20 -> addTime(10)
+            5 -> {
+                timerProgressBar.addTime(2)
+                Toast.makeText(this, "+2 s!", Toast.LENGTH_SHORT).show()
+            }
+            10 -> {
+                timerProgressBar.addTime(4)
+                Toast.makeText(this, "+4 s!", Toast.LENGTH_SHORT).show()
+            }
+            15 -> {
+                timerProgressBar.addTime(7)
+                Toast.makeText(this, "+7 s!", Toast.LENGTH_SHORT).show()
+            }
+            20 -> {
+                timerProgressBar.addTime(10)
+                Toast.makeText(this, "+10 s!", Toast.LENGTH_SHORT).show()
+            }
         }
         if (successfulStreak > 20 && successfulStreak % 20 == 0) {
-            addTime(15)
+            timerProgressBar.addTime(15)
+            Toast.makeText(this, "+15 s!", Toast.LENGTH_SHORT).show()
         }
-    }
-
-    //!
-    private fun addTime(seconds: Int) {
-        if (seconds > 0) {
-            timerProgressBar.addTime(seconds)
-            showComboToast("+$seconds s!")
-        }
-    }
-
-    private fun showComboToast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
     private fun accelerateIfNeeded() {
@@ -716,7 +713,7 @@ class SymbolRaceActivity : BaseActivity() {
         awaitingDoubleSide = side
         awaitingDoubleForId = forId
 
-        runDelayed(600L) {
+        runDelayed(DOUBLE_TAP_WINDOW_MS) {
             if (circleQueue.isNotEmpty() && circleQueue.last().id == forId && !isProcessing) {
                 animateFailure(circleQueue.last())
             }
@@ -728,21 +725,6 @@ class SymbolRaceActivity : BaseActivity() {
         awaitingDoubleClick = false
         awaitingDoubleSide = null
         awaitingDoubleForId = null
-    }
-
-    private fun startAutoShift() {
-        if (!isGameRunning) return
-
-        fun scheduleNext() {
-            runDelayed(currentReactionTimeMs) {
-                if (isGameRunning && !isProcessing && circleQueue.size >= currentVisibleCircles) {
-                    scheduleNext()
-                } else {
-                    runDelayed(100L) { scheduleNext() }
-                }
-            }
-        }
-        runDelayed(currentReactionTimeMs) { scheduleNext() }
     }
 
     private fun updateCirclePositions() {
