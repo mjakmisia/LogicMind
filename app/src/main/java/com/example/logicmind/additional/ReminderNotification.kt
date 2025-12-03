@@ -52,8 +52,5 @@ object ReminderNotification {
             PendingIntent.FLAG_MUTABLE
         )
         alarmManager.cancel(pendingIntent)
-
     }
-
-
 }

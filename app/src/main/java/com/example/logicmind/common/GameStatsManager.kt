@@ -73,7 +73,7 @@ open class GameStatsManager {
 
         val starsEarned = stars.coerceAtLeast(1)
 
-        return duration.toDouble() / starsEarned.toDouble() // w milisekundach
+        return duration.toDouble() / starsEarned.toDouble()
     }
 
     protected var totalAttempts: Int = 0

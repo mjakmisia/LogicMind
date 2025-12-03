@@ -49,7 +49,5 @@ object NotificationHelper {
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(NOTIFICATION_ID, builder.build())
-
-
     }
 }

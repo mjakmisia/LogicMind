@@ -62,7 +62,4 @@ class WelcomeActivityIntegrationTest {
         onView(withId(R.id.tvErrorMessage))
             .check(matches(not(isDisplayed())))
     }
-
-
-
 }
