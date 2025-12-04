@@ -8,7 +8,6 @@
     android:layout_height="match_parent"
     android:background="@color/dark_gray">
 
-    <!-- Górna linia pomocnicza do ustawiania przycisku pauzy i licznika punktów -->
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/topGuideline"
         android:layout_width="wrap_content"
@@ -16,7 +15,6 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.08" />
 
-    <!-- Pasek czasu -->
     <com.example.logicmind.common.GameTimerProgressBar
         style="?android:attr/progressBarStyleHorizontal"
         android:id="@+id/gameTimerProgressBar"
@@ -32,7 +30,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Przycisk pauzy -->
     <ImageButton
         android:id="@+id/pauseButton"
         android:layout_width="48dp"
@@ -51,7 +48,6 @@
         android:foreground="?attr/selectableItemBackground"
         />
 
-    <!-- Kontener z ikoną gwiazdki i liczbą punktów -->
     <LinearLayout
         android:id="@+id/starContainer"
         android:layout_width="wrap_content"
@@ -63,7 +59,6 @@
         app:layout_constraintTop_toTopOf="@id/topGuideline"
         app:layout_constraintStart_toStartOf="parent">
 
-        <!-- Ikona gwiazdki -->
         <ImageView
             android:id="@+id/starIcon"
             android:layout_width="28dp"
@@ -71,7 +66,6 @@
             android:src="@drawable/icon_star"
             android:contentDescription="@string/icon_star" />
 
-        <!-- Liczba zdobytych punktów -->
         <TextView
             android:id="@+id/starCountText"
             android:layout_width="wrap_content"
@@ -84,7 +78,6 @@
             android:fontFamily="sans-serif-medium" />
     </LinearLayout>
 
-    <!-- Główny kontener gry -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/gameContainer"
         android:layout_width="0dp"
@@ -96,7 +89,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Kontener kolejki owoców -->
         <LinearLayout
             android:id="@+id/fruitQueueContainer"
             android:layout_width="wrap_content"
@@ -108,7 +100,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginTop="96dp"> </LinearLayout>
 
-        <!-- Lewy koszyk -->
         <ImageView
             android:id="@+id/leftBasket"
             android:layout_width="0dp"
@@ -126,15 +117,28 @@
             android:id="@+id/leftBasketTargetContainer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
             android:elevation="2dp"
             app:layout_constraintBottom_toBottomOf="@id/leftBasket"
             app:layout_constraintEnd_toEndOf="@id/leftBasket"
             app:layout_constraintStart_toStartOf="@id/leftBasket"
-            app:layout_constraintTop_toTopOf="@id/leftBasket" />
+            app:layout_constraintTop_toTopOf="@id/leftBasket"
+            app:layout_constraintVertical_bias="0.5" >
+            <LinearLayout
+                android:id="@+id/leftBasketTargetTopRow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center" />
 
-        <!-- Prawy koszyk -->
+            <LinearLayout
+                android:id="@+id/leftBasketTargetBottomRow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="-12dp" /> </LinearLayout>
         <ImageView
             android:id="@+id/rightBasket"
             android:layout_width="0dp"
@@ -152,17 +156,30 @@
             android:id="@+id/rightBasketTargetContainer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
             android:elevation="2dp"
             app:layout_constraintBottom_toBottomOf="@id/rightBasket"
             app:layout_constraintEnd_toEndOf="@id/rightBasket"
             app:layout_constraintStart_toStartOf="@id/rightBasket"
-            app:layout_constraintTop_toTopOf="@id/rightBasket" />
+            app:layout_constraintTop_toTopOf="@id/rightBasket"
+            app:layout_constraintVertical_bias="0.5" >
+            <LinearLayout
+                android:id="@+id/rightBasketTargetTopRow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center" />
 
+            <LinearLayout
+                android:id="@+id/rightBasketTargetBottomRow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="-12dp" /> </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Tekst odliczania -->
     <TextView
         android:id="@+id/countdownText"
         android:layout_width="wrap_content"
@@ -176,7 +193,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Nakładka pauzy -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/pauseOverlay"
         android:layout_width="0dp"

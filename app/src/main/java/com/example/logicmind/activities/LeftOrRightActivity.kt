@@ -6,6 +6,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams as ConstraintLayoutParams
 import com.example.logicmind.R
 import com.example.logicmind.common.GameCountdownManager
 import com.example.logicmind.common.GameTimerProgressBar
@@ -55,6 +56,10 @@ class LeftOrRightActivity : BaseActivity() {
     private val activeGameFruits = mutableListOf<Int>()
     private lateinit var leftBasketTargetContainer: LinearLayout
     private lateinit var rightBasketTargetContainer: LinearLayout
+    private lateinit var leftBasketTargetTopRow: LinearLayout
+    private lateinit var leftBasketTargetBottomRow: LinearLayout
+    private lateinit var rightBasketTargetTopRow: LinearLayout
+    private lateinit var rightBasketTargetBottomRow: LinearLayout
     private var fruitSizePx: Int = 0
     private var overlapMarginPx: Int = 0
     private data class LevelConfig(
@@ -88,6 +93,10 @@ class LeftOrRightActivity : BaseActivity() {
         rightBasket = findViewById(R.id.rightBasket)
         leftBasketTargetContainer = findViewById(R.id.leftBasketTargetContainer)
         rightBasketTargetContainer = findViewById(R.id.rightBasketTargetContainer)
+        leftBasketTargetTopRow = findViewById(R.id.leftBasketTargetTopRow)
+        leftBasketTargetBottomRow = findViewById(R.id.leftBasketTargetBottomRow)
+        rightBasketTargetTopRow = findViewById(R.id.rightBasketTargetTopRow)
+        rightBasketTargetBottomRow = findViewById(R.id.rightBasketTargetBottomRow)
 
         if (isUserLoggedIn()) {
             val uid = auth.currentUser!!.uid
@@ -137,7 +146,7 @@ class LeftOrRightActivity : BaseActivity() {
 
                 gameStatsManager.startReactionTracking()
                 gameStatsManager.setGameStartTime()
-                
+
                 startNewGame()
             }
         )
@@ -156,16 +165,16 @@ class LeftOrRightActivity : BaseActivity() {
                 countdownManager.startCountdown()
             },
             onResume = {
-                onGameResumed() 
-                timerProgressBar.start() 
+                onGameResumed()
+                timerProgressBar.start()
             },
-            onPause = { 
-                onGamePaused() 
-                timerProgressBar.pause() 
+            onPause = {
+                onGamePaused()
+                timerProgressBar.pause()
             },
             onExit = {
                 handleGameOver()
-            }, 
+            },
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.left_or_right_instruction),
         )
@@ -255,18 +264,18 @@ class LeftOrRightActivity : BaseActivity() {
         }
 
         if (isLandscape) {
-            val queueParams = fruitQueueContainer.layoutParams as ConstraintLayout.LayoutParams
+            val queueParams = fruitQueueContainer.layoutParams as ConstraintLayoutParams
             queueParams.topMargin = 0
             queueParams.verticalBias = 0.15f
             fruitQueueContainer.layoutParams = queueParams
 
             val smallBottomMargin = (4 * resources.displayMetrics.density).toInt()
 
-            val leftParams = leftBasket.layoutParams as ConstraintLayout.LayoutParams
+            val leftParams = leftBasket.layoutParams as ConstraintLayoutParams
             leftParams.bottomMargin = smallBottomMargin
             leftBasket.layoutParams = leftParams
 
-            val rightParams = rightBasket.layoutParams as ConstraintLayout.LayoutParams
+            val rightParams = rightBasket.layoutParams as ConstraintLayoutParams
             rightParams.bottomMargin = smallBottomMargin
             rightBasket.layoutParams = rightParams
         }
@@ -284,6 +293,11 @@ class LeftOrRightActivity : BaseActivity() {
     }
 
     private fun startNewGame() {
+        isGameEnding = false
+        gameContainer.isEnabled = true
+        leftBasket.isEnabled = true
+        rightBasket.isEnabled = true
+
         fruitQueue.clear()
         fruitQueueContainer.removeAllViews()
 
@@ -311,15 +325,6 @@ class LeftOrRightActivity : BaseActivity() {
         }
     }
 
-    private fun displayFruitQueue() {
-        fruitQueueContainer.removeAllViews()
-
-        fruitQueue.reversed().forEach { fruitId ->
-            fruitQueueContainer.addView(createFruitView(fruitId))
-        }
-        updateQueueVisuals()
-    }
-
     private fun setupBaskets(leftCount: Int, rightCount: Int) {
         leftBasketTargets.clear()
         rightBasketTargets.clear()
@@ -339,17 +344,50 @@ class LeftOrRightActivity : BaseActivity() {
     }
 
     private fun displayBasketTargets() {
-        leftBasketTargetContainer.removeAllViews()
-        rightBasketTargetContainer.removeAllViews()
+        val targetsSize = leftBasketTargets.size.coerceAtLeast(rightBasketTargets.size)
 
-        leftBasketTargets.forEach { fruitId ->
-            val icon = createTargetIcon(fruitId)
-            leftBasketTargetContainer.addView(icon)
+        val dynamicBias = when (targetsSize) {
+            1, 2 -> 0.5f
+            else -> 0.55f
         }
 
-        rightBasketTargets.forEach { fruitId ->
+        val leftContainer = findViewById<LinearLayout>(R.id.leftBasketTargetContainer)
+        val rightContainer = findViewById<LinearLayout>(R.id.rightBasketTargetContainer)
+
+        (leftContainer.layoutParams as? ConstraintLayoutParams)?.let { params ->
+            params.verticalBias = dynamicBias
+            leftContainer.layoutParams = params
+        }
+
+        (rightContainer.layoutParams as? ConstraintLayoutParams)?.let { params ->
+            params.verticalBias = dynamicBias
+            rightContainer.layoutParams = params
+        }
+
+        val leftTopRow = leftContainer.findViewById<LinearLayout>(R.id.leftBasketTargetTopRow)
+        val leftBottomRow = leftContainer.findViewById<LinearLayout>(R.id.leftBasketTargetBottomRow)
+        val rightTopRow = rightContainer.findViewById<LinearLayout>(R.id.rightBasketTargetTopRow)
+        val rightBottomRow = rightContainer.findViewById<LinearLayout>(R.id.rightBasketTargetBottomRow)
+
+        leftTopRow.removeAllViews()
+        leftBottomRow.removeAllViews()
+        rightTopRow.removeAllViews()
+        rightBottomRow.removeAllViews()
+
+        leftBasketTargets.forEachIndexed { index, fruitId ->
             val icon = createTargetIcon(fruitId)
-            rightBasketTargetContainer.addView(icon)
+            when (index) {
+                0, 1 -> leftTopRow.addView(icon)
+                2 -> leftBottomRow.addView(icon)
+            }
+        }
+
+        rightBasketTargets.forEachIndexed { index, fruitId ->
+            val icon = createTargetIcon(fruitId)
+            when (index) {
+                0, 1 -> rightTopRow.addView(icon)
+                2 -> rightBottomRow.addView(icon)
+            }
         }
     }
 
@@ -445,6 +483,15 @@ class LeftOrRightActivity : BaseActivity() {
             )
             setImageResource(fruitId)
         }
+    }
+
+    private fun displayFruitQueue() {
+        fruitQueueContainer.removeAllViews()
+
+        fruitQueue.reversed().forEach { fruitId ->
+            fruitQueueContainer.addView(createFruitView(fruitId))
+        }
+        updateQueueVisuals()
     }
 
     private fun updateQueueVisuals() {
