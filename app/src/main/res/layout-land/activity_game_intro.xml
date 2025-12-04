@@ -8,7 +8,6 @@
     android:background="?attr/pageBackground"
     android:padding="16dp">
 
-    <!-- Guideline dla przesunięcia góry -->
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/topGuideline"
         android:layout_width="wrap_content"
@@ -16,7 +15,6 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.04" />
 
-    <!-- Guideline dla przesunięcia dołu przycisku -->
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/bottomButtonGuideline"
         android:layout_width="wrap_content"
@@ -24,7 +22,6 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.98" />
 
-    <!-- Guideline dla podziału szerokości ekranu na 1/3 i 2/3 -->
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/divisionGuideline"
         android:layout_width="wrap_content"
@@ -32,7 +29,6 @@
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.33" />
 
-    <!-- Górne przyciski -->
     <ImageButton
         android:id="@+id/btnClose"
         android:layout_width="48dp"
@@ -57,7 +53,6 @@
         app:layout_constraintTop_toTopOf="@id/topGuideline"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Ikona gry (lewa) -->
     <ImageView
         android:id="@+id/gameIcon"
         android:layout_width="0dp"
@@ -68,7 +63,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/divisionGuideline" />
 
-    <!-- Tytuł gry (lewa) -->
     <TextView
         android:id="@+id/gameTitle"
         android:layout_width="0dp"
@@ -82,7 +76,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/divisionGuideline" />
 
-    <!-- Kontener na sekcje (prawa) -->
     <LinearLayout
         android:id="@+id/sectionsContainer"
         android:layout_width="0dp"
@@ -95,7 +88,6 @@
         app:layout_constraintStart_toEndOf="@id/divisionGuideline"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Przycisk Start -->
     <Button
         android:id="@+id/btnStartGame"
         android:layout_width="0dp"
