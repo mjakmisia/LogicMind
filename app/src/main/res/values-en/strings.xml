@@ -99,6 +99,12 @@
     <string name="change_password_title">Change password</string>
     <string name="new_password_hint">New password (min. 8 chars)</string>
     <string name="change_btn">Change</string>
+    <string name="right_lane_description">Switch to the right lane</string>
+    <string name="left_lane_description">Switch to the left lane</string>
+    <string name="left_basket">Left basket</string>
+    <string name="right_basket">Right basket</string>
+    <string name="zero_streak">x0</string>
+    <string name="change">change</string>
 
     <string name="password_error_length">Password must be at least 8 characters long</string>
     <string name="password_error_uppercase">Password must contain at least one uppercase letter</string>
@@ -119,6 +125,14 @@
     <string name="best_score_label">Your record:</string>
     <string name="play_again">Play again</string>
     <string name="exit_menu">Exit menu</string>
+
+    <string name="mon_letter">Mon</string>
+    <string name="tue_letter">Tue</string>
+    <string name="wed_letter">Wed</string>
+    <string name="thu_letter">Thu</string>
+    <string name="fri_letter">Fri</string>
+    <string name="sat_letter">Sat</string>
+    <string name="sun_letter">Sun</string>
 
 
     <!-- GAME INTRO DESCRIPTIONS -->

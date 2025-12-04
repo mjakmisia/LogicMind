@@ -1,9 +1,10 @@
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/pageBackground">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="?attr/pageBackground"
+    tools:ignore="ContentDescription">
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/topGuideline"
@@ -24,7 +25,6 @@
         app:layout_constraintTop_toBottomOf="@id/topGuideline"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <!-- Ustawienia: CardView -->
     <androidx.cardview.widget.CardView
         android:id="@+id/settingsCard"
         android:layout_width="match_parent"
@@ -45,7 +45,6 @@
             android:layout_height="wrap_content"
             android:padding="16dp">
 
-            <!-- Dźwięki -->
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -65,7 +64,8 @@
                     android:layout_weight="1"
                     android:text="@string/sound"
                     android:textSize="22sp"
-                    android:textColor="?attr/text_dark" />
+                    android:textColor="?attr/text_dark"
+                    android:labelFor="@id/switchSound" />
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/switchSound"
@@ -77,7 +77,6 @@
                     app:thumbTint="?attr/switchThumbColor" />
             </TableRow>
 
-            <!-- Tryb nocny -->
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -97,7 +96,8 @@
                     android:layout_weight="1"
                     android:text="@string/darkMode"
                     android:textSize="22sp"
-                    android:textColor="?attr/text_dark" />
+                    android:textColor="?attr/text_dark"
+                    android:labelFor="@id/switchDarkMode"/>
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/switchDarkMode"
@@ -109,7 +109,6 @@
                     app:thumbTint="?attr/switchThumbColor" />
             </TableRow>
 
-            <!-- Powiadomienia -->
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -144,7 +143,6 @@
         </TableLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- Język: CardView -->
     <androidx.cardview.widget.CardView
         android:id="@+id/languageCard"
         android:layout_width="match_parent"
@@ -165,7 +163,6 @@
             android:layout_height="wrap_content"
             android:padding="16dp">
 
-            <!-- Tekst "Language/Język" -->
             <TextView
                 android:id="@+id/languageLabel"
                 android:layout_width="wrap_content"
@@ -177,7 +174,6 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"/>
 
-            <!-- bariera po prawej stronie tekstu (dodaje odstęp) po tekście-->
             <androidx.constraintlayout.widget.Barrier
                 android:id="@+id/languageBarrier"
                 app:barrierDirection="end"
@@ -192,13 +188,13 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center"
+                android:baselineAligned="false"
                 app:layout_constraintStart_toEndOf="@id/languageBarrier"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintHorizontal_bias="1.0">
 
-                <!-- POLSKI -->
                 <LinearLayout
                     android:id="@+id/langPl"
                     android:layout_width="0dp"
@@ -226,7 +222,6 @@
                         android:textColor="@color/lang_text_selector" />
                 </LinearLayout>
 
-                <!-- ENGLISH -->
                 <LinearLayout
                     android:id="@+id/langEn"
                     android:layout_width="0dp"
@@ -256,9 +251,6 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-
-    <!-- Kontener na przyciski – spięty łańcuchem -->
-
     <LinearLayout
         android:id="@+id/buttonsContainer"
         android:layout_width="0dp"
@@ -285,7 +277,8 @@
             android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@id/saveButton"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            tools:ignore="VisualLintButtonSize" />
 
         <Button
             android:id="@+id/saveButton"
@@ -300,7 +293,8 @@
             android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@id/includeBottomNav"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            tools:ignore="VisualLintButtonSize" />
     </LinearLayout>
 
     <include

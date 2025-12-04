@@ -32,14 +32,10 @@ class ProfileActivity : BaseActivity() {
 
         supportActionBar?.hide()
 
-        //bottomNav = findViewById(R.id.bottomNavigationView)
-        // Ustawienie menu na dole
         setupBottomNavigation(binding.includeBottomNav.bottomNavigationView, R.id.nav_profile)
 
-
-        // Logika kalendarza
         val calendar = getInstance()
-        val dayOfWeek = calendar.get(DAY_OF_WEEK) // 1=Sunday, 2=Monday, ... 7=Saturday
+        val dayOfWeek = calendar.get(DAY_OF_WEEK)
 
         val arrows = mapOf(
             MONDAY to binding.arrowMon,
@@ -53,23 +49,15 @@ class ProfileActivity : BaseActivity() {
 
         arrows[dayOfWeek]?.visibility = View.VISIBLE
 
-        Log.d(
-            "PROFILE",
-            "Aktualny użytkownik: ${FirebaseAuth.getInstance().currentUser?.uid ?: "brak"}"
-        )
-
-        // Na start ukryj wszystkie widoki
         binding.scrollView.visibility = View.GONE
         binding.textLoginPrompt.visibility = View.GONE
         binding.buttonLogin.visibility = View.GONE
         binding.progressBar.visibility = View.VISIBLE
 
-        // Pobranie danych użytkownika
         val user = auth.currentUser
 
         binding.progressBar.visibility = View.GONE
 
-        //poczekaj na wynik czy jest gościem
         if (!isUserLoggedIn()) {
             showLoginPrompt()
         } else {
@@ -80,28 +68,25 @@ class ProfileActivity : BaseActivity() {
             resetUserProgress()
         }
 
-        // Edycja nazwy
         binding.btnEditUsernameSmall.setOnClickListener {
             showChangeUsernameDialog()
         }
 
-        //zmiana hasła
         binding.buttonChangePassword.setOnClickListener {
             showChangePasswordDialog()
         }
 
-        // Ustawienie koloru przycisku programowo
         val btnDeleteAccount = binding.buttonDeleteAccount
-        // usuń wpływ motywu
+
         btnDeleteAccount.backgroundTintList = null
-        // pobierz drawable i zmień jego kolor
+
         val drawable = ContextCompat.getDrawable(this, R.drawable.bg_rounded_light_gray)?.mutate()
         drawable?.setTint(ContextCompat.getColor(this, R.color.red_lighter))
         btnDeleteAccount.background = drawable
 
         btnDeleteAccount.setOnClickListener {
-            //popup czy na pewno chcesz usunąć konto
-            val builder = AlertDialog.Builder(this)
+
+        val builder = AlertDialog.Builder(this)
             builder.setTitle(R.string.delete_account)
             builder.setMessage(R.string.delete_account_popup)
 
@@ -129,15 +114,10 @@ class ProfileActivity : BaseActivity() {
         }
     }
 
-    /**
-     * Metoda obsługująca zmianę hasła
-     */
-
     private fun showChangePasswordDialog() {
         val user = auth.currentUser
         if (user == null || !isUserLoggedIn()) return
 
-        // pole tekstowe do wpisania hasła
         val input = android.widget.EditText(this).apply {
             hint = "Nowe hasło (min. 8 znaków, wielka litera i cyfra)"
             inputType =
@@ -146,7 +126,6 @@ class ProfileActivity : BaseActivity() {
             background = ContextCompat.getDrawable(context, R.drawable.bg_edittext_rounded)
         }
 
-        // Kontener dla marginesów
         val container = android.widget.FrameLayout(this).apply {
             setPadding(40, 20, 40, 20)
             addView(input)
@@ -184,7 +163,6 @@ class ProfileActivity : BaseActivity() {
                     return@setPositiveButton
                 }
 
-                // Firebase: Zmiana hasła
                 user.updatePassword(newPassword)
                     .addOnSuccessListener {
                         Toast.makeText(
@@ -195,7 +173,6 @@ class ProfileActivity : BaseActivity() {
                         dialog.dismiss()
                     }
                     .addOnFailureListener { e ->
-                        // Firebase wymaga "świeżego" logowania do zmiany hasła.
                         if (e is FirebaseAuthRecentLoginRequiredException) {
                             Toast.makeText(
                                 this,
@@ -215,17 +192,13 @@ class ProfileActivity : BaseActivity() {
             .show()
     }
 
-    /**
-     * Wyświetla dialog do zmiany nazwy użytkownika i aktualizuje ją w bazie
-     */
     private fun showChangeUsernameDialog() {
         val user = auth.currentUser
         if (user == null || !isUserLoggedIn()) return
 
-        // Pole tekstowe do wpisania nowej nazwy
         val input = android.widget.EditText(this).apply {
             hint = getString(R.string.new_username_hint)
-            // Pobieramy obecną nazwę żeby user mógł ją edytować
+
             setText(binding.textUsername.text.toString())
             inputType =
                 android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PERSON_NAME
@@ -253,7 +226,6 @@ class ProfileActivity : BaseActivity() {
                     return@setPositiveButton
                 }
 
-                // Aktualizacja w Firebase Realtime Database
                 val uid = user.uid
                 db.getReference("users").child(uid).child("username").setValue(newUsername)
                     .addOnSuccessListener {
@@ -277,14 +249,9 @@ class ProfileActivity : BaseActivity() {
             .show()
     }
 
-    /**
-     * Pokazuje komunikat i przycisk, gdy użytkownik nie jest zalogowany
-     */
     private fun showLoginPrompt() {
-        // Ukryj główną zawartość
         binding.scrollView.visibility = View.GONE
 
-        // Pokaż komunikaty
         binding.textLoginPrompt.visibility = View.VISIBLE
         binding.buttonLogin.visibility = View.VISIBLE
 
@@ -294,18 +261,13 @@ class ProfileActivity : BaseActivity() {
         }
     }
 
-    /**
-     * Pobiera dane użytkownika (username, streak, bestStreak) z Realtime Database
-     */
     private fun loadUserData(uid: String) {
-        //pokazuje progress bar podczas ładowania danych użytkownika
         binding.progressBar.visibility = View.VISIBLE
         binding.scrollView.visibility = View.GONE
 
         db.getReference("users").child(uid)
             .get()
             .addOnSuccessListener { snapshot ->
-                //dane pobrane: pokaż reszte
                 binding.progressBar.visibility = View.GONE
                 binding.scrollView.visibility = View.VISIBLE
 
@@ -314,7 +276,6 @@ class ProfileActivity : BaseActivity() {
                     val currentStreak = calculateDisplayStreak(snapshot)
                     val bestStreak = snapshot.child("bestStreak").value as? Long ?: 0
 
-                    // Pobieranie gwiazdek
                     val totalStars = snapshot.child("statistics")
                         .child("totalStars")
                         .value as? Long ?: 0
@@ -327,20 +288,17 @@ class ProfileActivity : BaseActivity() {
                     binding.tvProfileTotalStars.text = totalStars.toString()
                 } else {
                     Log.e("PROFILE", "Brak danych użytkownika w bazie dla UID: $uid")
-                    // Wyloguj użytkownika i pokaż widok logowania
                     FirebaseAuth.getInstance().signOut()
                     showLoginPrompt()
                 }
             }
             .addOnFailureListener { e ->
-                // ukryj progress bar także w przypadku błędu
                 binding.progressBar.visibility = View.GONE
                 binding.scrollView.visibility = View.VISIBLE
 
                 Log.e("PROFILE", "Błąd pobierania danych użytkownika: ${e.message}")
                 Toast.makeText(this, "Błąd pobierania danych: ${e.message}", Toast.LENGTH_SHORT)
                     .show()
-                // Ustaw domyślne wartości w razie błędu
                 binding.textUsername.text = getString(R.string.error_fetching_user_data)
                 binding.textCurrentStreak.text = getString(R.string.zero_days)
                 binding.textBestStreak.text = getString(R.string.zero_days)
@@ -348,29 +306,20 @@ class ProfileActivity : BaseActivity() {
             }
     }
 
-    /**
-     * Usuwa konto użytkownika
-     * Firebase Auth wymaga, aby użytkownik był zalogowany ostatnio – jeśli sesja jest za stara, trzeba go ponownie uwierzytelnić
-     */
     private fun deleteAccount() {
         val user = FirebaseAuth.getInstance().currentUser
         if (user != null) {
             val uid = user.uid
 
-            // usunięcie danych z Realtime Database
             db.getReference("users").child(uid)
                 .removeValue()
                 .addOnSuccessListener {
-                    Log.d("PROFILE", "Dane użytkownika usunięte z bazy: $uid")
 
-                    // usunięcie konta z Firebase Authentication
                     user.delete()
                         .addOnSuccessListener {
-                            Log.d("PROFILE", "Konto użytkownika usunięte: $uid")
                             Toast.makeText(this, "Konto zostało usunięte", Toast.LENGTH_SHORT)
                                 .show()
 
-                            // przekierowanie do WelcomeActivity
                             startActivity(Intent(this, WelcomeActivity::class.java))
                             finish()
 
@@ -412,13 +361,11 @@ class ProfileActivity : BaseActivity() {
             .setTitle(R.string.reset_progress_title)
             .setMessage(getString(R.string.reset_progress_message))
             .setPositiveButton("Tak") { _, _ ->
-                // Pobranie całego węzła użytkownika w celu przygotowania mapy resetu
                 userRef.get().addOnSuccessListener { snapshot ->
                     if (!snapshot.exists()) return@addOnSuccessListener
 
                     val updates = mutableMapOf<String, Any>()
 
-                    // Reset głównych danych
                     updates["streak"] = 0
                     updates["bestStreak"] = 0
                     updates["statistics/totalStars"] = 0
@@ -428,7 +375,6 @@ class ProfileActivity : BaseActivity() {
                     updates["statistics/sumAccuracy"] = 0.0
                     updates["statistics/sumReactionTime"] = 0.0
 
-                    // Reset wszystkich gier w każdej kategorii
                     val categoriesSnap = snapshot.child("categories")
                     categoriesSnap.children.forEach { categorySnap ->
                         val categoryKey = categorySnap.key ?: return@forEach
@@ -447,12 +393,11 @@ class ProfileActivity : BaseActivity() {
                         }
                     }
 
-                    // Wysyłamy wszystkie zmiany w jednym updateChildren
                     userRef.updateChildren(updates)
                         .addOnSuccessListener {
                             Toast.makeText(this, "Postępy zostały zresetowane", Toast.LENGTH_SHORT)
                                 .show()
-                            loadUserData(uid) // odśwież UI
+                            loadUserData(uid)
                         }
                         .addOnFailureListener { e ->
                             Toast.makeText(

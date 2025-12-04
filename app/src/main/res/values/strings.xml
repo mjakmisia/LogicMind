@@ -99,6 +99,12 @@
     <string name="change_password_title">Zmiana hasła</string>
     <string name="new_password_hint">Nowe hasło</string>
     <string name="change_btn">Zmień</string>
+    <string name="right_lane_description">Przełącz na prawy pas</string>
+    <string name="left_lane_description">Przełącz na lewy pas</string>
+    <string name="left_basket">Lewy koszyk</string>
+    <string name="right_basket">Prawy koszyk</string>
+    <string name="zero_streak">x0</string>
+    <string name="change">zmień</string>
 
     <string name="password_error_length">Hasło musi mieć min. 8 znaków</string>
     <string name="password_error_uppercase">Hasło musi zawierać wielką literę</string>
@@ -119,6 +125,14 @@
     <string name="best_score_label">Twój rekord:</string>
     <string name="play_again">Zagraj ponownie</string>
     <string name="exit_menu">Wyjdź do menu</string>
+
+    <string name="mon_letter">Pon</string>
+    <string name="tue_letter">Wt</string>
+    <string name="wed_letter">Śr</string>
+    <string name="thu_letter">Czw</string>
+    <string name="fri_letter">Pt</string>
+    <string name="sat_letter">Sob</string>
+    <string name="sun_letter">Nd</string>
 
 
     <!-- OPISY GIER DO INTRO -->

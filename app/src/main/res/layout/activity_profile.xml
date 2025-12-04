@@ -4,7 +4,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/pageBackground">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="?attr/pageBackground"
+    tools:ignore="ContentDescription">
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scrollView"
@@ -50,7 +52,8 @@
                 android:orientation="horizontal"
                 app:layout_constraintBottom_toBottomOf="@+id/profileHeader"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/profileHeader">
+                app:layout_constraintTop_toTopOf="@+id/profileHeader"
+                tools:ignore="UseCompoundDrawables">
 
                 <ImageView
                     android:id="@+id/ivProfileStar"
@@ -58,13 +61,14 @@
                     android:layout_height="28dp"
                     android:layout_marginEnd="6dp"
                     android:contentDescription="@string/icon_star"
-                    android:src="@drawable/icon_star" />
+                    android:src="@drawable/icon_star"
+                    tools:ignore="ImageContrastCheck" />
 
                 <TextView
                     android:id="@+id/tvProfileTotalStars"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="0"
+                    android:text="@string/zero"
                     android:textColor="?attr/text_dark"
                     android:textSize="24sp"
                     android:textStyle="bold" />
@@ -91,7 +95,7 @@
                     android:layout_gravity="center_vertical"
                     android:gravity="center"
                     android:includeFontPadding="false"
-                    android:text="username"
+                    android:text="@string/username"
                     android:textColor="?attr/text_dark"
                     android:textSize="32sp"
                     android:textStyle="bold" />
@@ -99,7 +103,7 @@
                 <TextView
                     android:id="@+id/btnEditUsernameSmall"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="48dp"
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="2dp"
@@ -109,11 +113,12 @@
                     android:gravity="center"
                     android:includeFontPadding="false"
                     android:padding="6dp"
-                    android:text="zmień"
+                    android:text="@string/change"
                     android:textAllCaps="true"
                     android:textColor="?attr/text_light"
                     android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    tools:ignore="TouchTargetSize,TouchTargetSizeCheck" />
 
             </LinearLayout>
 
@@ -146,7 +151,7 @@
                     android:id="@+id/textCurrentStreak"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="5 dni"
+                    android:text="@string/zero_days"
                     android:textSize="24sp"
                     android:textStyle="bold"
                     android:textColor="@color/black"
@@ -181,7 +186,7 @@
                     android:id="@+id/textBestStreak"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="10 dni"
+                    android:text="@string/zero_days"
                     android:textSize="24sp"
                     android:textStyle="bold"
                     android:textColor="@color/black"
@@ -194,6 +199,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center"
+                android:baselineAligned="false"
                 android:layout_marginTop="24dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
@@ -220,7 +226,7 @@
                         android:id="@+id/dayMon"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="P"
+                        android:text="@string/mon_letter"
                         android:textSize="22sp"
                         android:textColor="?attr/text_dark"
                         android:gravity="center"
@@ -230,9 +236,10 @@
                         android:id="@+id/flameMon"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
+                        android:layout_marginTop="4dp"
                         android:src="@drawable/ic_flame"
                         app:tint="@color/light_gray_2"
-                        android:layout_marginTop="4dp"/>
+                        tools:ignore="ImageContrastCheck" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -255,7 +262,7 @@
                         android:id="@+id/dayTue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="W"
+                        android:text="@string/tue_letter"
                         android:textSize="22sp"
                         android:textColor="?attr/text_dark"
                         android:gravity="center"
@@ -265,9 +272,10 @@
                         android:id="@+id/flameTue"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
+                        android:layout_marginTop="4dp"
                         android:src="@drawable/ic_flame"
                         app:tint="@color/light_gray_2"
-                        android:layout_marginTop="4dp"/>
+                        tools:ignore="ImageContrastCheck" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -290,7 +298,7 @@
                         android:id="@+id/dayWed"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Ś"
+                        android:text="@string/fri_letter"
                         android:textSize="22sp"
                         android:textColor="?attr/text_dark"
                         android:gravity="center"
@@ -300,9 +308,10 @@
                         android:id="@+id/flameWed"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
+                        android:layout_marginTop="4dp"
                         android:src="@drawable/ic_flame"
                         app:tint="@color/light_gray_2"
-                        android:layout_marginTop="4dp"/>
+                        tools:ignore="ImageContrastCheck" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -325,19 +334,21 @@
                         android:id="@+id/dayThu"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="C"
-                        android:textSize="22sp"
-                        android:textColor="?attr/text_dark"
+                        android:layout_marginTop="4dp"
                         android:gravity="center"
-                        android:layout_marginTop="4dp" />
+                        android:text="@string/thu_letter"
+                        android:textColor="?attr/text_dark"
+                        android:textSize="22sp"
+                        tools:ignore="TextContrastCheck" />
 
                     <ImageView
                         android:id="@+id/flameThu"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
+                        android:layout_marginTop="4dp"
                         android:src="@drawable/ic_flame"
                         app:tint="@color/light_gray_2"
-                        android:layout_marginTop="4dp"/>
+                        tools:ignore="ImageContrastCheck" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -360,7 +371,7 @@
                         android:id="@+id/dayFri"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="P"
+                        android:text="@string/fri_letter"
                         android:textSize="22sp"
                         android:textColor="?attr/text_dark"
                         android:gravity="center"
@@ -370,9 +381,10 @@
                         android:id="@+id/flameFri"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
+                        android:layout_marginTop="4dp"
                         android:src="@drawable/ic_flame"
                         app:tint="@color/light_gray_2"
-                        android:layout_marginTop="4dp"/>
+                        tools:ignore="ImageContrastCheck" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -395,7 +407,7 @@
                         android:id="@+id/daySat"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="S"
+                        android:text="@string/sat_letter"
                         android:textSize="22sp"
                         android:textColor="?attr/text_dark"
                         android:gravity="center"
@@ -405,9 +417,10 @@
                         android:id="@+id/flameSat"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
+                        android:layout_marginTop="4dp"
                         android:src="@drawable/ic_flame"
                         app:tint="@color/light_gray_2"
-                        android:layout_marginTop="4dp"/>
+                        tools:ignore="ImageContrastCheck" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -429,7 +442,7 @@
                         android:id="@+id/daySun"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="N"
+                        android:text="@string/sun_letter"
                         android:textSize="22sp"
                         android:textColor="?attr/text_dark"
                         android:gravity="center"
@@ -439,9 +452,10 @@
                         android:id="@+id/flameSun"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
+                        android:layout_marginTop="4dp"
                         android:src="@drawable/ic_flame"
                         app:tint="@color/light_gray_2"
-                        android:layout_marginTop="4dp"/>
+                        tools:ignore="ImageContrastCheck" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -463,7 +477,8 @@
                 android:drawablePadding="28dp"
                 app:layout_constraintTop_toBottomOf="@id/weekCalendar"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent"
+                tools:ignore="VisualLintButtonSize" />
 
             <LinearLayout
                 android:id="@+id/policyLayout"
@@ -504,7 +519,6 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
-                android:layout_marginBottom="24dp"
                 android:background="@drawable/bg_rounded_light_gray"
                 android:text="@string/change_password_title"
                 android:textAllCaps="true"
@@ -514,7 +528,8 @@
                 android:visibility="visible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/policyLayout" />
+                app:layout_constraintTop_toBottomOf="@id/policyLayout"
+                tools:ignore="VisualLintButtonSize,TouchTargetSizeCheck" />
 
             <Button
                 android:id="@+id/buttonLogout"
@@ -533,7 +548,8 @@
                 android:visibility="visible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/buttonChangePassword" />
+                app:layout_constraintTop_toBottomOf="@id/buttonChangePassword"
+                tools:ignore="VisualLintButtonSize" />
 
             <Button
                 android:id="@+id/buttonDeleteAccount"
@@ -553,7 +569,8 @@
                 android:layout_marginBottom="16dp"
                 app:layout_constraintTop_toBottomOf="@id/buttonLogout"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent"
+                tools:ignore="VisualLintButtonSize" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>

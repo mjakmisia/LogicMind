@@ -6,34 +6,26 @@ import android.util.AttributeSet
 import android.widget.ProgressBar
 import androidx.core.content.ContextCompat
 
-/**
- * Custom ProgressBar z odliczaniem czasu gry.
- * Pokazuje pasek postępu, który zmniejsza się wraz z upływem czasu.
- */
 class GameTimerProgressBar @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
 ) : ProgressBar(context, attrs) {
 
-    private var totalTimeMs: Long = 60000 // Domyślny czas całkowity 60 sekund
-    private var currentTimeMs: Long = totalTimeMs // Aktualny pozostały czas
-    private var maxTimeMs: Long = 120000 // Maksymalny limit czasu
-    private val warningThresholdPercent = 25 // Próg, poniżej którego pasek zmienia kolor na czerwony
+    private var totalTimeMs: Long = 60000
+    private var currentTimeMs: Long = totalTimeMs
+    private var maxTimeMs: Long = 120000
+    private val warningThresholdPercent = 25
     private var startTimeMs: Long = 0L
     private var endTimeMs: Long = 0L
-    private var timer: CountDownTimer? = null // Androidowy timer odliczający czas
-    private var isRunning = false // Flaga czy timer jest aktywny
-
-    // Callback wywoływany po zakończeniu odliczania
+    private var timer: CountDownTimer? = null
+    private var isRunning = false
     private var onFinishCallback: (() -> Unit)? = null
 
     init {
-        max = 100  // Maksymalna wartość paska postępu (procent)
-        progress = 100  // Startowy postęp (pełny pasek)
-        // Ustaw kolor paska (biały domyślnie)
+        max = 100
+        progress = 100
         progressTintList = ContextCompat.getColorStateList(context, android.R.color.white)
     }
 
-    /** Ustawia całkowity czas odliczania w sekundach */
     fun setTotalTime(seconds: Int) {
         totalTimeMs = seconds * 1000L
         currentTimeMs = totalTimeMs
@@ -41,14 +33,12 @@ class GameTimerProgressBar @JvmOverloads constructor(
         updateProgress()
     }
 
-    /** Ustawia callback wywoływany po zakończeniu odliczania */
     fun setOnFinishCallback(callback: () -> Unit) {
         onFinishCallback = callback
     }
 
-    /** Startuje odliczanie od aktualnego czasu */
     fun start() {
-        stop() // ZAWSZE zatrzymaj stary timer przed uruchomieniem nowego
+        stop()
 
         if (currentTimeMs <= 0) {
             currentTimeMs = totalTimeMs
@@ -66,7 +56,7 @@ class GameTimerProgressBar @JvmOverloads constructor(
             }
 
             override fun onFinish() {
-                if (!isRunning) return // Zabezpieczenie przed podwójnym wywołaniem
+                if (!isRunning) return
                 currentTimeMs = 0
                 updateProgress()
                 isRunning = false
@@ -75,14 +65,12 @@ class GameTimerProgressBar @JvmOverloads constructor(
         }.start()
     }
 
-    /** Zatrzymuje odliczanie (całkowicie) */
     fun stop() {
         timer?.cancel()
         timer = null
         isRunning = false
     }
 
-    /** Pauzuje odliczanie (można wznowić przez start()) */
     fun pause() {
         if (!isRunning) return
         timer?.cancel()
@@ -90,7 +78,6 @@ class GameTimerProgressBar @JvmOverloads constructor(
         isRunning = false
     }
 
-    /** Dodaje czas (sekundy) do aktualnego czasu */
     fun addTime(seconds: Int) {
         currentTimeMs = (currentTimeMs + seconds * 1000L).coerceAtMost(maxTimeMs)
         if (isRunning) {
@@ -100,7 +87,6 @@ class GameTimerProgressBar @JvmOverloads constructor(
         }
     }
 
-    /** Odejmuje czas (sekundy) od aktualnego czasu */
     fun subtractTime(seconds: Int) {
         currentTimeMs = (currentTimeMs - seconds * 1000L).coerceAtLeast(0)
         if (currentTimeMs == 0L) {
@@ -116,21 +102,18 @@ class GameTimerProgressBar @JvmOverloads constructor(
         }
     }
 
-    /** Resetuje timer do wartości początkowej */
     fun reset() {
         stop()
         currentTimeMs = totalTimeMs
         updateProgress()
     }
 
-    /** Aktualizuje pasek postępu (procentowo) i kolor */
     private fun updateProgress() {
         val percent = ((currentTimeMs.toFloat() / totalTimeMs) * 100).toInt().coerceIn(0, 100)
         progress = percent
         updateColor(percent)
     }
 
-    /** Zmienia kolor paska na czerwony poniżej progu ostrzeżenia */
     private fun updateColor(percent: Int) {
         progressTintList = if (percent <= warningThresholdPercent) {
             ContextCompat.getColorStateList(context, android.R.color.holo_red_light)
@@ -139,13 +122,10 @@ class GameTimerProgressBar @JvmOverloads constructor(
         }
     }
 
-    /** Zwraca true jeśli timer jest aktualnie uruchomiony */
     fun isRunning() = isRunning
 
-    /** Zwraca pozostały czas w sekundach */
     fun getRemainingTimeSeconds() = (currentTimeMs / 1000).toInt()
 
-    /** Ustawia pozostały czas w ms bez restartowania logiki */
     fun setRemainingTimeMs(ms: Long) {
         currentTimeMs = ms.coerceAtLeast(0)
         if (isRunning) {
@@ -155,12 +135,10 @@ class GameTimerProgressBar @JvmOverloads constructor(
         updateProgress()
     }
 
-    /** Anuluje timer (do użycia w onDestroy) */
     fun cancel() {
         stop()
     }
 
-    /** Zabezpieczenie przy odłączaniu z okna */
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         stop()
