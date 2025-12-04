@@ -12,7 +12,9 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.logicmind.activities.WelcomeActivity
+import com.google.firebase.auth.FirebaseAuth
 import org.hamcrest.Matchers.not
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -23,15 +25,24 @@ class WelcomeActivityIntegrationTest {
     @get:Rule
     val activityRule = ActivityScenarioRule(WelcomeActivity::class.java)
 
-    private val TEST_EMAIL = "test@gmail.com"
+    private val TEST_EMAIL = "testt@gmail.com"
     private val TEST_PASSWORD = "Haslo1234"
+
+    @Before
+    fun setUp() {
+        if (FirebaseAuth.getInstance().currentUser != null) {
+            FirebaseAuth.getInstance().signOut()
+        }
+    }
 
     @Test
     fun test_login_invalidCredentials_showsError() {
         onView(withId(R.id.etEmail)).perform(typeText(TEST_EMAIL), closeSoftKeyboard())
         onView(withId(R.id.etPassword)).perform(typeText("Zlehaslo123"), closeSoftKeyboard())
         onView(withId(R.id.btnLogin)).perform(click())
+
         Thread.sleep(2000)
+
         onView(withId(R.id.tvErrorMessage))
             .check(matches(isDisplayed())).check(matches(withText(R.string.login_validation)))
     }
