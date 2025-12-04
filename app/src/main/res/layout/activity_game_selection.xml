@@ -2,11 +2,11 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/pageBackground">
 
-    <!-- Linia dzieląca ekran na pół -->
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guidelineCenter"
         android:layout_width="wrap_content"
@@ -14,7 +14,6 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.5" />
 
-    <!-- Pasek z pytaniem na środku -->
     <TextView
         android:id="@+id/tvQuestionChooseGame"
         android:layout_width="0dp"
@@ -22,16 +21,15 @@
         android:text="@string/choose_game_request"
         android:textSize="25sp"
         android:textStyle="bold"
-        android:textColor="?attr/pageBackground"
+        android:textColor="@color/white"
         android:gravity="center"
         android:padding="14dp"
-        android:background="@color/category_yellow_dark_mode"
+        android:background="@color/category_blue_light_mode"
         app:layout_constraintTop_toTopOf="@id/guidelineCenter"
         app:layout_constraintBottom_toBottomOf="@id/guidelineCenter"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Górna połowa: Gra 1 -->
     <LinearLayout
         android:id="@+id/game1Container"
         android:layout_width="0dp"
@@ -50,7 +48,9 @@
             android:layout_width="240dp"
             android:layout_height="240dp"
             android:layout_gravity="center"
-            android:src="@drawable/ic_close" />
+            android:src="@drawable/ic_close"
+            android:contentDescription="@null"
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:id="@+id/game1Title"
@@ -62,7 +62,6 @@
             android:layout_marginTop="12dp" />
     </LinearLayout>
 
-    <!-- Dolna połowa: Gra 2 -->
     <LinearLayout
         android:id="@+id/game2Container"
         android:layout_width="0dp"
@@ -81,7 +80,9 @@
             android:layout_width="240dp"
             android:layout_height="240dp"
             android:layout_gravity="center"
-            android:src="@drawable/ic_close" />
+            android:src="@drawable/ic_close"
+            android:contentDescription="@null"
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:id="@+id/game2Title"

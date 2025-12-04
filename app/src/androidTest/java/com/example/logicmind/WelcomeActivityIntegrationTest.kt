@@ -20,7 +20,6 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class WelcomeActivityIntegrationTest {
 
-    //uruchamia WelcomeActivity
     @get:Rule
     val activityRule = ActivityScenarioRule(WelcomeActivity::class.java)
 
@@ -63,7 +62,4 @@ class WelcomeActivityIntegrationTest {
         onView(withId(R.id.tvErrorMessage))
             .check(matches(not(isDisplayed())))
     }
-
-
-
 }

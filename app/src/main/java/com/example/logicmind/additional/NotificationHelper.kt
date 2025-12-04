@@ -14,10 +14,9 @@ object NotificationHelper {
     private const val CHANNEL_NAME = "Codzienne przypomnienie"
     private const val NOTIFICATION_ID = 1
 
-    /** Tworzy kanał powiadomień */
     fun createNotificationChannel(context: Context) {
         val importance =
-            NotificationManager.IMPORTANCE_DEFAULT //Dźwięk, wibracje, pojawia się w pasku stanu
+            NotificationManager.IMPORTANCE_DEFAULT
         val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, importance).apply {
             description = "Kanał dla codziennych przypomnień o streaku."
         }
@@ -26,11 +25,9 @@ object NotificationHelper {
         notificationManager.createNotificationChannel(channel)
     }
 
-    /** Wyświetla powiadomienia push */
     fun showNotification(context: Context, title: String, message: String) {
-        createNotificationChannel(context) //kanał istnieje
+        createNotificationChannel(context)
 
-        //uruchamia aplikacje po kliknięciu
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
@@ -52,7 +49,5 @@ object NotificationHelper {
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(NOTIFICATION_ID, builder.build())
-
-
     }
 }

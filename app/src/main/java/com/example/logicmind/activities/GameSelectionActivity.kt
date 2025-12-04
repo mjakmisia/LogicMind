@@ -21,12 +21,10 @@ class GameSelectionActivity : BaseActivity() {
         val categoryId = intent.getStringExtra("CATEGORY_ID") ?: "default"
         val config = GameConfigProvider.getConfig(categoryId)
 
-        // Pasek z pytaniem
         val questionBar = findViewById<TextView>(R.id.tvQuestionChooseGame)
         questionBar.setBackgroundColor(ContextCompat.getColor(this, config.colorRes))
         questionBar.text = getString(R.string.choose_game_request, getString(config.nameRes))
 
-        // Gra 1
         setupGame(
             containerId = R.id.game1Container,
             iconId = R.id.game1Icon,
@@ -34,7 +32,6 @@ class GameSelectionActivity : BaseActivity() {
             gameOption = config.games.getOrNull(0)
         )
 
-        // Gra 2
         setupGame(
             containerId = R.id.game2Container,
             iconId = R.id.game2Icon,
@@ -44,21 +41,23 @@ class GameSelectionActivity : BaseActivity() {
     }
 
     private fun setupGame(containerId: Int, iconId: Int, titleId: Int, gameOption: GameOption?) {
-        if (gameOption == null) return
+        gameOption?.let { option ->
+            val container = findViewById<LinearLayout>(containerId)
+            val icon = findViewById<ImageView>(iconId)
+            val title = findViewById<TextView>(titleId)
 
-        val container = findViewById<LinearLayout>(containerId)
-        val icon = findViewById<ImageView>(iconId)
-        val title = findViewById<TextView>(titleId)
+            icon.setImageResource(option.iconRes)
+            title.text = getString(option.title)
 
-        icon.setImageResource(gameOption.iconRes)
-        title.text = getString(gameOption.title)
+            icon.contentDescription = getString(option.title)
 
-        container.setOnClickListener { view ->
-            view.playSoundEffect(SoundEffectConstants.CLICK)
+            container.setOnClickListener { view ->
+                view.playSoundEffect(SoundEffectConstants.CLICK)
 
-            val intent = Intent(this, GameIntroActivity::class.java)
-            intent.putExtra("GAME_ID", gameOption.gameId)
-            startActivity(intent)
+                val intent = Intent(this, GameIntroActivity::class.java)
+                intent.putExtra("GAME_ID", option.gameId)
+                startActivity(intent)
+            }
         }
     }
 }

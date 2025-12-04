@@ -6,17 +6,16 @@ import android.media.SoundPool
 import com.example.logicmind.R
 
 /**
- * Menedżer dźwięków dla gier.
+ * Menedżer dźwięków.
  * Używa [SoundPool] do szybkiego odtwarzania krótkich efektów.
  */
+
 object SoundManager {
     private var soundPool: SoundPool? = null
-    private val soundMap = mutableMapOf<Int, Int>() // R.raw.id → soundId
+    private val soundMap = mutableMapOf<Int, Int>()
 
-    //kontrolowanie dźwięków z ustawien
     var isSoundEnabled: Boolean = true
 
-    /** Inicjalizuje SoundPool (tylko raz) */
     private fun ensureInitialized(context: Context) {
         if (soundPool != null) return
 
@@ -38,21 +37,17 @@ object SoundManager {
         ).forEach { loadSound(appContext, it) }
     }
 
-    /** Ładuje dźwięk do SoundPool (lub zwraca już załadowany) */
     private fun loadSound(context: Context, resId: Int): Int {
         return soundMap.getOrPut(resId) {
             soundPool?.load(context, resId, 1) ?: 0
         }
     }
 
-    /** Inicjalizuje menedżer */
     fun init(context: Context) {
         ensureInitialized(context)
     }
 
-    /** Odtwarza dźwięk */
     fun play(context: Context, resId: Int, volume: Float = 1f) {
-        //weryfikacja czy dźwięk jest wyłączony
         if (!isSoundEnabled) {
             return
         }
@@ -63,7 +58,6 @@ object SoundManager {
         }
     }
 
-    /** Zwalnia zasoby */
     fun release() {
         soundPool?.release()
         soundPool = null

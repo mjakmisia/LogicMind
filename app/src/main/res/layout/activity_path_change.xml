@@ -2,10 +2,12 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/dark_gray">
+    android:background="@color/dark_gray"
+    tools:ignore="ContentDescription">
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/topGuideline"
@@ -31,7 +33,7 @@
         android:id="@+id/streakCountText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="x0"
+        android:text="@string/zero_streak"
         android:textSize="18sp"
         android:textColor="#666666" android:visibility="gone"
         android:gravity="center_vertical"
@@ -61,7 +63,8 @@
         android:gravity="center_vertical"
         android:orientation="horizontal"
         app:layout_constraintTop_toTopOf="@id/topGuideline"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="UseCompoundDrawables">
         <ImageView
             android:id="@+id/starIcon"
             android:layout_width="28dp"
@@ -72,7 +75,7 @@
             android:id="@+id/starCountText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="0"
+            android:text="@string/zero"
             android:textSize="24sp"
             android:textColor="@android:color/white"
             android:layout_marginStart="8dp" />
@@ -101,7 +104,12 @@
             <ImageView android:layout_width="match_parent" android:layout_height="match_parent" android:src="@drawable/path_corner" android:rotation="180" android:scaleType="fitCenter" />
         </FrameLayout>
         <FrameLayout android:layout_width="0dp" android:layout_height="0dp" app:layout_row="0" app:layout_column="1" app:layout_rowWeight="1" app:layout_columnWeight="1" app:layout_gravity="fill" android:tag="goal_red">
-            <ImageView android:layout_width="match_parent" android:layout_height="match_parent" android:src="@drawable/path_goal_placeholder_red" />
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/path_goal_placeholder_red"
+                tools:ignore="ImageContrastCheck" />
         </FrameLayout>
         <FrameLayout android:layout_width="0dp" android:layout_height="0dp" app:layout_row="0" app:layout_column="2" app:layout_rowWeight="1" app:layout_columnWeight="1" app:layout_gravity="fill" android:tag="cell_empty" />
         <FrameLayout android:layout_width="0dp" android:layout_height="0dp" app:layout_row="0" app:layout_column="3" app:layout_rowWeight="1" app:layout_columnWeight="1" app:layout_gravity="fill" android:tag="cell_corner_br">

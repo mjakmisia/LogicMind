@@ -106,14 +106,10 @@ object WordBank {
         )
     )
 
-
-    // Pobiera losowe słowa z danego zakresu długości
     fun getWords(lang: String, minLength: Int, maxLength: Int, count: Int): List<String> {
         val langKey = lang.lowercase(Locale.ROOT)
 
-        // Przechodzi przez wszystkie słowa w danym języku
         val availableWords = words[langKey]?.flatMap { (length, wordList) ->
-            // Sprawdza czy długość słowa mieści się w danym zakresie
             if (length in minLength..maxLength) {
                 wordList
             } else {
@@ -122,14 +118,12 @@ object WordBank {
         } ?: emptyList()
 
         if (availableWords.isEmpty()) {
-            return emptyList() // Nie znaleziono słów
+            return emptyList()
         }
 
-        // Tasuje znalezione słowa i wybiera daną ilość pierwszych z listy
         return availableWords.shuffled().take(count)
     }
 
-    // Funkcja pomocnicza, ustawia minLength na sztywno
     fun getWords(lang: String, maxLength: Int, count: Int): List<String> {
         return getWords(lang, 3, maxLength, count)
     }

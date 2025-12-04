@@ -29,16 +29,12 @@ import java.io.Serializable
 import java.util.Locale
 
 class PathChangeActivity : BaseActivity() {
-
-    // --- WIDOKI UI ---
     private lateinit var gridLayout: GridLayout
     private lateinit var countdownText: TextView
     private lateinit var pauseButton: ImageButton
     private lateinit var pauseOverlay: ConstraintLayout
     private lateinit var rootLayout: ConstraintLayout
     private lateinit var streakCountText: TextView
-
-    // --- MANAGERY I STAN GRY ---
     private lateinit var timerProgressBar: GameTimerProgressBar
     private lateinit var starManager: StarManager
     private lateinit var pauseMenu: PauseMenu
@@ -46,12 +42,8 @@ class PathChangeActivity : BaseActivity() {
     private var isGameEnding = false
     private var isGameRunning = false
     private var currentLevel = 1
-
-    // --- LOGIKA PRZEŁĄCZNIKÓW ---
     private val switchStates = HashMap<String, Int>()
     private val switchViews = mutableListOf<FrameLayout>()
-
-    // --- LOGIKA KULEK ---
     private val cellViewMapByCoords = mutableMapOf<Pair<Int, Int>, View>()
     private val activeBalls = mutableListOf<BallState>()
     private val spawnHandler = Handler(Looper.getMainLooper())
@@ -63,15 +55,11 @@ class PathChangeActivity : BaseActivity() {
             this.resources.displayMetrics
         ).toInt()
     }
-
-    // --- LOGIKA TIMERA SPAWNU ---
     private var remainingSpawnDelayMs: Long = 0L
     private var isSpawnLoopRunning = false
     private val spawnLoopInterval = 100L
-
     private var currentBestScore = 0
 
-    // Klasa do przechowywania stanu każdej aktywnej kulki
     private data class BallState(
         @Transient val imageView: ImageView,
         val color: String,
@@ -82,8 +70,6 @@ class PathChangeActivity : BaseActivity() {
         var isMoving: Boolean = false,
         @Transient var currentAnimator: ObjectAnimator? = null
     )
-
-    // Klasa do zapisywania stanu kulki
     private data class SerializableBallState(
         val color: String,
         val currentRow: Int,
@@ -93,7 +79,6 @@ class PathChangeActivity : BaseActivity() {
         val isMoving: Boolean
     ) : Serializable
 
-    // Zmienne utrudniające rozgrywkę wraz z upływem czasu
     private var currentAnimDuration: Long = INITIAL_ANIM_DURATION
     private var currentSpawnDelayMs: Long = INITIAL_SPAWN_DELAY
     private var totalMoves = 0
@@ -125,7 +110,6 @@ class PathChangeActivity : BaseActivity() {
         setContentView(R.layout.activity_path_change)
         supportActionBar?.hide()
 
-        // Inicjalizacja widoków
         rootLayout = findViewById(R.id.rootLayout)
         gridLayout = findViewById(R.id.gridLayout)
         countdownText = findViewById(R.id.countdownText)
@@ -145,7 +129,6 @@ class PathChangeActivity : BaseActivity() {
                 }
         }
 
-        // Inicjalizacja paska czasu
         timerProgressBar.setTotalTime(BASE_TIME_SECONDS)
         timerProgressBar.setOnFinishCallback {
             runOnUiThread {
@@ -153,7 +136,6 @@ class PathChangeActivity : BaseActivity() {
             }
         }
 
-        // Inicjalizacja managera odliczania
         countdownManager = GameCountdownManager(
             countdownText = countdownText,
             gameView = gridLayout,
@@ -171,12 +153,11 @@ class PathChangeActivity : BaseActivity() {
                 timerProgressBar.reset()
                 timerProgressBar.start()
                 gameStatsManager.startReactionTracking()
-                gameStatsManager.setGameStartTime(this@PathChangeActivity)
+                gameStatsManager.setGameStartTime()
                 startNewGame()
             }
         )
 
-        // Inicjalizacja menu pauzy
         pauseMenu = PauseMenu(
             context = this,
             pauseOverlay = pauseOverlay,
@@ -214,7 +195,6 @@ class PathChangeActivity : BaseActivity() {
             instructionMessage = getString(R.string.path_change_instruction),
         )
 
-        // Sprawdzenie, czy gra jest uruchamiana po raz pierwszy
         if (savedInstanceState == null) {
             countdownManager.startCountdown()
 
@@ -223,7 +203,6 @@ class PathChangeActivity : BaseActivity() {
         }
     }
 
-    // Zapisuje stan gry, gdy aktywność jest pauzowana lub niszczona
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putInt("pauseOverlayVisibility", pauseOverlay.visibility)
@@ -239,7 +218,6 @@ class PathChangeActivity : BaseActivity() {
         outState.putSerializable("switchStates", switchStates)
         starManager.saveState(outState)
 
-        // Zapisywanie stanu kulek
         val serializableBalls = ArrayList(activeBalls.map { ball ->
             SerializableBallState(
                 color = ball.color,
@@ -250,21 +228,16 @@ class PathChangeActivity : BaseActivity() {
                 isMoving = ball.isMoving
             )
         })
+
         outState.putSerializable("activeBalls", serializableBalls)
-
-        // Zapisz pozostały czas do spawnu
         outState.putLong("remainingSpawnDelayMs", remainingSpawnDelayMs)
-
-        // Zapis stanu przyspieszenia
         outState.putLong("currentAnimDuration", currentAnimDuration)
         outState.putLong("currentSpawnDelayMs", currentSpawnDelayMs)
         outState.putInt("totalMoves", totalMoves)
         outState.putInt("successfulStreak", successfulStreak)
-
         saveGameStats(outState)
     }
 
-    // Przywraca stan gry
     private fun restoreGameState(savedInstanceState: Bundle) {
         pauseOverlay.visibility = savedInstanceState.getInt("pauseOverlayVisibility", View.GONE)
         countdownText.visibility = savedInstanceState.getInt("countdownTextVisibility", View.GONE)
@@ -279,7 +252,6 @@ class PathChangeActivity : BaseActivity() {
 
         isGameRunning = savedInstanceState.getBoolean("isGameRunning", false)
 
-        // Przywracanie stanów przełączników
         val savedStates = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             @Suppress("UNCHECKED_CAST")
             savedInstanceState.getSerializable("switchStates", HashMap::class.java) as? HashMap<String, Int>
@@ -292,16 +264,12 @@ class PathChangeActivity : BaseActivity() {
             switchStates.putAll(savedStates)
         }
 
-        // Odczytaj pozostały czas spawnu
         remainingSpawnDelayMs = savedInstanceState.getLong("remainingSpawnDelayMs", INITIAL_SPAWN_DELAY)
-
-        // Odczytaj stan przyspieszenia
         currentAnimDuration = savedInstanceState.getLong("currentAnimDuration", INITIAL_ANIM_DURATION)
         currentSpawnDelayMs = savedInstanceState.getLong("currentSpawnDelayMs", INITIAL_SPAWN_DELAY)
         totalMoves = savedInstanceState.getInt("totalMoves", 0)
         successfulStreak = savedInstanceState.getInt("successfulStreak", 0)
-        updateStreakDisplay() // Aktualizuj wyświetlacz serii
-
+        updateStreakDisplay()
 
         val countdownIndex = savedInstanceState.getInt("countdownIndex", 0)
         val countdownInProgress = savedInstanceState.getBoolean("countdownInProgress", false)
@@ -313,7 +281,6 @@ class PathChangeActivity : BaseActivity() {
                 timerProgressBar.start()
             }
 
-            // Inicjalizacja planszy i odtworzenie kulek
             gridLayout.post {
                 setupGrid()
 
@@ -330,7 +297,6 @@ class PathChangeActivity : BaseActivity() {
                 }
             }
 
-            // Uruchom pętlę spawnowania
             if (pauseOverlay.visibility != View.VISIBLE) {
                 startSpawningBalls()
             }
@@ -340,7 +306,6 @@ class PathChangeActivity : BaseActivity() {
         restoreGameStats(savedInstanceState)
     }
 
-    // Funkcja wywoływana po odliczaniu, rozpoczyna nową grę
     private fun startNewGame() {
         gameStatsManager.startReactionTracking()
         if (pauseMenu.isPaused) pauseMenu.resume()
@@ -351,21 +316,18 @@ class PathChangeActivity : BaseActivity() {
         switchStates.clear()
         clearAllBalls()
 
-        // Reset stanu przyspieszenia i streaka
         currentAnimDuration = INITIAL_ANIM_DURATION
         currentSpawnDelayMs = INITIAL_SPAWN_DELAY
         totalMoves = 0
         successfulStreak = 0
-        updateStreakDisplay() // Zresetuj wyświetlacz serii
+        updateStreakDisplay()
 
         setupGrid()
 
-        remainingSpawnDelayMs = 500L  // Ustaw timer dla pierwszej kulki
+        remainingSpawnDelayMs = 500L
         startSpawningBalls()
-
     }
 
-    // Konfiguruje siatkę, mapuje komórki i ustawia listenery przełączników
     private fun setupGrid() {
         switchViews.clear()
         cellViewMapByCoords.clear()
@@ -395,7 +357,6 @@ class PathChangeActivity : BaseActivity() {
         }
     }
 
-    // Obsługuje kliknięcie na przełącznik
     private fun onSwitchClicked(cell: FrameLayout) {
         if (!isGameRunning || isGameEnding) return
 
@@ -410,7 +371,6 @@ class PathChangeActivity : BaseActivity() {
         }
     }
 
-    // Aktualizuje obrazek przełącznika na podstawie stanu
     private fun updateSwitchImage(imageView: ImageView, tag: String, state: Int) {
         when (tag) {
             "switch_A" -> {
@@ -444,18 +404,17 @@ class PathChangeActivity : BaseActivity() {
         }
     }
 
-    // Rozpoczyna cykliczne spawnowanie kulek
     private fun startSpawningBalls() {
-        if (isSpawnLoopRunning) return // Pętla już działa
+        if (isSpawnLoopRunning) return
         isSpawnLoopRunning = true
 
         spawnHandler.post(object : Runnable {
             override fun run() {
-                if (!isSpawnLoopRunning) return // Pętla została zatrzymana z zewnątrz
+                if (!isSpawnLoopRunning) return
 
                 if (!isGameRunning || isGameEnding) {
                     isSpawnLoopRunning = false
-                    return // Gra zakończona, pętla umiera
+                    return
                 }
 
                 if (pauseMenu.isPaused) {
@@ -467,7 +426,6 @@ class PathChangeActivity : BaseActivity() {
 
                 if (remainingSpawnDelayMs <= 0) {
                     spawnBall()
-                    // Użyj aktualnej, dynamicznej wartości spawnu
                     remainingSpawnDelayMs = currentSpawnDelayMs
                 }
 
@@ -476,13 +434,11 @@ class PathChangeActivity : BaseActivity() {
         })
     }
 
-    // Zatrzymuje pętlę spawnowania kulek
     private fun stopSpawningBalls() {
         isSpawnLoopRunning = false
         spawnHandler.removeCallbacksAndMessages(null)
     }
 
-    // Tworzy i konfiguruje widok ImageView dla kulki
     private fun createBallImageView(color: String): ImageView {
         val drawableId = when (color) {
             "red" -> R.drawable.path_ball_red
@@ -501,18 +457,15 @@ class PathChangeActivity : BaseActivity() {
         }
     }
 
-    // Tworzy nową kulkę (widok i obiekt)
     private fun spawnBall() {
         if (!isGameRunning || isGameEnding) return
 
         val randomColor = ballColors.random()
         val imageView = createBallImageView(randomColor)
 
-        // Ustawienie poza ekranem, aby uniknąć mignięcia
         imageView.x = -1000f
         imageView.y = -1000f
 
-        // Stworzenie obiektu stanu dla kulki
         val newBall = BallState(
             imageView = imageView,
             color = randomColor,
@@ -533,13 +486,11 @@ class PathChangeActivity : BaseActivity() {
         }
     }
 
-    // Odtwarza kulkę na podstawie zapisanego stanu.
     private fun restoreBall(savedBall: SerializableBallState) {
         if (!isGameRunning) return
 
         val imageView = createBallImageView(savedBall.color)
 
-        // Stworzenie obiektu stanu z przywróconymi danymi
         val newBall = BallState(
             imageView = imageView,
             color = savedBall.color,
@@ -552,23 +503,19 @@ class PathChangeActivity : BaseActivity() {
 
         activeBalls.add(newBall)
 
-        // Natychmiast przenieś kulkę do jej ostatniej znanej komórki
         moveToStartCell(newBall)
 
-        // Jeśli kulka była w ruchu i gra nie jest w pauzie, kontynuuj ruch
         if (newBall.isMoving && !pauseMenu.isPaused) {
             executeNextMove(newBall)
         }
     }
 
-    // Zatrzymuje animacje wszystkich aktywnych kulek
     private fun pauseAllBalls() {
         activeBalls.forEach { ball ->
             ball.currentAnimator?.pause()
         }
     }
 
-    // Wznawia animacje wszystkich aktywnych kulek
     private fun resumeAllBalls() {
         activeBalls.forEach { ball ->
             ball.currentAnimator?.resume()
@@ -578,7 +525,6 @@ class PathChangeActivity : BaseActivity() {
         }
     }
 
-    // Usuwa kulkę z gry
     private fun removeBall(ball: BallState) {
         ball.isMoving = false
         ball.currentAnimator?.cancel()
@@ -586,12 +532,10 @@ class PathChangeActivity : BaseActivity() {
         activeBalls.remove(ball)
     }
 
-    // Usuwa wszystkie aktywne kulki (koniec gry)
     private fun clearAllBalls() {
         activeBalls.toList().forEach { removeBall(it) }
     }
 
-    // Ustawia kulkę na środku jej komórki startowej
     private fun moveToStartCell(ball: BallState) {
         val cell = cellViewMapByCoords[Pair(ball.currentRow, ball.currentCol)] ?: return
         val (startX, startY) = getCenterCoords(cell, ball.imageView)
@@ -599,7 +543,6 @@ class PathChangeActivity : BaseActivity() {
         ball.imageView.y = startY
     }
 
-    // Rozpoczyna sekwencję ruchu kulki
     private fun startMovement(ball: BallState) {
         if (ball.isMoving || pauseMenu.isPaused) return
 
@@ -611,7 +554,6 @@ class PathChangeActivity : BaseActivity() {
         }, 100)
     }
 
-    // Główna pętla ruchu dla pojedynczej kulki
     private fun executeNextMove(ball: BallState) {
         if (!ball.isMoving || pauseMenu.isPaused) return
 
@@ -646,37 +588,25 @@ class PathChangeActivity : BaseActivity() {
         }
     }
 
-    // Sprawdza punkty, zarządza przyspieszeniem i systemem streaka
     private fun handleGoalReached(ballColor: String, goalColor: String) {
-        // Zlicz ruch i sprawdź przyspieszenie
         totalMoves++
         accelerateIfNeeded()
 
-        // Sprawdź poprawność i zarządzaj streakiem
         if (ballColor == goalColor) {
-            // SUKCES
             starManager.increment()
             successfulStreak++
-            checkComboBonus() // Sprawdź, czy należy się bonus
-
+            checkComboBonus()
             gameStatsManager.registerAttempt(true)
         } else {
-            // BŁĄD
-            successfulStreak = 0 // Zeruj serię
+            successfulStreak = 0
             timerProgressBar.subtractTime(PENALTY_TIME_SECONDS)
             Toast.makeText(this, String.format(Locale.US, "-%ds!", PENALTY_TIME_SECONDS), Toast.LENGTH_SHORT).show()
-
             gameStatsManager.registerAttempt(false)
         }
 
-        // Zawsze aktualizuj wyświetlacz serii
         updateStreakDisplay()
     }
 
-    /**
-     * Na podstawie aktualnej pozycji (r, c) i poprzedniej (pr, pc),
-     * decyduje, gdzie iść dalej, uwzględniając stany przełączników.
-     */
     private fun findNextStep(r: Int, c: Int): Pair<Int, Int> {
 
         return when (Pair(r, c)) {
@@ -684,7 +614,7 @@ class PathChangeActivity : BaseActivity() {
             Pair(5, 3) -> Pair(5, 2)
             Pair(5, 2) -> Pair(4, 2)
 
-            Pair(4, 2) -> { // Switch C
+            Pair(4, 2) -> {
                 val state = switchStates["switch_C"] ?: 0
                 if (state == 0) Pair(4, 1) else Pair(3, 2)
             }
@@ -695,7 +625,7 @@ class PathChangeActivity : BaseActivity() {
             Pair(4, 0) -> Pair(3, 0)
             Pair(3, 0) -> Pair(2, 0)
 
-            Pair(2, 0) -> { // Switch A
+            Pair(2, 0) -> {
                 val state = switchStates["switch_A"] ?: 0
                 if (state == 0) Pair(1, 0) else Pair(2, 1)
             }
@@ -705,7 +635,7 @@ class PathChangeActivity : BaseActivity() {
             Pair(3, 2) -> Pair(2, 2)
             Pair(2, 2) -> Pair(2, 3)
 
-            Pair(2, 3) -> { // Switch B
+            Pair(2, 3) -> {
                 val state = switchStates["switch_B"] ?: 0
                 if (state == 0) Pair(1, 3) else Pair(3, 3)
             }
@@ -717,12 +647,10 @@ class PathChangeActivity : BaseActivity() {
         }
     }
 
-    // Animuje ruch kulki do nowej pozycji
     private fun animateMove(ball: BallState, targetX: Float, targetY: Float, onEnd: () -> Unit) {
         val pvhX = PropertyValuesHolder.ofFloat(View.X, targetX)
         val pvhY = PropertyValuesHolder.ofFloat(View.Y, targetY)
         ball.currentAnimator = ObjectAnimator.ofPropertyValuesHolder(ball.imageView, pvhX, pvhY).apply {
-            // Użyj dynamicznej prędkości
             duration = currentAnimDuration
             interpolator = android.view.animation.LinearInterpolator()
             addListener(object : AnimatorListenerAdapter() {
@@ -737,7 +665,6 @@ class PathChangeActivity : BaseActivity() {
         }
     }
 
-    // Pobiera środek komórki względem rootLayout
     private fun getCenterCoords(cell: View, ballImageView: ImageView): Pair<Float, Float> {
         val cellRect = Rect()
         cell.getGlobalVisibleRect(cellRect)
@@ -755,18 +682,15 @@ class PathChangeActivity : BaseActivity() {
         return Pair(centerX, centerY)
     }
 
-    // Przyspiesza grę po osiągnięciu progu ruchów
     private fun accelerateIfNeeded() {
         if (totalMoves > 0 && totalMoves % MOVES_PER_SPEEDUP == 0) {
-
             var accelerated = false
-            // Przyspiesz prędkość kulki
+
             if (currentAnimDuration > MIN_ANIM_DURATION) {
                 currentAnimDuration = (currentAnimDuration - ANIM_SPEEDUP_STEP).coerceAtLeast(MIN_ANIM_DURATION)
                 accelerated = true
             }
 
-            // Przyspiesz spawn
             if (currentSpawnDelayMs > MIN_SPAWN_DELAY) {
                 currentSpawnDelayMs = (currentSpawnDelayMs - SPAWN_SPEEDUP_STEP).coerceAtLeast(MIN_SPAWN_DELAY)
                 accelerated = true
@@ -778,7 +702,6 @@ class PathChangeActivity : BaseActivity() {
         }
     }
 
-    // Sprawdza, czy należy się bonus czasowy za serię
     private fun checkComboBonus() {
         val bonusSeconds = when (successfulStreak) {
             5 -> COMBO_BONUS_5
@@ -799,7 +722,6 @@ class PathChangeActivity : BaseActivity() {
         }
     }
 
-    // Aktualizuje widoczność i tekst licznika serii
     private fun updateStreakDisplay() {
         if (successfulStreak > 1) {
             streakCountText.text = String.format(Locale.US, "x%d", successfulStreak)
@@ -807,23 +729,6 @@ class PathChangeActivity : BaseActivity() {
         } else {
             streakCountText.visibility = View.GONE
         }
-    }
-
-    // Obsługa pauzy systemowej
-    override fun onPause() {
-        super.onPause()
-        if (isGameRunning && !isGameEnding && !pauseMenu.isPaused && !isChangingConfigurations) {
-            pauseMenu.pause()
-        }
-    }
-
-    // Czyszczenie zasobów przy niszczeniu aktywności
-    override fun onDestroy() {
-        super.onDestroy()
-        timerProgressBar.stop()
-        countdownManager.cancel()
-        stopSpawningBalls()
-        clearAllBalls()
     }
 
     private fun handleGameOver() {
@@ -837,7 +742,6 @@ class PathChangeActivity : BaseActivity() {
         showGameOverDialog(
             categoryKey = GameKeys.CATEGORY_REASONING,
             gameKey = GameKeys.GAME_PATH_CHANGE,
-            gameName = getString(R.string.path_change),
             starManager = starManager,
             timerProgressBar = timerProgressBar,
             countdownManager = countdownManager,
@@ -847,9 +751,23 @@ class PathChangeActivity : BaseActivity() {
                     currentBestScore = starManager.starCount
                 }
                 currentLevel = 1
-                // startNewGame() czyści planszę i zmienne
                 startNewGame()
             }
         )
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (isGameRunning && !isGameEnding && !pauseMenu.isPaused && !isChangingConfigurations) {
+            pauseMenu.pause()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        timerProgressBar.stop()
+        countdownManager.cancel()
+        stopSpawningBalls()
+        clearAllBalls()
     }
 }

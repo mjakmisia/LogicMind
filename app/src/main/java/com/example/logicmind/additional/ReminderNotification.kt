@@ -8,7 +8,6 @@ import java.util.Calendar
 
 object ReminderNotification {
     private const val NOTIFICATION_REQUEST_CODE = 100
-
     private const val HOUR_OF_DAY = 18
     private const val MINUTE = 13
 
@@ -23,25 +22,21 @@ object ReminderNotification {
             PendingIntent.FLAG_MUTABLE
         )
 
-        //Ustawienie pierwszego alarmu
         val calendar: Calendar = Calendar.getInstance().apply {
             timeInMillis = System.currentTimeMillis()
             set(Calendar.HOUR_OF_DAY, HOUR_OF_DAY)
             set(Calendar.MINUTE, MINUTE)
             set(Calendar.SECOND, 0)
 
-
-            //jeśli juz po 12 to ustaw na nastepny dzień
             if (timeInMillis < System.currentTimeMillis()) {
                 add(Calendar.DAY_OF_YEAR, 1)
             }
         }
 
-        //ustawienie powtarzania alarmu
         alarmManager.setInexactRepeating(
-            AlarmManager.RTC_WAKEUP, //wybudza urządzenie
+            AlarmManager.RTC_WAKEUP,
             calendar.timeInMillis,
-            AlarmManager.INTERVAL_DAY, //powtarza co 24h
+            AlarmManager.INTERVAL_DAY,
             pendingIntent
         )
     }
@@ -57,8 +52,5 @@ object ReminderNotification {
             PendingIntent.FLAG_MUTABLE
         )
         alarmManager.cancel(pendingIntent)
-
     }
-
-
 }

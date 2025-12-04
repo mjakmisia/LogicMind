@@ -22,34 +22,28 @@ class SettingsActivity : BaseActivity() {
 
         supportActionBar?.hide()
 
-        //aktualne ustawienia
         val sharedPrefs = getSharedPreferences("Settings", MODE_PRIVATE)
         val currentLang = sharedPrefs.getString("My_Lang", "pl") ?: "pl"
         selectedLanguage = currentLang
 
 
-        //stan przełączników na start
         val isDarkModeNow = (resources.configuration.uiMode and
                 Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
 
         val isSoundEnabledSaved = sharedPrefs.getBoolean("Sound_Enabled", true)
         binding.switchSound.isChecked = isSoundEnabledSaved
 
-        //ustawia stan SoundManager na start
         SoundManager.isSoundEnabled = isSoundEnabledSaved
 
         val isNotificationsEnabledSaved = sharedPrefs.getBoolean("Notifications_Enabled", true)
         binding.switchNotification.isChecked = isNotificationsEnabledSaved
 
-        // czy alarm jest aktywny przy starcie, jeśli był włączony
         if (isNotificationsEnabledSaved) {
             ReminderNotification.scheduleNotification(this)
         } else {
             ReminderNotification.cancelNotification(this)
         }
 
-        //jeśli istnieje zapisane ustawienie w SharedPrefs — użyj go,
-        //w przeciwnym razie ustaw zgodnie z aktualnym trybem systemowym
         val savedDarkMode = sharedPrefs.contains("DarkMode_Enabled")
         binding.switchDarkMode.isChecked = if (savedDarkMode) {
             sharedPrefs.getBoolean("DarkMode_Enabled", false)
@@ -59,8 +53,6 @@ class SettingsActivity : BaseActivity() {
 
         binding.switchNotification.isChecked = sharedPrefs.getBoolean("Notification_Enabled", true)
 
-
-        //wybór języka
         updateLanguageSelectionUI(currentLang)
 
         binding.langPl.setOnClickListener {
@@ -73,7 +65,6 @@ class SettingsActivity : BaseActivity() {
             updateLanguageSelectionUI("en")
         }
 
-        // Tryb nocny
         binding.switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
             sharedPrefs.edit { putBoolean("DarkMode_Enabled", isChecked) }
             AppCompatDelegate.setDefaultNightMode(
@@ -83,7 +74,6 @@ class SettingsActivity : BaseActivity() {
         }
 
 
-        // przycisk zapisz
         binding.saveButton.setOnClickListener {
             val currentLangBeforeChange = sharedPrefs.getString("My_Lang", "pl") ?: "pl"
 
@@ -106,21 +96,16 @@ class SettingsActivity : BaseActivity() {
                             apply()
                         }
 
-                        //aktualizacja SoundManager
                         SoundManager.isSoundEnabled = binding.switchSound.isChecked
 
-                        //logika planowania powiadomień
                         if (binding.switchNotification.isChecked) {
-                            // przełącznik jest włączony = zaplanuj powtarzalny alarm
                             ReminderNotification.scheduleNotification(this)
                         } else {
-                            // przełącznik jest wyłączony = anuluj istniejący alarm
                             ReminderNotification.cancelNotification(this)
                         }
 
-                        // tylko jeśli język się zmienił
                         if (selectedLanguage != currentLangBeforeChange) {
-                            recreate()   // przeładowanie całej aktywności
+                            recreate()
                         }
 
                     }
@@ -129,7 +114,6 @@ class SettingsActivity : BaseActivity() {
             }
         }
 
-        // reset ustawień
         binding.resetButton.setOnClickListener {
             AlertDialog.Builder(this)
                 .setTitle(getString(R.string.reset_settings_title))
@@ -158,8 +142,6 @@ class SettingsActivity : BaseActivity() {
                 .setNegativeButton(getString(R.string.cancel), null)
                 .show()
         }
-
-        // bottom navigation
         setupBottomNavigation(binding.includeBottomNav.bottomNavigationView, R.id.nav_settings)
     }
 
