@@ -6,15 +6,15 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams as ConstraintLayoutParams
+import androidx.core.view.children
+import androidx.core.view.isEmpty
+import androidx.core.view.isVisible
 import com.example.logicmind.R
 import com.example.logicmind.common.GameCountdownManager
 import com.example.logicmind.common.GameTimerProgressBar
 import com.example.logicmind.common.PauseMenu
 import com.example.logicmind.common.StarManager
-import androidx.core.view.children
-import androidx.core.view.isEmpty
-import androidx.core.view.isVisible
+import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams as ConstraintLayoutParams
 
 class LeftOrRightActivity : BaseActivity() {
     private lateinit var countdownText: TextView
@@ -205,6 +205,7 @@ class LeftOrRightActivity : BaseActivity() {
         outState.putIntegerArrayList("rightBasketTargets", ArrayList(rightBasketTargets))
         outState.putIntegerArrayList("activeGameFruits", ArrayList(activeGameFruits))
         starManager.saveState(outState)
+        saveGameStats(outState)
     }
 
     private fun restoreGameState(savedInstanceState: Bundle) {
@@ -250,6 +251,7 @@ class LeftOrRightActivity : BaseActivity() {
             displayBasketTargets()
             displayFruitQueue()
         }
+        restoreGameStats(savedInstanceState)
     }
 
     private fun updateLayoutForOrientation() {

@@ -54,6 +54,7 @@ class RoadDashActivity : BaseActivity() {
     private var spawnInterval = 1200L
     private var objectDuration = 2500L
     private val activeObjects = mutableListOf<View>()
+    private var currentBestScore = 0
 
     companion object {
         private const val BASE_TIME_SECONDS = 90
@@ -155,7 +156,9 @@ class RoadDashActivity : BaseActivity() {
     private fun setupGameLogic() {
         timerProgressBar.setTotalTime(BASE_TIME_SECONDS)
         timerProgressBar.setOnFinishCallback {
-            endGame("Czas minął!")
+            runOnUiThread {
+                handleGameOver()
+            }
         }
 
         countdownManager = GameCountdownManager(
@@ -165,6 +168,8 @@ class RoadDashActivity : BaseActivity() {
             onCountdownFinished = {
                 resetGameVariables()
                 timerProgressBar.start()
+                gameStatsManager.startReactionTracking()
+                gameStatsManager.setGameStartTime()
                 startGameLoop()
                 startSpawningObjects()
             }
@@ -188,7 +193,7 @@ class RoadDashActivity : BaseActivity() {
                 timerProgressBar.pause()
                 pauseGameLoop()
             },
-            onExit = { finish() },
+            onExit = { handleGameOver() },
             instructionTitle = getString(R.string.instructions),
             instructionMessage = getString(R.string.road_dash_instruction),
         )
@@ -362,12 +367,37 @@ class RoadDashActivity : BaseActivity() {
         toRemove.forEach { container.removeView(it) }
     }
 
-    private fun endGame(message: String) {
+    private fun handleGameOver() {
         if (isGameEnding) return
         isGameEnding = true
+
         stopGameLoop()
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-        finish()
+        removeAllObjects()
+
+        leftLaneContainer.isEnabled = false
+        rightLaneContainer.isEnabled = false
+        pauseOverlay.visibility = View.GONE
+
+        showGameOverDialog(
+            categoryKey = GameKeys.CATEGORY_COORDINATION,
+            gameKey = GameKeys.GAME_ROAD_DASH,
+            starManager = starManager,
+            timerProgressBar = timerProgressBar,
+            countdownManager = countdownManager,
+            currentBestScore = currentBestScore,
+            onRestartAction = {
+                if (starManager.starCount > currentBestScore) {
+                    currentBestScore = starManager.starCount
+                }
+                currentLevel = 1
+                resetCarsPosition()
+                resetGameVariables()
+
+                leftLaneContainer.isEnabled = true
+                rightLaneContainer.isEnabled = true
+
+            }
+        )
     }
 
     private fun stopGameLoop() {
@@ -399,6 +429,7 @@ class RoadDashActivity : BaseActivity() {
         outState.putBoolean("isLeftCarOnLeft", isLeftCarOnLeft)
         outState.putBoolean("isRightCarOnLeft", isRightCarOnLeft)
         starManager.saveState(outState)
+        saveGameStats(outState)
     }
 
     private fun restoreGameState(savedInstanceState: Bundle) {
@@ -436,6 +467,7 @@ class RoadDashActivity : BaseActivity() {
         }
 
         pauseMenu.syncWithOverlay()
+        restoreGameStats(savedInstanceState)
     }
 
     override fun onPause() {
