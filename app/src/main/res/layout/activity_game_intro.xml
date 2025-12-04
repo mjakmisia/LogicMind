@@ -7,7 +7,6 @@
     android:background="?attr/pageBackground"
     android:padding="16dp">
 
-    <!-- Guideline dla przesunięcia góry -->
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/topGuideline"
         android:layout_width="wrap_content"
@@ -15,7 +14,6 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.04" />
 
-    <!-- Guideline dla przesunięcia dołu przycisku -->
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/bottomButtonGuideline"
         android:layout_width="wrap_content"
@@ -23,7 +21,6 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.96" />
 
-    <!-- Górne przyciski -->
     <ImageButton
         android:id="@+id/btnClose"
         android:layout_width="48dp"
@@ -48,7 +45,6 @@
         app:layout_constraintTop_toTopOf="@id/topGuideline"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Ikona gry -->
     <ImageView
         android:id="@+id/gameIcon"
         android:layout_width="160dp"
@@ -59,7 +55,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Tytuł gry -->
     <TextView
         android:id="@+id/gameTitle"
         android:layout_width="0dp"
@@ -73,7 +68,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Kontener na sekcje -->
     <LinearLayout
         android:id="@+id/sectionsContainer"
         android:layout_width="0dp"
@@ -85,7 +79,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Przycisk Start -->
     <Button
         android:id="@+id/btnStartGame"
         android:layout_width="0dp"
