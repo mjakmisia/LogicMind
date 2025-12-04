@@ -304,7 +304,7 @@ class StatisticsActivity : BaseActivity() {
                     }
 
                     val formattedAccuracy = if (avgAccuracyVal > 0) {
-                        String.format(Locale.getDefault(), "%.1f%", avgAccuracyVal)
+                        String.format(Locale.getDefault(), "%.1f%%", avgAccuracyVal)
                     } else {
                         "-"
                     }
