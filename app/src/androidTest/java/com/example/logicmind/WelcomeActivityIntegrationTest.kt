@@ -20,7 +20,6 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class WelcomeActivityIntegrationTest {
 
-    //uruchamia WelcomeActivity
     @get:Rule
     val activityRule = ActivityScenarioRule(WelcomeActivity::class.java)
 
@@ -45,6 +44,7 @@ class WelcomeActivityIntegrationTest {
         onView(withId(R.id.etPassword)).perform(typeText(PASSWORD), closeSoftKeyboard())
         onView(withId(R.id.etEmail)).perform(typeText(INVALID_EMAIL), closeSoftKeyboard())
         onView(withId(R.id.btnRegister)).perform(click())
+        Thread.sleep(2000)
         onView(withId(R.id.etUsername)).check(doesNotExist())
         onView(withId(R.id.btnRegister)).check(matches(isDisplayed()))
     }
