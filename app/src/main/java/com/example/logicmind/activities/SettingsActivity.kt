@@ -75,15 +75,14 @@ class SettingsActivity : BaseActivity() {
 
 
         binding.saveButton.setOnClickListener {
-            val currentLangBeforeChange = sharedPrefs.getString("My_Lang", "pl") ?: "pl"
-
+            val currentLangBeforeChange = sharedPrefs
+                .getString("My_Lang", "pl") ?: "pl"
             if (selectedLanguage != null) {
                 val confirmMessage = if (currentLangBeforeChange == "pl") {
                     "Czy na pewno chcesz zapisać ustawienia?"
                 } else {
                     "Are you sure you want to save changes?"
                 }
-
                 AlertDialog.Builder(this)
                     .setTitle(getString(R.string.changes))
                     .setMessage(confirmMessage)
@@ -95,21 +94,17 @@ class SettingsActivity : BaseActivity() {
                             putBoolean("Notifications_Enabled", binding.switchNotification.isChecked)
                             apply()
                         }
-
-                        SoundManager.isSoundEnabled = binding.switchSound.isChecked
-
+                        SoundManager.isSoundEnabled =
+                            binding.switchSound.isChecked
                         if (binding.switchNotification.isChecked) {
                             ReminderNotification.scheduleNotification(this)
                         } else {
                             ReminderNotification.cancelNotification(this)
                         }
-
                         if (selectedLanguage != currentLangBeforeChange) {
                             recreate()
                         }
-
-                    }
-                    .setNegativeButton(android.R.string.cancel, null)
+                    }.setNegativeButton(android.R.string.cancel, null)
                     .show()
             }
         }

@@ -21,17 +21,21 @@ class GameStatsManagerTest {
     fun calculateAccuracy_zeroAttempts_returnsZero() {
         val expected = 0.0
         val actual = manager.callCalculateAccuracy()
-        assertEquals(expected, actual, 0.001, "Celność powinna wynieść 0.0 przy braku prób")
+        assertEquals(
+            expected, actual, 0.001,
+            "Celność powinna wynieść 0.0 przy braku prób"
+        )
     }
-
-
     @Test
     fun calculateAccuracy_fullSucces_returns100() {
         manager.testTotalAttempts = 5
         manager.testSuccessfulAttempts = 5
         val expected = 100.0
         val actual = manager.callCalculateAccuracy()
-        assertEquals(expected, actual, 0.001, "Celność powinna wynieść 100.0 przy pełnym sukcesie")
+        assertEquals(
+            expected, actual, 0.001,
+            "Celność powinna wynieść 100.0 przy pełnym sukcesie"
+        )
     }
 
     @Test
