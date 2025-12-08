@@ -604,7 +604,6 @@ class WordSearchActivity : BaseActivity() {
                 }
                 currentLevel = 1
                 overlayView.isEnabled = true
-                startNewGame()
             }
         )
     }

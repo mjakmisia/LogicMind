@@ -588,7 +588,6 @@ class LeftOrRightActivity : BaseActivity() {
                 fruitsToSpawnLimit = 0
                 fruitQueue.clear()
                 fruitQueueContainer.removeAllViews()
-                startNewGame()
             }
         )
     }

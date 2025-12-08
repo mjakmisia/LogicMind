@@ -888,7 +888,10 @@ class SymbolRaceActivity : BaseActivity() {
                 blueContainer.isEnabled = true
                 redContainer.isEnabled = true
 
-                startNewGame()
+                trackLine.visibility = View.GONE
+                blueContainer.visibility = View.INVISIBLE
+                redContainer.visibility = View.INVISIBLE
+                tempoInfoText.visibility = View.GONE
             }
         )
     }

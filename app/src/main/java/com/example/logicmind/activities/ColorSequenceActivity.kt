@@ -591,7 +591,6 @@ class ColorSequenceActivity : BaseActivity() {
                 currentLevel = 1
                 userSequence.clear()
                 currentSequence.clear()
-                startNewGame()
             }
         )
     }

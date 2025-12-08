@@ -751,7 +751,8 @@ class PathChangeActivity : BaseActivity() {
                     currentBestScore = starManager.starCount
                 }
                 currentLevel = 1
-                startNewGame()
+                stopSpawningBalls()
+                clearAllBalls()
             }
         )
     }

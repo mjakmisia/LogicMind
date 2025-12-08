@@ -561,8 +561,6 @@ class CardMatchActivity : BaseActivity() {
 
                 currentLevel = 1
                 pendingFlipCardIndex = -1
-
-                startNewGame()
             }
         )
     }
