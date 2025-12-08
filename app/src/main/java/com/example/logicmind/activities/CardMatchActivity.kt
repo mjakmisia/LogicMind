@@ -470,6 +470,8 @@ class CardMatchActivity : BaseActivity() {
             if (cards.all { it.isMatched || it.value == BOMB_VALUE }) {
                 currentLevel++
 
+                gridLayout.isEnabled = false
+
                 timerProgressBar.pause()
                 timerProgressBar.addTime(30)
 
