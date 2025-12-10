@@ -85,8 +85,7 @@ class ProfileActivity : BaseActivity() {
         btnDeleteAccount.background = drawable
 
         btnDeleteAccount.setOnClickListener {
-
-        val builder = AlertDialog.Builder(this)
+            val builder = AlertDialog.Builder(this)
             builder.setTitle(R.string.delete_account)
             builder.setMessage(R.string.delete_account_popup)
 

@@ -1,13 +1,13 @@
 package com.example.logicmind.common
 
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import com.example.logicmind.databinding.DialogGameOverBinding
+import androidx.core.graphics.drawable.toDrawable
 
 class GameOverDialogFragment : DialogFragment() {
     private var _binding: DialogGameOverBinding? = null
@@ -43,14 +43,13 @@ class GameOverDialogFragment : DialogFragment() {
         }
 
         binding.btnExitGame.setOnClickListener {
-            dismiss()
             onExitListener?.invoke()
         }
     }
 
     override fun onStart() {
         super.onStart()
-        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog?.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
         dialog?.window?.setLayout(
             (resources.displayMetrics.widthPixels * 0.90).toInt(),
             ViewGroup.LayoutParams.WRAP_CONTENT

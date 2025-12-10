@@ -472,7 +472,7 @@ class RoadDashActivity : BaseActivity() {
 
     override fun onPause() {
         super.onPause()
-        if (!pauseMenu.isPaused && !isChangingConfigurations) {
+        if (!isGameEnding && !pauseMenu.isPaused && !isChangingConfigurations) {
             pauseMenu.pause()
         }
     }

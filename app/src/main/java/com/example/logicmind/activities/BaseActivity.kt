@@ -402,9 +402,11 @@ open class BaseActivity : AppCompatActivity() {
 
         dialog.onExitListener = {
             val intent = Intent(this, MainActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
-            finish()
+
+            @Suppress("DEPRECATION")
+            overridePendingTransition(0, 0)
         }
 
         dialog.show(supportFragmentManager, "GameOverDialog")

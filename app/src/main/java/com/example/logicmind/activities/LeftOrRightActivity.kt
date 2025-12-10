@@ -596,7 +596,7 @@ class LeftOrRightActivity : BaseActivity() {
 
     override fun onPause() {
         super.onPause()
-        if (!pauseMenu.isPaused && !isChangingConfigurations) {
+        if (!pauseMenu.isPaused && !isChangingConfigurations && !isGameEnding) {
             pauseMenu.pause()
         }
     }
