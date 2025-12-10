@@ -23,6 +23,7 @@ import com.example.logicmind.common.StarManager
 import kotlin.random.Random
 
 class ColorSequenceActivity : BaseActivity() {
+    private val handler = Handler(Looper.getMainLooper())
     private var keyButtons: List<KeyButton> = emptyList()
     private var currentSequence = mutableListOf<Int>()
     private var userSequence = mutableListOf<Int>()
@@ -126,6 +127,7 @@ class ColorSequenceActivity : BaseActivity() {
             pauseOverlay = pauseOverlay,
             pauseButton = pauseButton,
             onRestart = {
+                cancelAllDelayedActions()
                 if (pauseMenu.isPaused) pauseMenu.resume()
                 currentLevel = 1
                 timerProgressBar.stop()
@@ -263,6 +265,7 @@ class ColorSequenceActivity : BaseActivity() {
     }
 
     private fun startNewGame() {
+        cancelAllDelayedActions()
         gameStatsManager.startReactionTracking()
         if (pauseMenu.isPaused) {
             pauseMenu.resume()
@@ -554,7 +557,7 @@ class ColorSequenceActivity : BaseActivity() {
             override fun run() {
                 val activity = activityRef.get() ?: return
                 if (pauseMenu.isPaused) {
-                    Handler(Looper.getMainLooper()).postDelayed(this, interval)
+                    handler.postDelayed(this, interval)
                     return
                 }
                 remaining -= interval
@@ -566,14 +569,19 @@ class ColorSequenceActivity : BaseActivity() {
                     activity.runOnUiThread { action() }
                     sequenceDelayRemaining = 0L
                 } else {
-                    Handler(Looper.getMainLooper()).postDelayed(this, interval)
+                    handler.postDelayed(this, interval)
                 }
             }
         }
-        Handler(Looper.getMainLooper()).postDelayed(runnable, interval)
+        handler.postDelayed(runnable, interval)
+    }
+
+    private fun cancelAllDelayedActions() {
+        handler.removeCallbacksAndMessages(null)
     }
 
     private fun handleGameOver() {
+        cancelAllDelayedActions()
         isGameEnding = true
         gridLayout.isEnabled = false
         keyButtons.forEach { it.view.isEnabled = false }
@@ -606,6 +614,7 @@ class ColorSequenceActivity : BaseActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        cancelAllDelayedActions()
         timerProgressBar.stop()
         countdownManager.cancel()
     }
