@@ -7,9 +7,6 @@
     <string name="category_attention">Skupienie</string>
     <string name="category_memory">Pamięć</string>
     <string name="unknown">Nieznane</string>
-    <string name="title_home">Strona główna</string>
-    <string name="title_dashboard">Panel główny</string>
-    <string name="title_notifications">Powiadomienia</string>
     <string name="home">Strona główna</string>
     <string name="profile">Profil</string>
     <string name="settings">Ustawienia</string>
@@ -30,7 +27,6 @@
     <string name="pause">Zatrzymaj</string>
     <string name="reset_progress">Resetuj postęp</string>
     <string name="reset_settings">Resetuj ustawienia</string>
-    <string name="save">Zapisz</string>
     <string name="cancel">Anuluj</string>
     <string name="reset_settings_title">Przywracanie ustawień</string>
     <string name="reset_settings_message">Czy na pewno chcesz wrócić do ustawień domyślnych?</string>
@@ -60,7 +56,6 @@
     <string name="password">Hasło</string>
     <string name="password_8_digits">Min. 8 znaków</string>
     <string name="password_capital_letter">Co najmniej jedna duża litera</string>
-    <string name="password_number">Co najmniej jedna cyfra</string>
     <string name="log_in">Zaloguj się</string>
     <string name="logout">Wyloguj się</string>
     <string name="register">Zarejestruj się</string>
@@ -68,13 +63,10 @@
     <string name="game_statistics">Statystyki gier</string>
     <string name="avg_reaction_time">Średni czas reakcji</string>
     <string name="accuracy">Poprawność odpowiedzi</string>
-    <string name="total_points">Łączna ilość punktów</string>
-    <string name="highest_score">Najwyższy wynik</string>
     <string name="avg_reaction_time_value">Średni czas reakcji: %1$s</string>
     <string name="accuracy_value">Poprawność: %1$s%%</string>
     <string name="total_points_value">Łączna liczba punktów: %1$s</string>
     <string name="highest_score_value">Najlepszy wynik: %1$s</string>
-    <string name="no_data">Brak danych</string>
     <string name="login_text_profile">Zaloguj się, żeby zobaczyć profil użytkownika</string>
     <string name="login_text_statistics">Zaloguj się, żeby zobaczyć statystyki użytkownika</string>
     <string name="login_button_text">ZALOGUJ SIĘ!</string>
@@ -93,9 +85,7 @@
     <string name="zero_days">0 dni</string>
     <string name="reset_progress_message">Czy na pewno chcesz zresetować wszystkie postępy? Tej operacji nie można cofnąć.</string>
     <string name="reset_progress_title">Reset postępów</string>
-    <string name="password_change">Zmień hasło</string>
     <string name="change_password_title">Zmiana hasła</string>
-    <string name="new_password_hint">Nowe hasło</string>
     <string name="change_btn">Zmień</string>
     <string name="right_lane_description">Przełącz na prawy pas</string>
     <string name="left_lane_description">Przełącz na lewy pas</string>
@@ -126,7 +116,6 @@
 
     <string name="mon_letter">Pon</string>
     <string name="tue_letter">Wt</string>
-    <string name="wed_letter">Śr</string>
     <string name="thu_letter">Czw</string>
     <string name="fri_letter">Pt</string>
     <string name="sat_letter">Sob</string>

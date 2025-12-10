@@ -25,7 +25,6 @@
             android:padding="16dp">
 
             <TextView
-                android:id="@+id/tvStatisticsTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="48dp"
@@ -189,7 +188,6 @@
 
 
             <TextView
-                android:id="@+id/tvCoordinationHeader"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
@@ -220,7 +218,6 @@
                         android:orientation="vertical">
 
                         <TextView
-                            android:id="@+id/tvCoordinationGame1Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/road_dash"
@@ -279,7 +276,6 @@
                         android:paddingStart="8dp">
 
                         <TextView
-                            android:id="@+id/tvCoordinationGame2Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/symbol_race"
@@ -332,7 +328,6 @@
             </androidx.cardview.widget.CardView>
 
             <TextView
-                android:id="@+id/tvMemoryHeader"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
@@ -363,7 +358,6 @@
                         android:orientation="vertical">
 
                         <TextView
-                            android:id="@+id/tvMemoryGame1Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/color_sequence"
@@ -422,7 +416,6 @@
                         android:paddingStart="8dp">
 
                         <TextView
-                            android:id="@+id/tvMemoryGame2Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/card_match"
@@ -475,7 +468,6 @@
             </androidx.cardview.widget.CardView>
 
             <TextView
-                android:id="@+id/tvAttentionHeader"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
@@ -506,7 +498,6 @@
                         android:orientation="vertical">
 
                         <TextView
-                            android:id="@+id/tvAttentionGame1Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/word_search"
@@ -565,7 +556,6 @@
                         android:paddingStart="8dp">
 
                         <TextView
-                            android:id="@+id/tvAttentionGame2Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/left_or_right"
@@ -618,7 +608,6 @@
             </androidx.cardview.widget.CardView>
 
             <TextView
-                android:id="@+id/tvReasoningHeader"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
@@ -649,7 +638,6 @@
                         android:orientation="vertical">
 
                         <TextView
-                            android:id="@+id/tvReasoningGame1Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/number_addition"
@@ -708,7 +696,6 @@
                         android:paddingStart="8dp">
 
                         <TextView
-                            android:id="@+id/tvReasoningGame2Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/path_change"

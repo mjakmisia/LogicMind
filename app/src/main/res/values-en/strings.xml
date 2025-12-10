@@ -7,9 +7,6 @@
     <string name="category_attention">Attention</string>
     <string name="category_memory">Memory</string>
     <string name="unknown">Unknown</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
     <string name="home">Home</string>
     <string name="profile">Profile</string>
     <string name="settings">Settings</string>
@@ -30,7 +27,6 @@
     <string name="pause">Stop</string>
     <string name="reset_progress">Reset proggress</string>
     <string name="reset_settings">Reset settings</string>
-    <string name="save">Save</string>
     <string name="cancel">Cancel</string>
     <string name="reset_settings_title">Resetting progress</string>
     <string name="reset_settings_message">Are you sure you want to return to default settings?</string>
@@ -60,7 +56,6 @@
     <string name="password">Password</string>
     <string name="password_8_digits">Minimum of 8 characters</string>
     <string name="password_capital_letter">At least 1 uppercase letter</string>
-    <string name="password_number">At least 1 number</string>
     <string name="log_in">Log in</string>
     <string name="logout">Log out</string>
     <string name="register">Register</string>
@@ -68,13 +63,10 @@
     <string name="game_statistics">Games statistics</string>
     <string name="avg_reaction_time">Average reaction time</string>
     <string name="accuracy">Accuracy</string>
-    <string name="total_points">Total points</string>
-    <string name="highest_score">Highest score</string>
     <string name="avg_reaction_time_value">Average reaction time: %1$s</string>
     <string name="accuracy_value">Accuracy: %1$s%%</string>
     <string name="total_points_value">Total points: %1$s</string>
     <string name="highest_score_value">Highest score: %1$s</string>
-    <string name="no_data">No data</string>
     <string name="login_text_profile">Log in to view your user profile</string>
     <string name="login_text_statistics">Log in to view your user statistics</string>
     <string name="login_button_text">LOG IN!</string>
@@ -89,15 +81,11 @@
     <string name="red_container">Red touch zone</string>
     <string name="last_played_game">Last played game: %1$s (%2$s)</string>
     <string name="last_played_game_none">Ostatnio zagrana gra: none</string>
-    <string name="current_streak_text">%1$d days</string>
-    <string name="best_streak_text">%1$d days</string>
     <string name="error_fetching_user_data">Error fetching user data</string>
     <string name="zero_days">0 days</string>
     <string name="reset_progress_message">Are you sure you want to reset all your progress? This action cannot be undone.</string>
     <string name="reset_progress_title">Reset Progress</string>
-    <string name="password_change">Change password</string>
     <string name="change_password_title">Change password</string>
-    <string name="new_password_hint">New password (min. 8 chars)</string>
     <string name="change_btn">Change</string>
     <string name="right_lane_description">Switch to the right lane</string>
     <string name="left_lane_description">Switch to the left lane</string>
@@ -128,7 +116,6 @@
 
     <string name="mon_letter">Mon</string>
     <string name="tue_letter">Tue</string>
-    <string name="wed_letter">Wed</string>
     <string name="thu_letter">Thu</string>
     <string name="fri_letter">Fri</string>
     <string name="sat_letter">Sat</string>
