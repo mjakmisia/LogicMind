@@ -148,7 +148,7 @@ class StatisticsActivity : BaseActivity() {
                 .child(gameName)
                 .get()
                 .addOnSuccessListener { snapshot ->
-                    val messageIfEmpty = "Zagraj w grę aby zobaczyć statystyki"
+                    val messageIfEmpty = getString(R.string.stats_empty_message)
 
                     if (snapshot.exists()) {
                         val data = snapshot.value as? Map<*, *>
@@ -189,7 +189,7 @@ class StatisticsActivity : BaseActivity() {
                     }
                 }
                 .addOnFailureListener {
-                    val messageIfError = "Błąd pobierania danych"
+                    val messageIfError = getString(R.string.data_error_short)
                     setStatsForGame(
                         viewIds[0], viewIds[1], viewIds[2], viewIds[3],
                         messageIfError, messageIfError, messageIfError, messageIfError
@@ -319,8 +319,9 @@ class StatisticsActivity : BaseActivity() {
             }
             .addOnFailureListener {
                 Log.e("STATS_DEBUG", "Błąd pobierania globalnych statystyk", it)
-                binding.tvGlobalReactionTime.text = "Błąd"
-                binding.tvGlobalAccuracy.text = "Błąd"
+                val errorMsg = getString(R.string.error_short)
+                binding.tvGlobalReactionTime.text = errorMsg
+                binding.tvGlobalAccuracy.text = errorMsg
             }
     }
 }

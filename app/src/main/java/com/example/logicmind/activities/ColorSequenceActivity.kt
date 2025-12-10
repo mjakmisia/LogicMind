@@ -485,7 +485,9 @@ class ColorSequenceActivity : BaseActivity() {
             if (currentSequence.size >= config.maxLength) {
                 currentLevel++
                 timerProgressBar.addTime(15)
-                Toast.makeText(this, "Świetnie! Nowy poziom: $currentLevel +15s BONUS", Toast.LENGTH_SHORT).show()
+
+                val msg = getString(R.string.level_up_bonus_message, currentLevel)
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
 
                 val newConfig = getSequenceConfig(currentLevel)
                 numKeys = newConfig.numKeys
@@ -503,7 +505,7 @@ class ColorSequenceActivity : BaseActivity() {
                 }
             }
         } else {
-            Toast.makeText(this, "Błąd! Powtórka sekwencji.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.sequence_error_repeat), Toast.LENGTH_SHORT).show()
             userSequence.clear()
             pendingShowSequenceDelay = 1500L
             runDelayed(1500L) {

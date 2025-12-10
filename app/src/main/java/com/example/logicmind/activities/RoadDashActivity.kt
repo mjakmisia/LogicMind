@@ -346,7 +346,7 @@ class RoadDashActivity : BaseActivity() {
             starManager.increment()
         } else {
             timerProgressBar.subtractTime(3)
-            Toast.makeText(this, "-3 sekundy!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.mistake_penalty_toast), Toast.LENGTH_SHORT).show()
         }
     }
 

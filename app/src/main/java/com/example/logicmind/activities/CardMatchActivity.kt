@@ -417,7 +417,7 @@ class CardMatchActivity : BaseActivity() {
             flipCard(card, true)
             timerProgressBar.subtractTime(10)
             card.isMatched = true
-            Toast.makeText(this, "Bomba! -10s", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.bomb_penalty_toast), Toast.LENGTH_SHORT).show()
             SoundManager.play(this, R.raw.explosion)
 
             val firstToFlip = firstCard

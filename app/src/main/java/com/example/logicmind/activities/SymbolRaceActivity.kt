@@ -642,6 +642,8 @@ class SymbolRaceActivity : BaseActivity() {
 
     private fun handleError() {
         timerProgressBar.subtractTime(6)
+        Toast.makeText(this, "-6 s!", Toast.LENGTH_SHORT).show()
+
         successfulStreak = 0
         totalMoves++
         accelerateIfNeeded()

@@ -90,10 +90,10 @@ class ProfileActivity : BaseActivity() {
             builder.setTitle(R.string.delete_account)
             builder.setMessage(R.string.delete_account_popup)
 
-            builder.setPositiveButton("Tak") { _, _ ->
+            builder.setPositiveButton(R.string.yes) { _, _ ->
                 deleteAccount()
             }
-            builder.setNegativeButton("Nie") { dialog, _ ->
+            builder.setNegativeButton(R.string.no) { dialog, _ ->
                 dialog.dismiss()
             }
             val dialog = builder.create()
@@ -102,14 +102,14 @@ class ProfileActivity : BaseActivity() {
 
         binding.buttonLogout.setOnClickListener {
             AlertDialog.Builder(this)
-                .setTitle("Wylogowanie")
-                .setMessage("Czy na pewno chcesz się wylogować?")
-                .setPositiveButton("Tak") { _, _ ->
+                .setTitle(getString(R.string.logout_title))
+                .setMessage(getString(R.string.logout_message))
+                .setPositiveButton(R.string.yes) { _, _ ->
                     auth.signOut()
                     startActivity(Intent(this, WelcomeActivity::class.java))
                     finish()
                 }
-                .setNegativeButton("Nie", null)
+                .setNegativeButton(R.string.no, null)
                 .show()
         }
     }
@@ -119,7 +119,7 @@ class ProfileActivity : BaseActivity() {
         if (user == null || !isUserLoggedIn()) return
 
         val input = android.widget.EditText(this).apply {
-            hint = "Nowe hasło (min. 8 znaków, wielka litera i cyfra)"
+            hint = getString(R.string.new_password_hint_full)
             inputType =
                 android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
             setPadding(50, 30, 50, 30)
@@ -132,9 +132,9 @@ class ProfileActivity : BaseActivity() {
         }
 
         AlertDialog.Builder(this)
-            .setTitle("Zmiana hasła")
+            .setTitle(getString(R.string.change_password_title))
             .setView(container)
-            .setPositiveButton("Zmień") { dialog, _ ->
+            .setPositiveButton(getString(R.string.change_btn)) { dialog, _ ->
                 val newPassword = input.text.toString().trim()
 
                 if (newPassword.length < 8) {
@@ -272,7 +272,7 @@ class ProfileActivity : BaseActivity() {
                 binding.scrollView.visibility = View.VISIBLE
 
                 if (snapshot.exists()) {
-                    val username = snapshot.child("username").value as? String ?: "Brak nazwy"
+                    val username = snapshot.child("username").value as? String ?: getString(R.string.no_name)
                     val currentStreak = calculateDisplayStreak(snapshot)
                     val bestStreak = snapshot.child("bestStreak").value as? Long ?: 0
 
@@ -281,9 +281,17 @@ class ProfileActivity : BaseActivity() {
                         .value as? Long ?: 0
 
                     binding.textUsername.text = username
-                    binding.textCurrentStreak.text =
-                        getString(R.string.current_streak_text, currentStreak)
-                    binding.textBestStreak.text = getString(R.string.best_streak_text, bestStreak)
+
+                    binding.textCurrentStreak.text = resources.getQuantityString(
+                        R.plurals.streak_days_format,
+                        currentStreak,
+                        currentStreak
+                    )
+                    binding.textBestStreak.text = resources.getQuantityString(
+                        R.plurals.streak_days_format,
+                        bestStreak.toInt(),
+                        bestStreak
+                    )
 
                     binding.tvProfileTotalStars.text = totalStars.toString()
                 } else {
@@ -297,11 +305,13 @@ class ProfileActivity : BaseActivity() {
                 binding.scrollView.visibility = View.VISIBLE
 
                 Log.e("PROFILE", "Błąd pobierania danych użytkownika: ${e.message}")
-                Toast.makeText(this, "Błąd pobierania danych: ${e.message}", Toast.LENGTH_SHORT)
+                Toast.makeText(this, getString(R.string.data_fetch_error, e.message), Toast.LENGTH_SHORT)
                     .show()
                 binding.textUsername.text = getString(R.string.error_fetching_user_data)
-                binding.textCurrentStreak.text = getString(R.string.zero_days)
-                binding.textBestStreak.text = getString(R.string.zero_days)
+
+                binding.textCurrentStreak.text = resources.getQuantityString(R.plurals.streak_days_format, 0, 0)
+                binding.textBestStreak.text = resources.getQuantityString(R.plurals.streak_days_format, 0, 0)
+
                 binding.tvProfileTotalStars.text = "-"
             }
     }
@@ -314,21 +324,18 @@ class ProfileActivity : BaseActivity() {
             db.getReference("users").child(uid)
                 .removeValue()
                 .addOnSuccessListener {
-
                     user.delete()
                         .addOnSuccessListener {
-                            Toast.makeText(this, "Konto zostało usunięte", Toast.LENGTH_SHORT)
+                            Toast.makeText(this, getString(R.string.account_deleted), Toast.LENGTH_SHORT)
                                 .show()
-
                             startActivity(Intent(this, WelcomeActivity::class.java))
                             finish()
-
                         }
                         .addOnFailureListener { e ->
                             Log.e("PROFILE", "Błąd usuwania konta użytkownika: ${e.message}")
                             Toast.makeText(
                                 this,
-                                "Nie udało się usunąć konta: ${e.message}",
+                                getString(R.string.account_delete_error, e.message),
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
@@ -337,20 +344,19 @@ class ProfileActivity : BaseActivity() {
                     Log.e("PROFILE", "Błąd usuwania danych użytkownika: ${e.message}")
                     Toast.makeText(
                         this,
-                        "Nie udało się usunąć danych: ${e.message}",
+                        getString(R.string.data_delete_error, e.message),
                         Toast.LENGTH_SHORT
                     ).show()
                 }
         } else {
-            Toast.makeText(this, "Brak zalogowanego użytkownika", Toast.LENGTH_SHORT).show()
-
+            Toast.makeText(this, getString(R.string.no_user_logged_in), Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun resetUserProgress() {
         val user = FirebaseAuth.getInstance().currentUser
         if (user == null) {
-            Toast.makeText(this, "Brak zalogowanego użytkownika", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.no_user_logged_in), Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -360,7 +366,7 @@ class ProfileActivity : BaseActivity() {
         AlertDialog.Builder(this)
             .setTitle(R.string.reset_progress_title)
             .setMessage(getString(R.string.reset_progress_message))
-            .setPositiveButton("Tak") { _, _ ->
+            .setPositiveButton(R.string.yes) { _, _ ->
                 userRef.get().addOnSuccessListener { snapshot ->
                     if (!snapshot.exists()) return@addOnSuccessListener
 
@@ -395,24 +401,23 @@ class ProfileActivity : BaseActivity() {
 
                     userRef.updateChildren(updates)
                         .addOnSuccessListener {
-                            Toast.makeText(this, "Postępy zostały zresetowane", Toast.LENGTH_SHORT)
+                            Toast.makeText(this, getString(R.string.progress_reset_success), Toast.LENGTH_SHORT)
                                 .show()
                             loadUserData(uid)
                         }
                         .addOnFailureListener { e ->
                             Toast.makeText(
                                 this,
-                                "Błąd resetowania danych: ${e.message}",
+                                getString(R.string.data_reset_error, e.message),
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
                 }.addOnFailureListener { e ->
-                    Toast.makeText(this, "Błąd pobierania danych: ${e.message}", Toast.LENGTH_SHORT)
+                    Toast.makeText(this, getString(R.string.data_fetch_error, e.message), Toast.LENGTH_SHORT)
                         .show()
                 }
             }
-            .setNegativeButton("Nie", null)
+            .setNegativeButton(R.string.no, null)
             .show()
     }
-
 }

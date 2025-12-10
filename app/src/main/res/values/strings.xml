@@ -89,8 +89,6 @@
     <string name="red_container">Czerwona strefa dotyku</string>
     <string name="last_played_game">%1$s (%2$s)</string>
     <string name="last_played_game_none">Ostatnio zagrana gra: brak</string>
-    <string name="current_streak_text">%1$d dni</string>
-    <string name="best_streak_text">%1$d dni</string>
     <string name="error_fetching_user_data">Błąd pobierania danych użytkownika</string>
     <string name="zero_days">0 dni</string>
     <string name="reset_progress_message">Czy na pewno chcesz zresetować wszystkie postępy? Tej operacji nie można cofnąć.</string>
@@ -133,6 +131,53 @@
     <string name="fri_letter">Pt</string>
     <string name="sat_letter">Sob</string>
     <string name="sun_letter">Nd</string>
+
+    <plurals name="streak_days_format">
+        <item quantity="one">%d dzień</item>
+        <item quantity="other">%d dni</item>
+    </plurals>
+
+    <string name="notification_title">Streak!</string>
+    <string name="notification_message">Nie zapomnij o swoim streaku! Zagraj teraz aby nie stracić postępów!</string>
+    <string name="notification_channel_name">Codzienne przypomnienie</string>
+    <string name="notification_channel_desc">Kanał dla codziennych przypomnień o streaku.</string>
+
+    <string name="logout_title">Wylogowanie</string>
+    <string name="logout_message">Czy na pewno chcesz się wylogować?</string>
+    <string name="yes">Tak</string>
+    <string name="no">Nie</string>
+
+    <string name="new_password_hint_full">Nowe hasło (min. 8 znaków, wielka litera i cyfra)</string>
+    <string name="account_deleted">Konto zostało usunięte</string>
+    <string name="account_delete_error">Nie udało się usunąć konta: %1$s</string>
+    <string name="data_delete_error">Nie udało się usunąć danych: %1$s</string>
+    <string name="no_user_logged_in">Brak zalogowanego użytkownika</string>
+    <string name="no_name">Brak nazwy</string>
+
+    <string name="progress_reset_success">Postępy zostały zresetowane</string>
+    <string name="data_reset_error">Błąd resetowania danych: %1$s</string>
+    <string name="data_fetch_error">Błąd pobierania danych: %1$s</string>
+
+    <string name="save_changes_question">Czy na pewno chcesz zapisać ustawienia?</string>
+
+    <string name="bomb_penalty_toast">Bomba! -10s</string>
+    <string name="level_up_bonus_message">Świetnie! Nowy poziom: %1$d +15s BONUS</string>
+    <string name="sequence_error_repeat">Błąd! Powtórka sekwencji</string>
+    <string name="mistake_penalty_toast">Błąd! -3s</string>
+    <string name="instruction_pick_n_numbers">Wybierz %d liczby, aby suma dała cel!</string>
+    <string name="tempo_up">Tempo rośnie!</string>
+    <string name="stats_empty_message">Zagraj, aby zobaczyć</string>
+    <string name="data_error_short">Błąd danych</string>
+    <string name="error_short">Błąd</string>
+    <string name="fill_all_fields">Wypełnij wszystkie pola</string>
+    <string name="invalid_email">Niepoprawny adres e-mail</string>
+    <string name="no_internet">Brak internetu.</string>
+    <string name="guest_login_error">Nie udało się kontynuować jako gość</string>
+    <string name="registration_success">Rejestracja przebiegła pomyślnie!</string>
+    <string name="user_save_error">Błąd zapisu użytkownika</string>
+    <string name="email_collision_error">Użytkownik o podanym adresie e-mail już istnieje</string>
+    <string name="registration_error_prefix">Błąd rejestracji: %1$s</string>
+    <string name="error_not_enough_words">Błąd: Za mało słów w banku!</string>
 
 
     <!-- OPISY GIER DO INTRO -->

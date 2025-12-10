@@ -134,6 +134,53 @@
     <string name="sat_letter">Sat</string>
     <string name="sun_letter">Sun</string>
 
+    <plurals name="streak_days_format">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+
+    <string name="notification_title">Streak!</string>
+    <string name="notification_message">Don\'t forget about your streak! Play now to keep your progress!</string>
+    <string name="notification_channel_name">Daily Reminder</string>
+    <string name="notification_channel_desc">Channel for daily streak reminders.</string>
+
+    <string name="logout_title">Log out</string>
+    <string name="logout_message">Are you sure you want to log out?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+
+    <string name="new_password_hint_full">New password (min. 8 chars, uppercase &amp; digit)</string>
+    <string name="account_deleted">Account deleted</string>
+    <string name="account_delete_error">Failed to delete account: %1$s</string>
+    <string name="data_delete_error">Failed to delete data: %1$s</string>
+    <string name="no_user_logged_in">No user logged in</string>
+    <string name="no_name">No name</string>
+
+    <string name="progress_reset_success">Progress reset successfully</string>
+    <string name="data_reset_error">Error resetting data: %1$s</string>
+    <string name="data_fetch_error">Error fetching data: %1$s</string>
+
+    <string name="save_changes_question">Are you sure you want to save changes?</string>
+
+    <string name="bomb_penalty_toast">Bomb! -10s</string>
+    <string name="level_up_bonus_message">Great! New level: %1$d +15s BONUS</string>
+    <string name="sequence_error_repeat">Error! Replaying sequence</string>
+    <string name="mistake_penalty_toast">Mistake! -3s</string>
+    <string name="instruction_pick_n_numbers">Select %d numbers to sum up to the target!</string>
+    <string name="tempo_up">Speed up!</string>
+    <string name="stats_empty_message">Play to see stats</string>
+    <string name="data_error_short">Data error</string>
+    <string name="error_short">Error</string>
+    <string name="fill_all_fields">Fill in all fields</string>
+    <string name="invalid_email">Invalid email address</string>
+    <string name="no_internet">No internet connection.</string>
+    <string name="guest_login_error">Failed to continue as guest</string>
+    <string name="registration_success">Registration successful!</string>
+    <string name="user_save_error">Error saving user data</string>
+    <string name="email_collision_error">User with this email already exists</string>
+    <string name="registration_error_prefix">Registration error: %1$s</string>
+    <string name="error_not_enough_words">Error: Not enough words in the bank!</string>
+
 
     <!-- GAME INTRO DESCRIPTIONS -->
 

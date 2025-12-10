@@ -697,7 +697,7 @@ class PathChangeActivity : BaseActivity() {
             }
 
             if (accelerated) {
-                Toast.makeText(this, "Tempo rośnie!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.tempo_up), Toast.LENGTH_SHORT).show()
             }
         }
     }

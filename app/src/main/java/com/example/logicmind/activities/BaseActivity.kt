@@ -258,7 +258,6 @@ open class BaseActivity : AppCompatActivity() {
         val userId = auth.currentUser?.uid ?: return
         val userRef = db.getReference("users").child(userId)
 
-        //Fragment metody updateUserStatistics
         val statsRef = userRef.child("statistics")
         statsRef.runTransaction(object : Transaction.Handler {
             override fun doTransaction(currentData: MutableData): Transaction.Result {

@@ -5,6 +5,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.children
 import androidx.core.view.isEmpty
@@ -432,6 +433,7 @@ class LeftOrRightActivity : BaseActivity() {
                 starManager.increment()
             } else {
                 timerProgressBar.subtractTime(3)
+                Toast.makeText(this, getString(R.string.mistake_penalty_toast), Toast.LENGTH_SHORT).show()
             }
         }
 
