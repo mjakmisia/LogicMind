@@ -93,6 +93,7 @@
     <string name="right_basket">Prawy koszyk</string>
     <string name="zero_streak">x0</string>
     <string name="change">zmień</string>
+    <string name="_3_5s">3.5s</string>
 
     <string name="password_error_length">Hasło musi mieć min. 8 znaków</string>
     <string name="password_error_uppercase">Hasło musi zawierać wielką literę</string>
