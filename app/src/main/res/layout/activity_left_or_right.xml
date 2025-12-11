@@ -46,7 +46,7 @@
         android:clickable="true"
         android:focusable="true"
         android:foreground="?attr/selectableItemBackground"
-        />
+        tools:ignore="PrivateResource" />
 
     <LinearLayout
         android:layout_width="wrap_content"

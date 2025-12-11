@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -24,7 +25,8 @@
             app:icon="@drawable/ic_play"
             android:textColor="?attr/colorOnPrimary"
             android:backgroundTint="?attr/colorPrimary"
-            style="@style/PauseButton" />
+            style="@style/PauseButton"
+            tools:ignore="PrivateResource" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnRestart"
@@ -34,7 +36,8 @@
             app:icon="@drawable/ic_restart"
             android:textColor="?attr/colorOnPrimary"
             android:backgroundTint="?attr/colorPrimary"
-            style="@style/PauseButton" />
+            style="@style/PauseButton"
+            tools:ignore="PrivateResource" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnHelp"
@@ -44,7 +47,8 @@
             app:icon="@drawable/ic_help"
             android:textColor="?attr/colorOnPrimary"
             android:backgroundTint="?attr/colorPrimary"
-            style="@style/PauseButton" />
+            style="@style/PauseButton"
+            tools:ignore="PrivateResource" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnExit"
@@ -54,6 +58,7 @@
             app:icon="@drawable/ic_exit"
             android:textColor="?attr/colorOnPrimary"
             android:backgroundTint="?attr/colorPrimary"
-            style="@style/PauseButton" />
+            style="@style/PauseButton"
+            tools:ignore="PrivateResource" />
     </LinearLayout>
 </FrameLayout>

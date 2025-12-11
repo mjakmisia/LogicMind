@@ -30,16 +30,16 @@
         app:layout_constraintGuide_percent="0.33" />
 
     <ImageButton
-        android:id="@+id/btnClose"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:padding="10dp"
-        android:background="@drawable/bg_rounded_light_gray"
-        android:src="@drawable/ic_close"
-        android:contentDescription="@string/close"
-        app:tint="?attr/text"
-        app:layout_constraintTop_toTopOf="@id/topGuideline"
-        app:layout_constraintStart_toStartOf="parent" />
+    android:id="@+id/btnClose"
+    android:layout_width="48dp"
+    android:layout_height="48dp"
+    android:padding="10dp"
+    android:background="@drawable/bg_rounded_light_gray"
+    android:src="@drawable/ic_close"
+    android:contentDescription="@string/close"
+    app:tint="?attr/text"
+    app:layout_constraintTop_toTopOf="@id/topGuideline"
+    app:layout_constraintStart_toStartOf="parent" />
 
     <ImageButton
         android:id="@+id/btnHelp"
@@ -96,8 +96,8 @@
         android:textAllCaps="false"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:textColor="?attr/pageBackground"
-        tools:ignore="ButtonSize"
+        android:textColor="@color/white"
+        tools:ignore="ButtonSize,VisualLintButtonSize"
         app:layout_constraintBottom_toTopOf="@id/bottomButtonGuideline"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

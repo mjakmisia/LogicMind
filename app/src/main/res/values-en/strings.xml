@@ -96,6 +96,8 @@
     <string name="_3_5s">3.5s</string>
     <string name="game_name">Game name</string>
     <string name="empty">-</string>
+    <string name="Login">Login</string>
+    <string name="im_moving_on">I am moving on!</string>
 
     <string name="statistics_header">Game Statistics</string>
     <string name="last_played_label">Last Played</string>

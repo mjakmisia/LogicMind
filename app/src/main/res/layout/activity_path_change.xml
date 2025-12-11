@@ -128,7 +128,8 @@
         </FrameLayout>
         <FrameLayout android:layout_width="0dp" android:layout_height="0dp" app:layout_row="1" app:layout_column="4" app:layout_rowWeight="1" app:layout_columnWeight="1" app:layout_gravity="fill" android:tag="cell_empty" />
 
-        <FrameLayout android:layout_width="0dp" android:layout_height="0dp" app:layout_row="2" app:layout_column="0" app:layout_rowWeight="1" app:layout_columnWeight="1" app:layout_gravity="fill" android:tag="switch_A" android:background="?attr/selectableItemBackground">
+        <FrameLayout android:layout_width="0dp" android:layout_height="0dp" app:layout_row="2" app:layout_column="0" app:layout_rowWeight="1" app:layout_columnWeight="1" app:layout_gravity="fill" android:tag="switch_A" android:background="?attr/selectableItemBackground"
+            tools:ignore="PrivateResource">
             <ImageView android:layout_width="match_parent" android:layout_height="match_parent" android:src="@drawable/path_switch_background" />
             <ImageView android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" app:tint="#000000" />
         </FrameLayout>
@@ -138,7 +139,8 @@
         <FrameLayout android:layout_width="0dp" android:layout_height="0dp" app:layout_row="2" app:layout_column="2" app:layout_rowWeight="1" app:layout_columnWeight="1" app:layout_gravity="fill" android:tag="cell_corner_br">
             <ImageView android:layout_width="match_parent" android:layout_height="match_parent" android:src="@drawable/path_corner" android:rotation="180" android:scaleType="fitCenter" />
         </FrameLayout>
-        <FrameLayout android:layout_width="0dp" android:layout_height="0dp" app:layout_row="2" app:layout_column="3" app:layout_rowWeight="1" app:layout_columnWeight="1" app:layout_gravity="fill" android:tag="switch_B" android:background="?attr/selectableItemBackground">
+        <FrameLayout android:layout_width="0dp" android:layout_height="0dp" app:layout_row="2" app:layout_column="3" app:layout_rowWeight="1" app:layout_columnWeight="1" app:layout_gravity="fill" android:tag="switch_B" android:background="?attr/selectableItemBackground"
+            tools:ignore="PrivateResource">
             <ImageView android:layout_width="match_parent" android:layout_height="match_parent" android:src="@drawable/path_switch_background" />
             <ImageView android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" app:tint="#000000" />
         </FrameLayout>
@@ -164,7 +166,8 @@
         <FrameLayout android:layout_width="0dp" android:layout_height="0dp" app:layout_row="4" app:layout_column="1" app:layout_rowWeight="1" app:layout_columnWeight="1" app:layout_gravity="fill" android:tag="cell_corner_br">
             <ImageView android:layout_width="match_parent" android:layout_height="match_parent" android:src="@drawable/path_corner" android:rotation="180" android:scaleType="fitCenter" />
         </FrameLayout>
-        <FrameLayout android:layout_width="0dp" android:layout_height="0dp" app:layout_row="4" app:layout_column="2" app:layout_rowWeight="1" app:layout_columnWeight="1" app:layout_gravity="fill" android:tag="switch_C" android:background="?attr/selectableItemBackground">
+        <FrameLayout android:layout_width="0dp" android:layout_height="0dp" app:layout_row="4" app:layout_column="2" app:layout_rowWeight="1" app:layout_columnWeight="1" app:layout_gravity="fill" android:tag="switch_C" android:background="?attr/selectableItemBackground"
+            tools:ignore="PrivateResource">
             <ImageView android:layout_width="match_parent" android:layout_height="match_parent" android:src="@drawable/path_switch_background" />
             <ImageView android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" app:tint="#000000" />
         </FrameLayout>

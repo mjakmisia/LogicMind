@@ -273,7 +273,7 @@
             app:layout_constraintBottom_toTopOf="@id/saveButton"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            tools:ignore="VisualLintButtonSize" />
+            tools:ignore="PrivateResource,VisualLintButtonSize" />
 
         <Button
             android:id="@+id/saveButton"
@@ -289,7 +289,7 @@
             app:layout_constraintBottom_toTopOf="@id/includeBottomNav"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            tools:ignore="VisualLintButtonSize" />
+            tools:ignore="PrivateResource,VisualLintButtonSize" />
     </LinearLayout>
 
     <include

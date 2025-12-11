@@ -59,7 +59,7 @@
         android:clickable="true"
         android:focusable="true"
         android:foreground="?attr/selectableItemBackground"
-        />
+        tools:ignore="PrivateResource" />
 
     <TextView
         android:id="@+id/countdownText"

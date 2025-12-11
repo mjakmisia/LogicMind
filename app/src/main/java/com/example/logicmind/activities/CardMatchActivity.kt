@@ -268,7 +268,7 @@ class CardMatchActivity : BaseActivity() {
 
                 val imageView = ImageView(this).apply {
                     setImageResource(0)
-                    setBackgroundResource(R.drawable.bg_rounded_card)
+                    setBackgroundResource(R.drawable.bg_game_card)
                     layoutParams = GridLayout.LayoutParams().apply {
                         width = 0
                         height = 0
@@ -502,7 +502,7 @@ class CardMatchActivity : BaseActivity() {
                 .start()
         } else {
             card.view.setImageResource(0)
-            card.view.setBackgroundResource(R.drawable.bg_rounded_card)
+            card.view.setBackgroundResource(R.drawable.bg_game_card)
             card.isFlipped = false
             card.view.animate().scaleX(1f).scaleY(1f).setDuration(150)
                 .start()
