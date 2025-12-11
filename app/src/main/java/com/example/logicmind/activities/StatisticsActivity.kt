@@ -3,19 +3,26 @@ package com.example.logicmind.activities
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.view.isGone
 import com.example.logicmind.R
 import com.example.logicmind.databinding.ActivityStatisticsBinding
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.core.view.isVisible
 
 class StatisticsActivity : BaseActivity() {
     private lateinit var binding: ActivityStatisticsBinding
+
+    private data class GameConfig(
+        val category: String,
+        val gameNameKey: String,
+        val gameTitleResId: Int,
+        val containerId: Int
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,105 +54,62 @@ class StatisticsActivity : BaseActivity() {
             auth.currentUser?.let {
                 loadUserStats(it.uid)
                 loadLastPlayedGame(it.uid)
-                loadGlobalStats(it.uid)
+                calculateGlobalStatsFromGames(it.uid)
             }
         }
     }
 
     private fun setupExpandableStats() {
         val pairs = listOf(
-            Pair(R.id.layoutCoordinationGame1, R.id.layoutCoordinationGame1Stats),
-            Pair(R.id.layoutCoordinationGame2, R.id.layoutCoordinationGame2Stats),
-            Pair(R.id.layoutAttentionGame1, R.id.layoutAttentionGame1Stats),
-            Pair(R.id.layoutAttentionGame2, R.id.layoutAttentionGame2Stats),
-            Pair(R.id.layoutMemoryGame1, R.id.layoutMemoryGame1Stats),
-            Pair(R.id.layoutMemoryGame2, R.id.layoutMemoryGame2Stats),
-            Pair(R.id.layoutReasoningGame1, R.id.layoutReasoningGame1Stats),
-            Pair(R.id.layoutReasoningGame2, R.id.layoutReasoningGame2Stats)
+            Pair(R.id.layoutCoordinationHeader, R.id.contentCoordination),
+            Pair(R.id.layoutAttentionHeader, R.id.contentAttention),
+            Pair(R.id.layoutMemoryHeader, R.id.contentMemory),
+            Pair(R.id.layoutReasoningHeader, R.id.contentReasoning)
         )
 
-        pairs.forEach { (layoutId, statsId) ->
-            val layout = binding.root.findViewById<LinearLayout>(layoutId)
-            val stats = binding.root.findViewById<LinearLayout>(statsId)
+        pairs.forEach { (headerId, contentId) ->
+            val header = binding.root.findViewById<LinearLayout>(headerId)
+            val content = binding.root.findViewById<LinearLayout>(contentId)
 
-            layout.setOnClickListener {
-                stats.visibility = if (stats.isGone) View.VISIBLE else View.GONE
+            var arrowIcon: ImageView? = null
+            for (i in 0 until header.childCount) {
+                val child = header.getChildAt(i)
+                if (child is ImageView) {
+                    arrowIcon = child
+                    break
+                }
+            }
+
+            header.setOnClickListener {
+                val isExpanded = content.isVisible
+
+                content.visibility = if (isExpanded) View.GONE else View.VISIBLE
+
+                val targetRotation = if (isExpanded) 0f else 180f
+                arrowIcon?.animate()?.rotation(targetRotation)?.setDuration(300)?.start()
             }
         }
     }
 
     private fun loadUserStats(uid: String) {
-        val gameMapping =
-            listOf(
-                Triple(
-                    "Koordynacja", "road_dash", listOf(
-                        R.id.tvCoordinationGame1Reaction,
-                        R.id.tvCoordinationGame1Accuracy,
-                        R.id.tvCoordinationGame1Total,
-                        R.id.tvCoordinationGame1Best
-                    )
-                ),
-                Triple(
-                    "Koordynacja", "symbol_race", listOf(
-                        R.id.tvCoordinationGame2Reaction,
-                        R.id.tvCoordinationGame2Accuracy,
-                        R.id.tvCoordinationGame2Total,
-                        R.id.tvCoordinationGame2Best
-                    )
-                ),
-                Triple(
-                    "Skupienie", "word_search", listOf(
-                        R.id.tvAttentionGame1Reaction,
-                        R.id.tvAttentionGame1Accuracy,
-                        R.id.tvAttentionGame1Total,
-                        R.id.tvAttentionGame1Best
-                    )
-                ),
-                Triple(
-                    "Skupienie", "left_or_right", listOf(
-                        R.id.tvAttentionGame2Reaction,
-                        R.id.tvAttentionGame2Accuracy,
-                        R.id.tvAttentionGame2Total,
-                        R.id.tvAttentionGame2Best
-                    )
-                ),
-                Triple(
-                    "Pamiec", "color_sequence", listOf(
-                        R.id.tvMemoryGame1Reaction,
-                        R.id.tvMemoryGame1Accuracy,
-                        R.id.tvMemoryGame1Total,
-                        R.id.tvMemoryGame1Best
-                    )
-                ),
-                Triple(
-                    "Pamiec", "card_match", listOf(
-                        R.id.tvMemoryGame2Reaction,
-                        R.id.tvMemoryGame2Accuracy,
-                        R.id.tvMemoryGame2Total,
-                        R.id.tvMemoryGame2Best
-                    )
-                ),
-                Triple(
-                    "Rozwiazywanie_problemow", "number_addition", listOf(
-                        R.id.tvReasoningGame1Reaction,
-                        R.id.tvReasoningGame1Accuracy,
-                        R.id.tvReasoningGame1Total,
-                        R.id.tvReasoningGame1Best
-                    )
-                ),
-                Triple(
-                    "Rozwiazywanie_problemow", "path_change", listOf(
-                        R.id.tvReasoningGame2Reaction,
-                        R.id.tvReasoningGame2Accuracy,
-                        R.id.tvReasoningGame2Total,
-                        R.id.tvReasoningGame2Best
-                    )
-                )
-            )
+        val games = listOf(
+            GameConfig("Koordynacja", "road_dash", R.string.road_dash, R.id.statsCoordination1),
+            GameConfig("Koordynacja", "symbol_race", R.string.symbol_race, R.id.statsCoordination2),
+            GameConfig("Skupienie", "word_search", R.string.word_search, R.id.statsAttention1),
+            GameConfig("Skupienie", "left_or_right", R.string.left_or_right, R.id.statsAttention2),
+            GameConfig("Pamiec", "color_sequence", R.string.color_sequence, R.id.statsMemory1),
+            GameConfig("Pamiec", "card_match", R.string.card_match, R.id.statsMemory2),
+            GameConfig("Rozwiazywanie_problemow", "number_addition", R.string.number_addition, R.id.statsReasoning1),
+            GameConfig("Rozwiazywanie_problemow", "path_change", R.string.path_change, R.id.statsReasoning2)
+        )
 
-        gameMapping.forEach { (category, gameName, viewIds) ->
-            db.getReference("users").child(uid).child("categories").child(category).child("games")
-                .child(gameName)
+        games.forEach { config ->
+            val container = binding.root.findViewById<View>(config.containerId)
+            val titleTv = container.findViewById<TextView>(R.id.tvGameTitle)
+            titleTv.text = getString(config.gameTitleResId)
+
+            db.getReference("users").child(uid).child("categories")
+                .child(config.category).child("games").child(config.gameNameKey)
                 .get()
                 .addOnSuccessListener { snapshot ->
                     val messageIfEmpty = getString(R.string.stats_empty_message)
@@ -171,29 +135,17 @@ class StatisticsActivity : BaseActivity() {
                             val total = data["starsEarned"]?.toString() ?: messageIfEmpty
                             val best = data["bestStars"]?.toString() ?: messageIfEmpty
 
-                            setStatsForGame(
-                                viewIds[0], viewIds[1], viewIds[2], viewIds[3],
-                                reaction, accuracy, total, best
-                            )
+                            setStatsForGame(config.containerId, reaction, accuracy, total, best)
                         } else {
-                            setStatsForGame(
-                                viewIds[0], viewIds[1], viewIds[2], viewIds[3],
-                                messageIfEmpty, messageIfEmpty, messageIfEmpty, messageIfEmpty
-                            )
+                            setStatsForGame(config.containerId, messageIfEmpty, messageIfEmpty, messageIfEmpty, messageIfEmpty)
                         }
                     } else {
-                        setStatsForGame(
-                            viewIds[0], viewIds[1], viewIds[2], viewIds[3],
-                            messageIfEmpty, messageIfEmpty, messageIfEmpty, messageIfEmpty
-                        )
+                        setStatsForGame(config.containerId, messageIfEmpty, messageIfEmpty, messageIfEmpty, messageIfEmpty)
                     }
                 }
                 .addOnFailureListener {
                     val messageIfError = getString(R.string.data_error_short)
-                    setStatsForGame(
-                        viewIds[0], viewIds[1], viewIds[2], viewIds[3],
-                        messageIfError, messageIfError, messageIfError, messageIfError
-                    )
+                    setStatsForGame(config.containerId, messageIfError, messageIfError, messageIfError, messageIfError)
                 }
         }
     }
@@ -242,14 +194,13 @@ class StatisticsActivity : BaseActivity() {
         }
     }
 
-    @SuppressLint("DiscouragedApi")
     private fun updateLastPlayedText(gameKey: String?, timestamp: Long?) {
         if (gameKey == null || timestamp == null) {
             binding.tvLastPlayedGame.text = getString(R.string.last_played_game_none)
             return
         }
 
-        val resID = resources.getIdentifier(gameKey, "string", packageName)
+        val resID = getGameTitleResId(gameKey)
         val displayName = if (resID != 0) {
             getString(resID)
         } else {
@@ -260,11 +211,27 @@ class StatisticsActivity : BaseActivity() {
         binding.tvLastPlayedGame.text = getString(R.string.last_played_game, displayName, lastPlayedDate)
     }
 
+    private fun getGameTitleResId(gameKey: String): Int {
+        return when (gameKey) {
+            "road_dash" -> R.string.road_dash
+            "symbol_race" -> R.string.symbol_race
+            "word_search" -> R.string.word_search
+            "left_or_right" -> R.string.left_or_right
+            "color_sequence" -> R.string.color_sequence
+            "card_match" -> R.string.card_match
+            "number_addition" -> R.string.number_addition
+            "path_change" -> R.string.path_change
+            else -> 0
+        }
+    }
+
     @SuppressLint("DefaultLocale")
     private fun setStatsForGame(
-        reactionId: Int, accuracyId: Int, totalId: Int, bestId: Int,
+        containerId: Int,
         reactionValue: Any?, accuracyValue: Any?, totalValue: Any?, bestValue: Any?
     ) {
+        val container = binding.root.findViewById<View>(containerId)
+
         val formattedReaction = if (reactionValue is Double && reactionValue >= 0) {
             String.format("%.2f s", reactionValue / 1000.0)
         } else {
@@ -277,48 +244,59 @@ class StatisticsActivity : BaseActivity() {
             "0"
         }
 
-        binding.root.findViewById<TextView>(reactionId).text =
+        container.findViewById<TextView>(R.id.tvReaction).text =
             getString(R.string.avg_reaction_time_value, formattedReaction)
-        binding.root.findViewById<TextView>(accuracyId).text =
+        container.findViewById<TextView>(R.id.tvAccuracy).text =
             getString(R.string.accuracy_value, formattedAccuracy)
-        binding.root.findViewById<TextView>(totalId).text =
+        container.findViewById<TextView>(R.id.tvTotal).text =
             getString(R.string.total_points_value, totalValue ?: "0")
-        binding.root.findViewById<TextView>(bestId).text =
+        container.findViewById<TextView>(R.id.tvBest).text =
             getString(R.string.highest_score_value, bestValue ?: "0")
     }
 
-    private fun loadGlobalStats(uid: String) {
-        db.getReference("users").child(uid).child("statistics")
+    private fun calculateGlobalStatsFromGames(uid: String) {
+        db.getReference("users").child(uid).child("categories")
             .get()
             .addOnSuccessListener { snapshot ->
-                if (snapshot.exists()) {
-                    val avgReactionMs =
-                        snapshot.child("avgReactionTime").getValue(Double::class.java) ?: 0.0
-                    val avgAccuracyVal =
-                        snapshot.child("avgAccuracy").getValue(Double::class.java) ?: 0.0
+                var totalGamesPlayed = 0
+                var totalSumAccuracy = 0.0
+                var totalSumReaction = 0.0
 
-                    val formattedReaction = if (avgReactionMs > 0) {
-                        String.format(Locale.getDefault(), "%.2f s", avgReactionMs / 1000.0)
-                    } else {
-                        "-"
+                snapshot.children.forEach { categorySnapshot ->
+                    val gamesSnapshot = categorySnapshot.child("games")
+                    gamesSnapshot.children.forEach { gameSnapshot ->
+                        val gamesPlayed = gameSnapshot.child("gamesPlayed").getValue(Long::class.java)?.toInt() ?: 0
+
+                        if (gamesPlayed > 0) {
+                            val sumAccuracy = gameSnapshot.child("sumAccuracy").getValue(Double::class.java) ?: 0.0
+                            val sumReaction = gameSnapshot.child("sumReactionTime").getValue(Double::class.java) ?: 0.0
+
+                            totalGamesPlayed += gamesPlayed
+                            totalSumAccuracy += sumAccuracy
+                            totalSumReaction += sumReaction
+                        }
                     }
-
-                    val formattedAccuracy = if (avgAccuracyVal > 0) {
-                        String.format(Locale.getDefault(), "%.1f%%", avgAccuracyVal)
-                    } else {
-                        "-"
-                    }
-
-                    binding.tvGlobalReactionTime.text = formattedReaction
-                    binding.tvGlobalAccuracy.text = formattedAccuracy
-
-                } else {
-                    binding.tvGlobalReactionTime.text = "-"
-                    binding.tvGlobalAccuracy.text = "-"
                 }
+
+                val avgAccuracy = if (totalGamesPlayed > 0) totalSumAccuracy / totalGamesPlayed else 0.0
+                val avgReactionMs = if (totalGamesPlayed > 0) totalSumReaction / totalGamesPlayed else 0.0
+
+                val formattedReaction = if (avgReactionMs > 0) {
+                    String.format(Locale.getDefault(), "%.2f s", avgReactionMs / 1000.0)
+                } else {
+                    "-"
+                }
+
+                val formattedAccuracy = if (avgAccuracy > 0) {
+                    String.format(Locale.getDefault(), "%.1f%%", avgAccuracy)
+                } else {
+                    "-"
+                }
+
+                binding.tvGlobalReactionTime.text = formattedReaction
+                binding.tvGlobalAccuracy.text = formattedAccuracy
             }
             .addOnFailureListener {
-                Log.e("STATS_DEBUG", "Błąd pobierania globalnych statystyk", it)
                 val errorMsg = getString(R.string.error_short)
                 binding.tvGlobalReactionTime.text = errorMsg
                 binding.tvGlobalAccuracy.text = errorMsg

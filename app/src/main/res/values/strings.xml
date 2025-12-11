@@ -94,6 +94,21 @@
     <string name="zero_streak">x0</string>
     <string name="change">zmień</string>
     <string name="_3_5s">3.5s</string>
+    <string name="game_name">Nazwa gry</string>
+    <string name="empty">-</string>
+
+    <string name="statistics_header">Statystyki gier</string>
+    <string name="last_played_label">Ostatnio zagrana</string>
+    <string name="avg_reaction_label">Śr. czas reakcji</string>
+    <string name="accuracy_label">Poprawność</string>
+    <string name="no_data">Brak</string>
+    <string name="login_to_see_stats">Zaloguj się, aby zobaczyć swoje postępy</string>
+    <string name="login_action">Zaloguj się</string>
+
+    <string name="stat_reaction">Reakcja:</string>
+    <string name="stat_accuracy">Poprawność:</string>
+    <string name="stat_total">Punkty:</string>
+    <string name="stat_best">Najlepszy:</string>
 
     <string name="password_error_length">Hasło musi mieć min. 8 znaków</string>
     <string name="password_error_uppercase">Hasło musi zawierać wielką literę</string>
