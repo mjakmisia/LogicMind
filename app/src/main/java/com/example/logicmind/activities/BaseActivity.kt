@@ -261,7 +261,6 @@ open class BaseActivity : AppCompatActivity() {
         val userId = auth.currentUser?.uid ?: return
         val userRef = db.getReference("users").child(userId)
 
-        //Fragment metody updateUserStatistics
         val statsRef = userRef.child("statistics")
         statsRef.runTransaction(object : Transaction.Handler {
             override fun doTransaction(currentData: MutableData): Transaction.Result {
@@ -406,9 +405,11 @@ open class BaseActivity : AppCompatActivity() {
 
         dialog.onExitListener = {
             val intent = Intent(this, MainActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
-            finish()
+
+            @Suppress("DEPRECATION")
+            overridePendingTransition(0, 0)
         }
 
         dialog.show(supportFragmentManager, "GameOverDialog")

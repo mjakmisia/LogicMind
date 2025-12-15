@@ -391,14 +391,10 @@ class NumberAdditionActivity : BaseActivity() {
     }
 
     private fun showLevelInstruction() {
-        val toastMessage = when (currentLevel) {
-            1 -> "Wybierz 2 liczby, aby suma dała cel!"
-            4 -> "Wybierz 3 liczby, aby suma dała cel!"
-            7 -> "Wybierz 4 liczby, aby suma dała cel!"
-            else -> null
-        }
-        toastMessage?.let {
-            Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+        if (currentLevel == 1 || currentLevel == 4 || currentLevel == 7) {
+            val count = numbersToSelect()
+            val msg = getString(R.string.instruction_pick_n_numbers, count)
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
         }
     }
 

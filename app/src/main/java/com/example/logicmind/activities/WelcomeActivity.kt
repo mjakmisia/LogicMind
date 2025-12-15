@@ -50,16 +50,16 @@ class WelcomeActivity : BaseActivity() {
             val email = binding.etEmail.text.toString().trim()
             val password = binding.etPassword.text.toString().trim()
             if (email.isEmpty() || password.isEmpty()) {
-                showToast("Wypełnij wszystkie pola")
+                showToast(getString(R.string.fill_all_fields))
                 return@setOnClickListener
             }
             if (!isEmailValid(email)) {
-                showToast("Niepoprawny adres e-mail")
+                showToast(getString(R.string.invalid_email))
                 return@setOnClickListener
             }
 
             if (!isNetworkAvailable()) {
-                Toast.makeText(this, "Brak internetu.", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, getString(R.string.no_internet), Toast.LENGTH_LONG).show()
                 return@setOnClickListener
             }
             loginUser(email, password)
@@ -70,15 +70,15 @@ class WelcomeActivity : BaseActivity() {
             val password = binding.etPassword.text.toString().trim()
 
             if (email.isEmpty() || password.isEmpty()) {
-                showToast("Wypełnij wszystkie pola")
+                showToast(getString(R.string.fill_all_fields))
                 return@setOnClickListener
             }
             if (!isEmailValid(email)) {
-                showToast("Niepoprawny adres e-mail")
+                showToast(getString(R.string.invalid_email))
                 return@setOnClickListener
             }
             if (!isNetworkAvailable()) {
-                Toast.makeText(this, "Brak internetu.", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, getString(R.string.no_internet), Toast.LENGTH_LONG).show()
                 return@setOnClickListener
             }
 
@@ -88,7 +88,7 @@ class WelcomeActivity : BaseActivity() {
             auth.signInAnonymously()
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) goToMain()
-                    else showToast("Nie udało się kontynuować jako gość")
+                    else showToast(getString(R.string.guest_login_error))
                 }
         }
     }
@@ -149,19 +149,22 @@ class WelcomeActivity : BaseActivity() {
                     userRef.setValue(userData)
                         .addOnSuccessListener {
                             createDefaultCategoriesAndGames(userId)
-                            showToast("Rejestracja przebiegła pomyślnie!")
+                            showToast(getString(R.string.registration_success))
                             goToMain()
                         }
                         .addOnFailureListener { e ->
                             Log.e("REGISTER", "Błąd zapisu użytkownika: ${e.message}")
-                            showToast("Błąd zapisu użytkownika")
+                            showToast(getString(R.string.user_save_error))
                         }
                 } else {
                     if (task.exception is FirebaseAuthUserCollisionException) {
-                        showToast("Użytkownik o podanym adresie e-mail już istnieje")
+                        showToast(getString(R.string.email_collision_error))
                     } else {
-                        Toast.makeText(this, "Błąd rejestracji: ${task.exception?.message}", Toast.LENGTH_SHORT)
-                            .show()
+                        Toast.makeText(
+                            this,
+                            getString(R.string.registration_error_prefix, task.exception?.message),
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             }

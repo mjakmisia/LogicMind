@@ -7,9 +7,6 @@
     <string name="category_attention">Attention</string>
     <string name="category_memory">Memory</string>
     <string name="unknown">Unknown</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
     <string name="home">Home</string>
     <string name="profile">Profile</string>
     <string name="settings">Settings</string>
@@ -30,7 +27,6 @@
     <string name="pause">Stop</string>
     <string name="reset_progress">Reset proggress</string>
     <string name="reset_settings">Reset settings</string>
-    <string name="save">Save</string>
     <string name="cancel">Cancel</string>
     <string name="reset_settings_title">Resetting progress</string>
     <string name="reset_settings_message">Are you sure you want to return to default settings?</string>
@@ -60,7 +56,6 @@
     <string name="password">Password</string>
     <string name="password_8_digits">Minimum of 8 characters</string>
     <string name="password_capital_letter">At least 1 uppercase letter</string>
-    <string name="password_number">At least 1 number</string>
     <string name="log_in">Log in</string>
     <string name="logout">Log out</string>
     <string name="register">Register</string>
@@ -68,13 +63,10 @@
     <string name="game_statistics">Games statistics</string>
     <string name="avg_reaction_time">Average reaction time</string>
     <string name="accuracy">Accuracy</string>
-    <string name="total_points">Total points</string>
-    <string name="highest_score">Highest score</string>
     <string name="avg_reaction_time_value">Average reaction time: %1$s</string>
     <string name="accuracy_value">Accuracy: %1$s%%</string>
     <string name="total_points_value">Total points: %1$s</string>
     <string name="highest_score_value">Highest score: %1$s</string>
-    <string name="no_data">No data</string>
     <string name="login_text_profile">Log in to view your user profile</string>
     <string name="login_text_statistics">Log in to view your user statistics</string>
     <string name="login_button_text">LOG IN!</string>
@@ -89,15 +81,11 @@
     <string name="red_container">Red touch zone</string>
     <string name="last_played_game">Last played game: %1$s (%2$s)</string>
     <string name="last_played_game_none">Ostatnio zagrana gra: none</string>
-    <string name="current_streak_text">%1$d days</string>
-    <string name="best_streak_text">%1$d days</string>
     <string name="error_fetching_user_data">Error fetching user data</string>
     <string name="zero_days">0 days</string>
     <string name="reset_progress_message">Are you sure you want to reset all your progress? This action cannot be undone.</string>
     <string name="reset_progress_title">Reset Progress</string>
-    <string name="password_change">Change password</string>
     <string name="change_password_title">Change password</string>
-    <string name="new_password_hint">New password (min. 8 chars)</string>
     <string name="change_btn">Change</string>
     <string name="right_lane_description">Switch to the right lane</string>
     <string name="left_lane_description">Switch to the left lane</string>
@@ -105,6 +93,24 @@
     <string name="right_basket">Right basket</string>
     <string name="zero_streak">x0</string>
     <string name="change">change</string>
+    <string name="_3_5s">3.5s</string>
+    <string name="game_name">Game name</string>
+    <string name="empty">-</string>
+    <string name="Login">Login</string>
+    <string name="im_moving_on">I am moving on!</string>
+
+    <string name="statistics_header">Game Statistics</string>
+    <string name="last_played_label">Last Played</string>
+    <string name="avg_reaction_label">Avg Reaction</string>
+    <string name="accuracy_label">Accuracy</string>
+    <string name="no_data">None</string>
+    <string name="login_to_see_stats">Log in to see your progress</string>
+    <string name="login_action">Log In</string>
+
+    <string name="stat_reaction">Reaction:</string>
+    <string name="stat_accuracy">Accuracy:</string>
+    <string name="stat_total">Total:</string>
+    <string name="stat_best">Best:</string>
 
     <string name="password_error_length">Password must be at least 8 characters long</string>
     <string name="password_error_uppercase">Password must contain at least one uppercase letter</string>
@@ -128,11 +134,57 @@
 
     <string name="mon_letter">Mon</string>
     <string name="tue_letter">Tue</string>
-    <string name="wed_letter">Wed</string>
     <string name="thu_letter">Thu</string>
     <string name="fri_letter">Fri</string>
     <string name="sat_letter">Sat</string>
     <string name="sun_letter">Sun</string>
+
+    <plurals name="streak_days_format">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+
+    <string name="notification_title">Streak!</string>
+    <string name="notification_message">Don\'t forget about your streak! Play now to keep your progress!</string>
+    <string name="notification_channel_name">Daily Reminder</string>
+    <string name="notification_channel_desc">Channel for daily streak reminders.</string>
+
+    <string name="logout_title">Log out</string>
+    <string name="logout_message">Are you sure you want to log out?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+
+    <string name="new_password_hint_full">New password (min. 8 chars, uppercase &amp; digit)</string>
+    <string name="account_deleted">Account deleted</string>
+    <string name="account_delete_error">Failed to delete account: %1$s</string>
+    <string name="data_delete_error">Failed to delete data: %1$s</string>
+    <string name="no_user_logged_in">No user logged in</string>
+    <string name="no_name">No name</string>
+
+    <string name="progress_reset_success">Progress reset successfully</string>
+    <string name="data_reset_error">Error resetting data: %1$s</string>
+    <string name="data_fetch_error">Error fetching data: %1$s</string>
+
+    <string name="save_changes_question">Are you sure you want to save changes?</string>
+
+    <string name="bomb_penalty_toast">Bomb! -10s</string>
+    <string name="level_up_bonus_message">Great! New level: %1$d +15s BONUS</string>
+    <string name="sequence_error_repeat">Error! Replaying sequence</string>
+    <string name="mistake_penalty_toast">Mistake! -3s</string>
+    <string name="instruction_pick_n_numbers">Select %d numbers to sum up to the target!</string>
+    <string name="tempo_up">Speed up!</string>
+    <string name="stats_empty_message">Play to see stats</string>
+    <string name="data_error_short">Data error</string>
+    <string name="error_short">Error</string>
+    <string name="fill_all_fields">Fill in all fields</string>
+    <string name="invalid_email">Invalid email address</string>
+    <string name="no_internet">No internet connection.</string>
+    <string name="guest_login_error">Failed to continue as guest</string>
+    <string name="registration_success">Registration successful!</string>
+    <string name="user_save_error">Error saving user data</string>
+    <string name="email_collision_error">User with this email already exists</string>
+    <string name="registration_error_prefix">Registration error: %1$s</string>
+    <string name="error_not_enough_words">Error: Not enough words in the bank!</string>
 
 
     <!-- GAME INTRO DESCRIPTIONS -->

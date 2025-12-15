@@ -1,8 +1,8 @@
 package com.example.logicmind.activities
 
-import android.app.AlertDialog
 import android.content.res.Configuration
 import android.os.Bundle
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.edit
 import com.example.logicmind.R
@@ -13,7 +13,7 @@ import com.example.logicmind.databinding.ActivitySettingsBinding
 class SettingsActivity : BaseActivity() {
 
     private var selectedLanguage: String? = "pl"
-    private lateinit var binding :ActivitySettingsBinding
+    private lateinit var binding: ActivitySettingsBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,7 +25,6 @@ class SettingsActivity : BaseActivity() {
         val sharedPrefs = getSharedPreferences("Settings", MODE_PRIVATE)
         val currentLang = sharedPrefs.getString("My_Lang", "pl") ?: "pl"
         selectedLanguage = currentLang
-
 
         val isDarkModeNow = (resources.configuration.uiMode and
                 Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
@@ -51,7 +50,7 @@ class SettingsActivity : BaseActivity() {
             isDarkModeNow
         }
 
-        binding.switchNotification.isChecked = sharedPrefs.getBoolean("Notification_Enabled", true)
+        binding.switchNotification.isChecked = sharedPrefs.getBoolean("Notifications_Enabled", true)
 
         updateLanguageSelectionUI(currentLang)
 
@@ -73,19 +72,13 @@ class SettingsActivity : BaseActivity() {
             recreate()
         }
 
-
         binding.saveButton.setOnClickListener {
-            val currentLangBeforeChange = sharedPrefs
-                .getString("My_Lang", "pl") ?: "pl"
+            val currentLangBeforeChange = sharedPrefs.getString("My_Lang", "pl") ?: "pl"
+
             if (selectedLanguage != null) {
-                val confirmMessage = if (currentLangBeforeChange == "pl") {
-                    "Czy na pewno chcesz zapisać ustawienia?"
-                } else {
-                    "Are you sure you want to save changes?"
-                }
                 AlertDialog.Builder(this)
                     .setTitle(getString(R.string.changes))
-                    .setMessage(confirmMessage)
+                    .setMessage(getString(R.string.save_changes_question))
                     .setPositiveButton(android.R.string.ok) { _, _ ->
                         sharedPrefs.edit().apply {
                             putString("My_Lang", selectedLanguage)
@@ -94,17 +87,21 @@ class SettingsActivity : BaseActivity() {
                             putBoolean("Notifications_Enabled", binding.switchNotification.isChecked)
                             apply()
                         }
-                        SoundManager.isSoundEnabled =
-                            binding.switchSound.isChecked
+
+                        SoundManager.isSoundEnabled = binding.switchSound.isChecked
+
                         if (binding.switchNotification.isChecked) {
                             ReminderNotification.scheduleNotification(this)
                         } else {
                             ReminderNotification.cancelNotification(this)
                         }
+
                         if (selectedLanguage != currentLangBeforeChange) {
                             recreate()
                         }
-                    }.setNegativeButton(android.R.string.cancel, null)
+
+                    }
+                    .setNegativeButton(android.R.string.cancel, null)
                     .show()
             }
         }
@@ -113,7 +110,7 @@ class SettingsActivity : BaseActivity() {
             AlertDialog.Builder(this)
                 .setTitle(getString(R.string.reset_settings_title))
                 .setMessage(getString(R.string.reset_settings_message))
-                .setPositiveButton("Tak") { _, _ ->
+                .setPositiveButton(getString(R.string.yes)) { _, _ ->
                     sharedPrefs.edit().apply {
                         putString("My_Lang", "pl")
                         putBoolean("Sound_Enabled", true)
@@ -139,7 +136,6 @@ class SettingsActivity : BaseActivity() {
         }
         setupBottomNavigation(binding.includeBottomNav.bottomNavigationView, R.id.nav_settings)
     }
-
 
     private fun updateLanguageSelectionUI(currentLang: String) {
         val selectedBg = R.drawable.lang_button_selected

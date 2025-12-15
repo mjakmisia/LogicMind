@@ -11,14 +11,15 @@ import com.example.logicmind.activities.MainActivity
 
 object NotificationHelper {
     private const val CHANNEL_ID = "streak_reminder_channel"
-    private const val CHANNEL_NAME = "Codzienne przypomnienie"
     private const val NOTIFICATION_ID = 1
 
     fun createNotificationChannel(context: Context) {
-        val importance =
-            NotificationManager.IMPORTANCE_DEFAULT
-        val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, importance).apply {
-            description = "Kanał dla codziennych przypomnień o streaku."
+        val name = context.getString(R.string.notification_channel_name)
+        val descriptionText = context.getString(R.string.notification_channel_desc)
+
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+            description = descriptionText
         }
         val notificationManager: NotificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

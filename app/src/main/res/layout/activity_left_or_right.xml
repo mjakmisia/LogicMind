@@ -46,10 +46,9 @@
         android:clickable="true"
         android:focusable="true"
         android:foreground="?attr/selectableItemBackground"
-        />
+        tools:ignore="PrivateResource" />
 
     <LinearLayout
-        android:id="@+id/starContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"

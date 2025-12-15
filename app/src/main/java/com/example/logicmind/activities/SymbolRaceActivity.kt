@@ -642,6 +642,8 @@ class SymbolRaceActivity : BaseActivity() {
 
     private fun handleError() {
         timerProgressBar.subtractTime(6)
+        Toast.makeText(this, "-6 s!", Toast.LENGTH_SHORT).show()
+
         successfulStreak = 0
         totalMoves++
         accelerateIfNeeded()
@@ -888,7 +890,10 @@ class SymbolRaceActivity : BaseActivity() {
                 blueContainer.isEnabled = true
                 redContainer.isEnabled = true
 
-                startNewGame()
+                trackLine.visibility = View.GONE
+                blueContainer.visibility = View.INVISIBLE
+                redContainer.visibility = View.INVISIBLE
+                tempoInfoText.visibility = View.GONE
             }
         )
     }

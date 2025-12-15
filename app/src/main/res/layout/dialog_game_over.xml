@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="320dp"
     android:layout_height="wrap_content"
     app:cardBackgroundColor="?attr/pageBackground"
     app:cardCornerRadius="24dp"
-    app:cardElevation="8dp">
+    app:cardElevation="8dp"
+    tools:ignore="ContentDescription">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -35,7 +37,8 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:layout_marginEnd="12dp"
-                android:src="@drawable/icon_star" />
+                android:src="@drawable/icon_star"
+                tools:ignore="ImageContrastCheck" />
 
             <TextView
                 android:layout_width="0dp"
@@ -49,7 +52,7 @@
                 android:id="@+id/tvCurrentScore"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="5"
+                android:text="@string/zero"
                 android:textColor="?attr/text_dark"
                 android:textSize="26sp"
                 android:textStyle="bold" />
@@ -82,7 +85,7 @@
                 android:id="@+id/tvTimeTaken"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="45s"
+                android:text="@string/zero"
                 android:textColor="?attr/text_dark"
                 android:textSize="26sp"
                 android:textStyle="bold" />
@@ -103,7 +106,8 @@
                 android:layout_height="32dp"
                 android:layout_marginEnd="12dp"
                 android:src="@drawable/ic_flame"
-                app:tint="#FFC107" />
+                app:tint="#FFC107"
+                tools:ignore="ImageContrastCheck" />
 
             <TextView
                 android:layout_width="0dp"
@@ -117,7 +121,7 @@
                 android:id="@+id/tvBestScore"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="10"
+                android:text="@string/zero"
                 android:textColor="?attr/text_dark"
                 android:textSize="26sp"
                 android:textStyle="bold" />
@@ -135,7 +139,8 @@
             android:textStyle="bold"
             app:cornerRadius="16dp"
             app:icon="@drawable/ic_restart"
-            app:iconGravity="textStart" />
+            app:iconGravity="textStart"
+            tools:ignore="PrivateResource" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnExitGame"
@@ -151,7 +156,8 @@
             app:iconGravity="textStart"
             app:iconTint="?attr/colorPrimary"
             app:strokeColor="?attr/colorPrimary"
-            app:strokeWidth="2dp" />
+            app:strokeWidth="2dp"
+            tools:ignore="PrivateResource" />
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

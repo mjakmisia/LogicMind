@@ -48,9 +48,9 @@
             android:layout_width="240dp"
             android:layout_height="240dp"
             android:layout_gravity="center"
-            android:src="@drawable/ic_close"
             android:contentDescription="@null"
-            tools:ignore="ContentDescription" />
+            android:src="@drawable/ic_close"
+            tools:ignore="ContentDescription,ImageContrastCheck" />
 
         <TextView
             android:id="@+id/game1Title"
@@ -80,9 +80,9 @@
             android:layout_width="240dp"
             android:layout_height="240dp"
             android:layout_gravity="center"
-            android:src="@drawable/ic_close"
             android:contentDescription="@null"
-            tools:ignore="ContentDescription" />
+            android:src="@drawable/ic_close"
+            tools:ignore="ContentDescription,ImageContrastCheck" />
 
         <TextView
             android:id="@+id/game2Title"

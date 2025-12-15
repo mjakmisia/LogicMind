@@ -340,7 +340,7 @@ class WordSearchActivity : BaseActivity() {
         while (currentBoard == null) {
             val words = WordBank.getWords(lang, maxLength = boardSize, count = wordCount)
             if (words.size < wordCount) {
-                Toast.makeText(this, "Błąd: Za mało słów w banku!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.error_not_enough_words), Toast.LENGTH_SHORT).show()
                 return
             }
 
@@ -604,14 +604,13 @@ class WordSearchActivity : BaseActivity() {
                 }
                 currentLevel = 1
                 overlayView.isEnabled = true
-                startNewGame()
             }
         )
     }
 
     override fun onPause() {
         super.onPause()
-        if (!pauseMenu.isPaused && !isChangingConfigurations) {
+        if (!pauseMenu.isPaused && !isChangingConfigurations && !isGameEnding) {
             pauseMenu.pause()
         }
     }

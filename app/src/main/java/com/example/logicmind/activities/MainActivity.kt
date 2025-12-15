@@ -73,7 +73,7 @@ class MainActivity : BaseActivity() {
         val user = auth.currentUser
 
         if (user == null || !isUserLoggedIn()) {
-            binding.streakText.text = getString(R.string.zero_days)
+            binding.streakText.text = resources.getQuantityString(R.plurals.streak_days_format, 0, 0)
             return
         }
 
@@ -82,10 +82,15 @@ class MainActivity : BaseActivity() {
         userRef.get()
             .addOnSuccessListener { snapshot ->
                 val streak = calculateDisplayStreak(snapshot)
-                binding.streakText.text = getString(R.string.current_streak_text, streak)
+
+                binding.streakText.text = resources.getQuantityString(
+                    R.plurals.streak_days_format,
+                    streak,
+                    streak
+                )
             }
             .addOnFailureListener {
-                binding.streakText.text = "błąd"
+                binding.streakText.text = getString(R.string.error_prefix, "-")
                 Log.e("STREAK_DEBUG", "Błąd pobierania streaka", it)
             }
     }

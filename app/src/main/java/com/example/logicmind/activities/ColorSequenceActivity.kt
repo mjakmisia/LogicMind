@@ -23,6 +23,7 @@ import com.example.logicmind.common.StarManager
 import kotlin.random.Random
 
 class ColorSequenceActivity : BaseActivity() {
+    private val handler = Handler(Looper.getMainLooper())
     private var keyButtons: List<KeyButton> = emptyList()
     private var currentSequence = mutableListOf<Int>()
     private var userSequence = mutableListOf<Int>()
@@ -126,6 +127,7 @@ class ColorSequenceActivity : BaseActivity() {
             pauseOverlay = pauseOverlay,
             pauseButton = pauseButton,
             onRestart = {
+                cancelAllDelayedActions()
                 if (pauseMenu.isPaused) pauseMenu.resume()
                 currentLevel = 1
                 timerProgressBar.stop()
@@ -263,6 +265,7 @@ class ColorSequenceActivity : BaseActivity() {
     }
 
     private fun startNewGame() {
+        cancelAllDelayedActions()
         gameStatsManager.startReactionTracking()
         if (pauseMenu.isPaused) {
             pauseMenu.resume()
@@ -485,7 +488,9 @@ class ColorSequenceActivity : BaseActivity() {
             if (currentSequence.size >= config.maxLength) {
                 currentLevel++
                 timerProgressBar.addTime(15)
-                Toast.makeText(this, "Świetnie! Nowy poziom: $currentLevel +15s BONUS", Toast.LENGTH_SHORT).show()
+
+                val msg = getString(R.string.level_up_bonus_message, currentLevel)
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
 
                 val newConfig = getSequenceConfig(currentLevel)
                 numKeys = newConfig.numKeys
@@ -503,7 +508,7 @@ class ColorSequenceActivity : BaseActivity() {
                 }
             }
         } else {
-            Toast.makeText(this, "Błąd! Powtórka sekwencji.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.sequence_error_repeat), Toast.LENGTH_SHORT).show()
             userSequence.clear()
             pendingShowSequenceDelay = 1500L
             runDelayed(1500L) {
@@ -552,7 +557,7 @@ class ColorSequenceActivity : BaseActivity() {
             override fun run() {
                 val activity = activityRef.get() ?: return
                 if (pauseMenu.isPaused) {
-                    Handler(Looper.getMainLooper()).postDelayed(this, interval)
+                    handler.postDelayed(this, interval)
                     return
                 }
                 remaining -= interval
@@ -564,14 +569,19 @@ class ColorSequenceActivity : BaseActivity() {
                     activity.runOnUiThread { action() }
                     sequenceDelayRemaining = 0L
                 } else {
-                    Handler(Looper.getMainLooper()).postDelayed(this, interval)
+                    handler.postDelayed(this, interval)
                 }
             }
         }
-        Handler(Looper.getMainLooper()).postDelayed(runnable, interval)
+        handler.postDelayed(runnable, interval)
+    }
+
+    private fun cancelAllDelayedActions() {
+        handler.removeCallbacksAndMessages(null)
     }
 
     private fun handleGameOver() {
+        cancelAllDelayedActions()
         isGameEnding = true
         gridLayout.isEnabled = false
         keyButtons.forEach { it.view.isEnabled = false }
@@ -591,7 +601,6 @@ class ColorSequenceActivity : BaseActivity() {
                 currentLevel = 1
                 userSequence.clear()
                 currentSequence.clear()
-                startNewGame()
             }
         )
     }
@@ -605,6 +614,7 @@ class ColorSequenceActivity : BaseActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        cancelAllDelayedActions()
         timerProgressBar.stop()
         countdownManager.cancel()
     }
