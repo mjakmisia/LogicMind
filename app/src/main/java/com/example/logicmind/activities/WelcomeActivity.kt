@@ -3,8 +3,6 @@ package com.example.logicmind.activities
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.Log
 import android.util.Patterns
 import android.view.Gravity
@@ -12,9 +10,11 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toDrawable
+import androidx.core.widget.doOnTextChanged
 import com.example.logicmind.R
 import com.example.logicmind.databinding.ActivityWelcomeBinding
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
@@ -28,33 +28,19 @@ class WelcomeActivity : BaseActivity() {
         binding = ActivityWelcomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.etPassword.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        binding.etPassword.doOnTextChanged { text, _, _, _ ->
+            val password = text.toString()
+            val context = binding.root.context
 
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                val password = s.toString()
-
-                binding.tvLength.setTextColor(
-                    ContextCompat.getColor(
-                        this@WelcomeActivity,
-                        if (password.length >= 8) R.color.green else R.color.red
-                    )
-                )
-                binding.tvUppercase.setTextColor(
-                    ContextCompat.getColor(
-                        this@WelcomeActivity,
-                        if (password.any { it.isUpperCase() }) R.color.green else R.color.red
-                    )
-                )
-                binding.tvDigit.setTextColor(
-                    ContextCompat.getColor(
-                        this@WelcomeActivity,
-                        if (password.any { it.isDigit() }) R.color.green else R.color.red
-                    )
-                )
+            fun updateColor(view: TextView, isValid: Boolean) {
+                val colorRes = if (isValid) R.color.green else R.color.red
+                view.setTextColor(ContextCompat.getColor(context, colorRes))
             }
-            override fun afterTextChanged(s: Editable?) {}
-        })
+
+            updateColor(binding.tvLength, password.length >= 8)
+            updateColor(binding.tvUppercase, password.any { it.isUpperCase() })
+            updateColor(binding.tvDigit, password.any { it.isDigit() })
+        }
 
         binding.etPassword.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) binding.passwordRequirementsLayout.visibility = View.VISIBLE

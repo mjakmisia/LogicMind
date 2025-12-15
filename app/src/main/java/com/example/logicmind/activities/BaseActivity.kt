@@ -13,8 +13,11 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.example.logicmind.R
+import com.example.logicmind.common.GameCountdownManager
 import com.example.logicmind.common.GameOverDialogFragment
 import com.example.logicmind.common.GameStatsManager
+import com.example.logicmind.common.GameTimerProgressBar
+import com.example.logicmind.common.StarManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -261,25 +264,25 @@ open class BaseActivity : AppCompatActivity() {
         val statsRef = userRef.child("statistics")
         statsRef.runTransaction(object : Transaction.Handler {
             override fun doTransaction(currentData: MutableData): Transaction.Result {
-                val currentStats = currentData.value as? Map<*, *> ?: emptyMap<String, Any>()
-                val currentStars = (currentStats["totalStars"] as? Long)?.toInt() ?: 0
-                val currentGamesPlayed = (currentStats["gamesPlayed"] as? Long)?.toInt() ?: 0
-                val currentSumAccuracy = (currentStats["sumAccuracy"] as? Double) ?: 0.0
-                val currentSumReaction = (currentStats["sumReactionTime"] as? Double) ?: 0.0
+                val stats = currentData.value as? Map<*, *> ?: emptyMap<String, Any>()
+                val currentStars = (stats["totalStars"] as? Long)?.toInt() ?: 0
+                val currentGamesPlayed = (stats["gamesPlayed"] as? Long)?.toInt() ?: 0
+                val currentSumAccuracy = (stats["sumAccuracy"] as? Double) ?: 0.0
+                val currentSumReaction = (stats["sumReactionTime"] as? Double) ?: 0.0
                 val newGamesPlayed = currentGamesPlayed + 1
                 val newSumAccuracy = currentSumAccuracy + accuracy
                 val newSumReaction = currentSumReaction + reactionTime
-                val newAvgAccuracy =
-                    if (newGamesPlayed > 0) newSumAccuracy / newGamesPlayed else 0.0
-                val newAvgReaction =
-                    if (newGamesPlayed > 0) newSumReaction / newGamesPlayed else 0.0
                 val updatedStats = mapOf<String, Any>(
                     "totalStars" to (currentStars + starsEarned),
-                    "gamesPlayed" to newGamesPlayed,
-                    "sumAccuracy" to newSumAccuracy,
-                    "sumReactionTime" to newSumReaction,
-                    "avgAccuracy" to newAvgAccuracy,
-                    "avgReactionTime" to newAvgReaction
+                    "gamesPlayed" to currentGamesPlayed + 1,
+                    "sumAccuracy" to currentSumAccuracy + accuracy,
+                    "sumReactionTime" to currentSumReaction + reactionTime,
+                    "avgAccuracy" to
+                            if (newGamesPlayed > 0)
+                                newSumAccuracy / newGamesPlayed else 0.0,
+                    "avgReactionTime" to
+                            if (newGamesPlayed > 0)
+                                newSumReaction / newGamesPlayed else 0.0
                 )
                 currentData.value = updatedStats
                 return Transaction.success(currentData)
@@ -350,9 +353,9 @@ open class BaseActivity : AppCompatActivity() {
     protected fun showGameOverDialog(
         categoryKey: String,
         gameKey: String,
-        starManager: com.example.logicmind.common.StarManager,
-        timerProgressBar: com.example.logicmind.common.GameTimerProgressBar,
-        countdownManager: com.example.logicmind.common.GameCountdownManager,
+        starManager: StarManager,
+        timerProgressBar: GameTimerProgressBar,
+        countdownManager: GameCountdownManager,
         currentBestScore: Int,
         onRestartAction: () -> Unit
     ) {

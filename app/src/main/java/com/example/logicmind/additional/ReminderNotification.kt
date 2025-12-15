@@ -12,16 +12,13 @@ object ReminderNotification {
     private const val MINUTE = 13
 
     fun scheduleNotification(context: Context) {
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE)
+                as AlarmManager
         val intent = Intent(context, AlarmReceiver::class.java)
-
         val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            NOTIFICATION_REQUEST_CODE,
-            intent,
-            PendingIntent.FLAG_MUTABLE
+            context, NOTIFICATION_REQUEST_CODE,
+            intent, PendingIntent.FLAG_MUTABLE
         )
-
         val calendar: Calendar = Calendar.getInstance().apply {
             timeInMillis = System.currentTimeMillis()
             set(Calendar.HOUR_OF_DAY, HOUR_OF_DAY)
@@ -32,12 +29,9 @@ object ReminderNotification {
                 add(Calendar.DAY_OF_YEAR, 1)
             }
         }
-
         alarmManager.setInexactRepeating(
-            AlarmManager.RTC_WAKEUP,
-            calendar.timeInMillis,
-            AlarmManager.INTERVAL_DAY,
-            pendingIntent
+            AlarmManager.RTC_WAKEUP, calendar.timeInMillis,
+            AlarmManager.INTERVAL_DAY, pendingIntent
         )
     }
 
